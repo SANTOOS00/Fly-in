@@ -1,1 +1,1 @@
-import Parsing
+from .map_parser import Parsing

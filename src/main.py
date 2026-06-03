@@ -1,12 +1,14 @@
 import sys
-import Parsing
+from parser import Parsing
+
 
 def main() -> None:
     if (len(sys.argv) != 2):
         print("Usage: python3 <name_file>.txt", file=sys.stderr)
         return
-    Parsing(sys.argv[1])
-        
+    Parsing.parser_args(sys.argv[1])
+
+
 if __name__ == "__main__":
     try:
         main()
