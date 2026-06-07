@@ -1,9 +1,9 @@
 from typing import List, Dict, Any
-from abs import ABS, abstractmethod
+from abc import ABC, abstractmethod
 # import ParsingError   
 
 
-class Parsing(ABC)
+class Parsier(ABC):
     @abstractmethod
     def parser_line(slef) -> Dict[str, Any]:
         pass
@@ -12,26 +12,41 @@ class ParsingError(Exception):
     def __init__(self, line: int, message: str) -> None:
         super().__init__(f"line {line}: {message}")
 
-class Drones_parsing(Parsing):
+class Drones_parsing(Parsier):
     def __init__(self, meta_data) -> None:
+        self.meta_data = meta_data
+
+    def parser_line(self) ->Dict:
         pass
 
-class Start_hub_parsing(Parsing):
+class Start_hub_parsing(Parsier):
     def __init__(self, meta_data) -> None:
-        pass
-
-class Hub_parsing(Parsing):
-    def __init__(self, meta_data) -> None:
-        pass
-
-class End_hub_parsing(Parsing):
-    def __init__(self, meta_data) -> None:
-        pass
+        self.meta_data = meta_data
     
-class Connection_parsing(Parsing):
-    def __init__(self, meta_data) -> None:
+    def parser_line(self) ->Dict:
         pass
-  
+
+class Hub_parsing(Parsier):
+    def __init__(self, meta_data) -> None:
+        self.meta_data = meta_data
+
+    def parser_line(self) ->Dict:
+        pass
+
+class End_hub_parsing(Parsier):
+    def __init__(self, meta_data) -> None:
+        self.meta_data = meta_data
+    
+    def parser_line(self) ->Dict:
+        pass        
+    
+class Connection_parsing(Parsier):
+    def __init__(self, meta_data) -> None:
+        self.meta_data = meta_data
+    
+    def parser_line(self) ->Dict:
+        pass
+
 class LineValidator:
     def __init__(self, name_file: str) -> None:
         self.name_file = name_file
@@ -67,25 +82,30 @@ class LineValidator:
                 break
         return {
             "line": self.number_line,
-            "type_insetince": self.type_line(line_str)
+            
+            "type_instance": self.type_line(line_str)
         }
+        
+class Start_hub:
+    def __init__(self):
+        pass
+
 class Parsing:
     def __init__(self, name_file: str) -> None:
         self.start_hub: Start_hub = None
         self.hub: List[Hub]= []
         self.end_hub: End_hub = None
-        self.connection: List[connection] = []
+        self.connection: List[Connection] = []
         self.linevalidator: LineValidator = LineValidator(name_file)
 
     def parser_args(self) -> None:
-        print(self.linevalidator.parser_line())
-        print(self.linevalidator.parser_line())
-        print(self.linevalidator.parser_line())
-        print(self.linevalidator.parser_line())
-        print(self.linevalidator.parser_line())
-        print(self.linevalidator.parser_line())
-        print(self.linevalidator.parser_line())
-        print(self.linevalidator.parser_line())
-        print(self.linevalidator.parser_line())
-        print(self.linevalidator.parser_line())
+        while (True):
+            data = self.parser_line()
+            if (isinstance(data["type_instance"], Start_hub_parsing)):
+                print(data["type_instance"].meta_data)
+                break
+    # def append_hub(self, hub: Hub) -> None:
+    #     pass
 
+    # def append_connection(self, connection: Connection) -> None:
+    #     pass
