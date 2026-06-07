@@ -1,9 +1,10 @@
 from typing import List, Dict, Any
 from abc import ABC, abstractmethod
-# import ParsingError   
 
-
-class Parsier(ABC):
+class Parsier_meta_data(ABC):
+    def __init__(self, meta_data) -> None:
+        self.meta_data = meta_data
+    
     @abstractmethod
     def parser_line(slef) -> Dict[str, Any]:
         pass
@@ -12,37 +13,37 @@ class ParsingError(Exception):
     def __init__(self, line: int, message: str) -> None:
         super().__init__(f"line {line}: {message}")
 
-class Drones_parsing(Parsier):
+class Drones_parsing(Parsier_meta_data):
     def __init__(self, meta_data) -> None:
-        self.meta_data = meta_data
+        super().__init__(meta_data)
 
     def parser_line(self) ->Dict:
         pass
 
-class Start_hub_parsing(Parsier):
+class Start_hub_parsing(Parsier_meta_data):
     def __init__(self, meta_data) -> None:
-        self.meta_data = meta_data
+        super().__init__(meta_data)
     
     def parser_line(self) ->Dict:
         pass
 
-class Hub_parsing(Parsier):
+class Hub_parsing(Parsier_meta_data):
     def __init__(self, meta_data) -> None:
-        self.meta_data = meta_data
+        super().__init__(meta_data)
 
     def parser_line(self) ->Dict:
         pass
 
-class End_hub_parsing(Parsier):
+class End_hub_parsing(Parsier_meta_data):
     def __init__(self, meta_data) -> None:
-        self.meta_data = meta_data
+        super().__init__(meta_data)
     
     def parser_line(self) ->Dict:
         pass        
     
-class Connection_parsing(Parsier):
+class Connection_parsing(Parsier_meta_data):
     def __init__(self, meta_data) -> None:
-        self.meta_data = meta_data
+        super().__init__(meta_data)
     
     def parser_line(self) ->Dict:
         pass
@@ -77,12 +78,12 @@ class LineValidator:
             self.number_line += 1
             line_str = self.fd.readline()
             if not line_str:
+                self.fd.close()
                 return (None)
             if (line_str != '\n'):
                 break
         return {
             "line": self.number_line,
-            
             "type_instance": self.type_line(line_str)
         }
         
@@ -100,10 +101,21 @@ class Parsing:
 
     def parser_args(self) -> None:
         while (True):
-            data = self.parser_line()
-            if (isinstance(data["type_instance"], Start_hub_parsing)):
-                print(data["type_instance"].meta_data)
+            data = self.linevalidator.parser_line()
+            if not data:
                 break
+            if (isinstance(data["type_instance"], Start_hub_parsing)):
+                self.start_hub = data["type_instance"].parser_line()
+
+            if (isinstance(data["type_instance"], Hub_parsing)):
+                self.start_hub = data["type_instance"].parser_line()
+
+            if (isinstance(data["type_instance"], End_hub_parsing)):
+                self.start_hub = data["type_instance"].parser_line()
+
+            if (isinstance(data["type_instance"], Connection_parsing)):
+                self.start_hub = data["type_instance"].parser_line()
+
     # def append_hub(self, hub: Hub) -> None:
     #     pass
 
