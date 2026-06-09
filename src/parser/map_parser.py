@@ -17,8 +17,10 @@ class Drones_parsing(Parsier_meta_data):
     def __init__(self, meta_data) -> None:
         super().__init__(meta_data)
 
-    def parser_line(self) ->Dict:
-        pass
+    def parser_line(self) ->int:
+        number_of_drones: int  = 0
+        number_of_drones = int(self.meta_data)
+        return (number_of_drones)
 
 class Start_hub_parsing(Parsier_meta_data):
     def __init__(self, meta_data) -> None:
@@ -93,6 +95,7 @@ class Start_hub:
 
 class Parsing:
     def __init__(self, name_file: str) -> None:
+        self.number_of_drones: int = 0
         self.start_hub: Start_hub = None
         self.hub: List[Hub]= []
         self.end_hub: End_hub = None
@@ -101,21 +104,21 @@ class Parsing:
 
     def parser_args(self) -> None:
         while (True):
-            data = self.linevalidator.parser_line()
+            data = self.linevalidator.()
             if not data:
                 break
-            if (isinstance(data["type_instance"], Start_hub_parsing)):
-                self.start_hub = data["type_instance"].parser_line()
+            if (isinstance(data["type_instance"], Drones_parsing)):
+                self.number_of_drones = data["type_instance"].parser_line()
 
-            if (isinstance(data["type_instance"], Hub_parsing)):
-                self.start_hub = data["type_instance"].parser_line()
+            # if (isinstance(data["type_instance"], Hub_parsing)):
+            #     self.start_hub = data["type_instance"].parser_line()
 
-            if (isinstance(data["type_instance"], End_hub_parsing)):
-                self.start_hub = data["type_instance"].parser_line()
+            # if (isinstance(data["type_instance"], End_hub_parsing)):
+            #     self.start_hub = data["type_instance"].parser_line()
 
-            if (isinstance(data["type_instance"], Connection_parsing)):
-                self.start_hub = data["type_instance"].parser_line()
-
+            # if (isinstance(data["type_instance"], Connection_parsing)):
+            #     self.start_hub = data["type_instance"].parser_line()
+        print(self.number_of_drones)
     # def append_hub(self, hub: Hub) -> None:
     #     pass
 
