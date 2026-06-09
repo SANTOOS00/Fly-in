@@ -49,22 +49,69 @@ class Start_hub_parsing(Parsier_meta_data):
         super().__init__(meta_data, number_line)
 
     def parser_line(self) -> Start_hub:
-        if not self.meta_data:
-            raise ParsingError(f"len {self.number_line} line is not invalide")
-        # pattern = r"(\w+)\s+(\d+)\s+(\d+)\s+(.+)?"
-        # name = match.group(1)
-        # try:
-        #     y = int(match.group(2))
-        # except ValueError:
-        #     raise ParsingError(f"{self.number_line} number in y not in valide")
-        # try:
-        #     x = int(match.group(3))
-        # except ValueError:
-        #     raise ParsingError(f"{self.number_line} number in x not in valide")
+        data = self.meta_data.split()
+        if len(data) < 4:
+            raise ParsingError(f"Line {self.number_line}: Missing data. Expected Name, Y, X, and MetaData.")
+        name = data[0]
+        try:
+            y = int(data[1])
+        except ValueError:
+            raise ParsingError(f"Line {self.number_line}: Y coordinate '{data[1]}' must be a valid number.")
+        try:
+            x = int(data[2])
+        except ValueError:
+            raise ParsingError(f"Line {self.number_line}: X coordinate '{data[2]}' must be a valid number.")
+        meta_data_str = data[3]
+        meta_dict = self.parser_meta_data(meta_data_str)
+        if len(data) > 4:
+            extra_stuff = " ".join(data[4:])
+            raise ParsingError(f"Line {self.number_line}: Unexpected extra data found at the end: '{extra_stuff}'")
+        return Start_hub(name, y, x, meta_dict)
 
-        # meta = match.group(4)
-        # print(match)
-        return (Start_hub(name, y, x, meta))
+    def parser_meta_data(self, string: str) -> Dict[str, Any]:
+        print(string)
+        if not string.startswith("["):
+            raise ParsingError(f"Line {self.number_line}: MetaData syntax error. Must start with '[' (found: '{string}')")
+        if not string.endswith("]"):
+            raise ParsingError(f"Line {self.number_line}: MetaData syntax error. Missing closing bracket ']' at the end of '{string}'")
+        content = string[1:-1]
+        result_dict = {}
+        if not string:
+            return result_dict
+        pairs = string.split()
+        for pair in pairs:
+            if "=" not in pair:
+                raise ParsingError(f"Line {self.number_line}: Invalid MetaData property '{pair}'. Expected 'key=value'")
+            key, value = pair.split("=", 1)
+            if not key or not value:
+                raise ParsingError(f"Line {self.number_line}: MetaData key or value cannot be empty in '{pair}'")
+            if value.isdigit():
+                result_dict[key] = int(value)
+            else:
+                result_dic  t[key] = value
+                
+        return result_dict
+
+    # def parser_line(self) -> Start_hub:
+    #     data = self.meta_data.split()
+    #     if len(data) != 4:
+    #         raise ParsingError(f"line {self.number_line} in error")
+    #     name = data[0]
+    #     try:
+    #         y = data[1]
+    #     except ParsingError:
+    #         raise ParsingError(f"{self.number_line} y is a number")
+    #     try:
+    #         x = data[2]
+    #     except ParsingError:
+    #         raise ParsingError(f"{self.number_line}: x is a number")
+    #     meta_data = data[3]
+    #     return (Start_hub(name, y, x, self.parser_meta_data(meta_data)))
+
+    # def parser_meta_data(self, string: str) -> Dict[str, Any]:
+    #     # meta_data: Dict[str: Any] = {}
+    #     if string[0] is not "[" or string[-1] is not "[":
+    #             raise ParsingError(f"{self.number_line} [   ]")
 
 
 class Hub_parsing(Parsier_meta_data):
