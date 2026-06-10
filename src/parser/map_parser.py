@@ -1,7 +1,8 @@
 from typing import List, Dict, Any
 from abc import ABC, abstractmethod
 from simulation import Start_hub, Hub, End_hub, Drones
-from parser import ParsingError
+from .custom_error import ParsingError
+from utils import get_hex, allowed_status
 
 
 class Parsier_meta_data(ABC):
@@ -72,17 +73,38 @@ class Start_hub_parsing(Parsier_meta_data):
         try:
             y = int(data[1])
         except ValueError:
-            raise ParsingError(f"Line {self.number_line}: Y coordinate '{data[1]}' must be a valid number.")
+            raise ParsingError(f"Line {self.number_line}: Y coordinate "
+                               f"'{data[1]}' must be a valid number.")
         try:
             x = int(data[2])
         except ValueError:
-            raise ParsingError(f"Line {self.number_line}: X coordinate '{data[2]}' must be a valid number.")
+            raise ParsingError(f"Line {self.number_line}: X coordinate "
+                               f"'{data[2]}' must be a valid number.")
         meta_data_str = data[3]
         meta_dict = self.parser_meta_data(meta_data_str)
+        print(meta_dict)
         return Start_hub(name, y, x, meta_dict)
 
     def parser_meta_data(self, string: str) -> Dict[str, Any]:
         meta_dict: Dict[str, str] = super().parser_meta_data(string)
+        if meta_dict.get("max_drones"):
+            try:
+                meta_dict["max_drones"] = int(meta_dict["max_drones"])
+            except ValueError:
+                raise ValueError(
+                    f"Line {self.number_line}: Invalid value for "
+                    f"'max_drones' -> '{meta_dict['max_drones']}'. "
+                    "Expected an integer.")
+        for k, v in meta_dict.items():
+            if k == "color":
+                meta_dict["color"] = get_hex(v, self.number_line)
+            elif k == "max_drones":
+                continue
+            else:
+                raise ParsingError(
+                    f"Line {self.number_line}: Invalid meta key '{k}'. "
+                    "Allowed keys: color, max_drones")
+        return meta_dict
 
 
 class Hub_parsing(Parsier_meta_data):
@@ -92,22 +114,45 @@ class Hub_parsing(Parsier_meta_data):
     def parser_line(self) -> Dict:
         data = self.meta_data.split(" ", 3)
         if len(data) < 4:
-            raise ParsingError(f"Line {self.number_line}: Missing data. Expected Name, Y, X, and [MetaData].")
+            raise ParsingError(f"Line {self.number_line}: Missing data. "
+                               "Expected Name, Y, X, and [MetaData].")
         name = data[0]
         try:
             y = int(data[1])
         except ValueError:
-            raise ParsingError(f"Line {self.number_line}: Y coordinate '{data[1]}' must be a valid number.")
+            raise ParsingError(f"Line {self.number_line}: Y coordinate "
+                               "'{data[1]}' must be a valid number.")
         try:
             x = int(data[2])
         except ValueError:
-            raise ParsingError(f"Line {self.number_line}: X coordinate '{data[2]}' must be a valid number.")
+            raise ParsingError(f"Line {self.number_line}: X coordinate "
+                               "'{data[2]}' must be a valid number.")
         meta_data_str = data[3]
         meta_dict = self.parser_meta_data(meta_data_str)
         return Hub(name, y, x, meta_dict)
 
     def parser_meta_data(self, string: str) -> Dict[str, Any]:
         meta_dict: Dict[str, str] = super().parser_meta_data(string)
+        if meta_dict.get("max_drones"):
+            try:
+                meta_dict["max_drones"] = int(meta_dict["max_drones"])
+            except ValueError:
+                raise ValueError(
+                    f"Line {self.number_line}: Invalid value for "
+                    f"'max_drones' -> '{meta_dict['max_drones']}'. "
+                    "Expected an integer.")
+        for k, v in meta_dict.items():
+            if k == "color":
+                meta_dict["color"] = get_hex(v, self.number_line)
+            elif k == "zone":
+                meta_dict["zone"] = allowed_status(v, self.number_line)
+            elif k == "max_drones":
+                continue
+            else:
+                raise ParsingError(
+                    f"Line {self.number_line}: Invalid meta key '{k}'. "
+                    "Allowed keys: color, max_drones")
+        return meta_dict
 
 
 class End_hub_parsing(Parsier_meta_data):
@@ -117,22 +162,26 @@ class End_hub_parsing(Parsier_meta_data):
     def parser_line(self) -> Dict:
         data = self.meta_data.split(" ", 3)
         if len(data) < 4:
-            raise ParsingError(f"Line {self.number_line}: Missing data. Expected Name, Y, X, and [MetaData].")
+            raise ParsingError(f"Line {self.number_line}: Missing data. "
+                               "Expected Name, Y, X, and [MetaData].")
         name = data[0]
         try:
             y = int(data[1])
         except ValueError:
-            raise ParsingError(f"Line {self.number_line}: Y coordinate '{data[1]}' must be a valid number.")
+            raise ParsingError(f"Line {self.number_line}: Y coordinate "
+                               f"'{data[1]}' must be a valid number.")
         try:
             x = int(data[2])
         except ValueError:
-            raise ParsingError(f"Line {self.number_line}: X coordinate '{data[2]}' must be a valid number.")
+            raise ParsingError(f"Line {self.number_line}: X coordinate "
+                               f"'{data[2]}' must be a valid number.")
         meta_data_str = data[3]
         meta_dict = self.parser_meta_data(meta_data_str)
         return End_hub(name, y, x, meta_dict)
 
     def parser_meta_data(self, string: str) -> Dict[str, Any]:
         meta_dict: Dict[str, str] = super().parser_meta_data(string)
+        return meta_dict
 
 
 class Connection_parsing(Parsier_meta_data):
@@ -144,6 +193,7 @@ class Connection_parsing(Parsier_meta_data):
 
     def parser_meta_data(self, meta_string):
         meta_dict: Dict[str, str] = super().parser_meta_data(meta_string)
+        return meta_dict
 
 
 class LineValidator:
@@ -154,22 +204,35 @@ class LineValidator:
 
     def type_line(self, line_str: str) -> ParsingError:
         try:
-            if (line_str[0] == "#"):
-                return ("#")
-            elif (line_str.split(":")[0] == "nb_drones"):
-                return (Drones_parsing(line_str.split(":")[1].strip(), self.number_line))
-            elif (line_str.split(":")[0] == "start_hub"):
-                return (Start_hub_parsing(line_str.split(":")[1].strip(), self.number_line))
-            elif (line_str.split(":")[0] == "hub"):
-                return (Hub_parsing(line_str.split(":")[1].strip(), self.number_line))
-            elif (line_str.split(":")[0] == "end_hub"):
-                return (End_hub_parsing(line_str.split(":")[1].strip(), self.number_line))
-            elif (line_str.split(":")[0] == "connection"):
-                return (Connection_parsing(line_str.split(":")[1].strip(), self.number_line))
+            key = line_str.split(":")[0].strip()
+
+            if line_str.startswith("#"):
+                return "#"
+            elif key == "nb_drones":
+                return Drones_parsing(line_str.split(":")[1].strip(),
+                                      self.number_line)
+            elif key == "start_hub":
+                return Start_hub_parsing(line_str.split(":")[1].strip(),
+                                         self.number_line)
+            elif key == "hub":
+                return Hub_parsing(line_str.split(":")[1].strip(),
+                                   self.number_line)
+            elif key == "end_hub":
+                return End_hub_parsing(line_str.split(":")[1].strip(),
+                                       self.number_line)
+            elif key == "connection":
+                return Connection_parsing(line_str.split(":")[1].strip(),
+                                          self.number_line)
             else:
-                raise ParsingError(f"line {self.number_line}santax error [nb_drones, .....]")
+                raise ParsingError(
+                    f"Line {self.number_line}: Invalid keyword '{key}'. "
+                    "Expected one of [nb_drones, start_hub, "
+                    "hub, end_hub, connection]"
+                )
         except Exception:
-            raise ParsingError(f"line {self.number_line} santax error example [nb_drones , ...]:")
+            raise ParsingError(
+                        f"Line {self.number_line}: Syntax error. "
+                        "Expected format 'key: value'.")
 
     def parser_line(self) -> ParsingError:
         while (True):
@@ -211,6 +274,6 @@ class Parsing:
 
     def append_hub(self, hub: Hub) -> None:
         self.hubs.append(hub)
-        print(hub.meta)
+        # print(hub.meta)
     # def append_connection(self, connection: Connection) -> None:
     #     self.connections.append(connection)

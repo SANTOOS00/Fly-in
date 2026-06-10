@@ -7,13 +7,13 @@ MAP ?= maps/hard/03_ultimate_challenge.txt
 all: run
 
 run:
-	@python3 $(SCRIPT) $(MAP)
+	@python3  $(SCRIPT) $(MAP)
 
 # debug:
 # 	@python3 -m pdb $(SCRIPT) $(MAP)
 
-# install:
-# 	@pip3 install -r requirements.txt
+install:
+	@pip3 install -r requirements.txt
 
 # clean:
 # 	@rm -rf __pycache__ .mypy_cache .pytest_cache
