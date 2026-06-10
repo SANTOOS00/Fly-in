@@ -1,6 +1,6 @@
 SCRIPT = src/main.py
 
-MAP ?= maps/easy/01_linear_path.txt
+MAP ?= maps/hard/03_ultimate_challenge.txt
 
 # .PHONY: all run clean lint install debug
 
