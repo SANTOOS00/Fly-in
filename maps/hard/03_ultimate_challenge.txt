@@ -44,7 +44,7 @@ hub: final_gate1 10 0 [color=orange max_drones=3]
 hub: final_gate2 11 0 [color=orange max_drones=2]
 hub: final_gate3 12 0 [color=orange max_drones=1]
 
-end_hub: goal 13 0 [color=gold max_drones=15]
+end_hub: goal 13 0 [color=gold]
 
 # Layer 1 connections
 connection: start-dist_gate1
@@ -56,7 +56,7 @@ connection: dist_gate1-maze_correct
 connection: dist_gate2-maze_trap1 [max_link_capacity=2]
 connection: dist_gate3-maze_loop1
 connection: maze_trap1-maze_trap2 [max_link_capacity=2]
-connection: maze_loop1-maze_loop2
+connection: ma_loop1-maze_loop2
 connection: maze_loop2-maze_loop3
 connection: maze_loop3-maze_loop4
 connection: maze_loop4-maze_loop1

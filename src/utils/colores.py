@@ -35,12 +35,12 @@ COLOR_HEX = {
 }
 
 
-def get_hex(color: str, line: int) -> str:
+def get_hex(color: str) -> str:
     try:
         c = Color(color.lower())
         return COLOR_HEX[c]
     except ValueError:
         raise ParsingError(
-            f"Line {line}: invalid color '{color}'. "
+            f"invalid color '{color}'. "
             f"Allowed: {[c.value for c in Color]}"
         )
