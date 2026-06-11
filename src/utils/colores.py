@@ -15,6 +15,7 @@ class Color(Enum):
     PURPLE = "purple"
     BROWN = "brown"
     LIME = "lime"
+    GOLD = "gold"
 
 
 COLOR_HEX = {
@@ -30,6 +31,7 @@ COLOR_HEX = {
     Color.PURPLE: "#800080",
     Color.BROWN: "#A52A2A",
     Color.LIME: "#00FF00",
+    Color.GOLD: "#FFD700",
 }
 
 
