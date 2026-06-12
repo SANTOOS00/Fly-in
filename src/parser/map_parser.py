@@ -157,8 +157,10 @@ class LineValidator:
     def __init__(self, name_file: str) -> None:
         self.fd = open(name_file, "r")
         self.line_number = 0
+        self.error_string: str = None
 
-    def next_parser(self) -> Tuple[Optional[BaseParser], Optional[str]]:
+    def next_parser(self, errors: List[str]
+                    ) -> Tuple[Optional[BaseParser] | str, Optional[str]]:
         line = self.fd.readline()
         if not line:
             self.fd.close()
@@ -183,7 +185,10 @@ class LineValidator:
         if key in parsers:
             return parsers[key](value, self.line_number), "SUCCESS"
         else:
-            raise ParsingError(f"Unknown configuration token '{key}'.")
+            errors.append(
+                f"Line {self.line_number}: "
+                f"Unknown configuration token '{key}'")
+            return None, "ERROR"
 
 
 class ConfigParser:
@@ -210,10 +215,12 @@ class ConfigParser:
         validator = LineValidator(self.file_name)
         while True:
             try:
-                parser, status = validator.next_parser()
+                parser, status = validator.next_parser(self.errors)
                 if status == "EOF":
                     break
                 if status == "COMMENT_OR_EMPTY" or not parser:
+                    continue
+                if status == "ERROR":
                     continue
                 result = parser.parse()
                 if isinstance(parser, DroneParser):
@@ -244,3 +251,11 @@ class ConfigParser:
             self.errors.append(
                 "Global Error: Missing 'end_hub' definition. "
                 "The simulation needs a destination point (goal).")
+
+
+# parser
+# example errors
+# -1
+# zone not valid
+# hub: maze_trap1 1 2 ##[color=
+# hub: : 1 2 [color=red]
