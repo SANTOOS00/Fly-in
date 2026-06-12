@@ -1,8 +1,13 @@
 from typing import List, Dict, Any, Tuple, Optional
 from abc import ABC, abstractmethod
-from simulation import Start_hub, Hub, End_hub, Drones, Connection
-from .custom_error import ParsingError
-from utils import get_hex, allowed_status
+from start_hub import Start_hub
+from end_hub import End_hub
+from connection import Connection
+from hub import Hub
+from drones import Drones
+from custom_error import ParsingError
+from utils import Utils
+
 import sys
 
 
@@ -81,7 +86,7 @@ class NodeParser(BaseParser):
             except ValueError:
                 raise ParsingError("'max_drones' value must be an integer.")
         if "color" in meta_dict:
-            meta_dict["color"] = get_hex(meta_dict["color"])
+            meta_dict["color"] = Utils.get_hex(meta_dict["color"])
         return meta_dict
 
 
@@ -102,7 +107,7 @@ class HubParser(NodeParser):
         meta_dict = self.parse_metadata(meta_str) if meta_str else {}
         meta_dict = self.validate_common_meta(meta_dict)
         if "zone" in meta_dict:
-            meta_dict["zone"] = allowed_status(meta_dict["zone"])
+            meta_dict["zone"] = (meta_dict["zone"])
         for k in meta_dict:
             if k not in ["color", "max_drones", "zone"]:
                 raise ParsingError(f"Invalid key '{k}' for hub.")

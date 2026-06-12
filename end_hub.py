@@ -1,5 +1,5 @@
 from typing import Dict, Any
-from parser.custom_error import ParsingError
+from custom_error import ParsingError
 
 
 class End_hub:

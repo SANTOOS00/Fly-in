@@ -1,5 +1,5 @@
 import sys
-from parser import ConfigParser
+from map_parser import ConfigParser
 
 
 def main() -> None:
@@ -8,7 +8,6 @@ def main() -> None:
         return
     map_parser = ConfigParser(sys.argv[1])
     map_parser.parse_pipeline()
-    
 
 
 if __name__ == "__main__":

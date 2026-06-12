@@ -1,4 +1,4 @@
-SCRIPT = src/main.py
+SCRIPT = main.py
 
 MAP ?= maps/easy/01_linear_path.txt
 
