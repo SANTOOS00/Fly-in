@@ -8,3 +8,4 @@ class Hub:
         self.x = x
         self.y = y
         self.meta: Dict[str: Any] | None = meta
+    

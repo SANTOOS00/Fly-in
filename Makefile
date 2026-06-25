@@ -1,6 +1,6 @@
 SCRIPT = main.py
 
-MAP ?= maps/easy/01_linear_path.txt
+MAP ?= maps/easy/02_simple_fork.txt
 
 # .PHONY: all run clean lint install debug
 
@@ -15,10 +15,9 @@ run:
 install:
 	@pip3 install -r requirements.txt
 
-# clean:
-# 	@rm -rf __pycache__ .mypy_cache .pytest_cache
-# 	@echo "Cleaned cache files!"
-
-# lint:
-# 	@flake8 .
-# 	@mypy --warn-return-any --warn-unused-ignores --ignore-missing-imports --disallow-untyped-defs --check-untyped-defs .
+clean:
+	@rm -rf __pycache__ .mypy_cache .pytest_cache
+	@echo "Cleaned cache files!"
+lint:
+	@flake8 .
+	@mypy . --warn-return-any --warn-unused-ignores --ignore-missing-imports --disallow-untyped-defs --check-untyped-defs

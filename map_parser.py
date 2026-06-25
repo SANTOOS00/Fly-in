@@ -7,8 +7,15 @@ from hub import Hub
 from drones import Drones
 from custom_error import ParsingError
 from utils import Utils
+from graph import Graph
+from functools import singledispatch
 
 import sys
+
+
+@singledispatch
+def append() -> None:
+    pass
 
 
 class BaseParser(ABC):
@@ -59,6 +66,10 @@ class DroneParser(BaseParser):
             raise ParsingError(f"'nb_drones' value '{self.raw_line}' "
                                f"must be a valid integer.")
 
+    @append.register(Drones)
+    def _(data, graph: Graph) -> None:
+        graph.drones = data
+
 
 class NodeParser(BaseParser):
     def split_line(self) -> Tuple[str, int, int, Optional[str]]:
@@ -100,6 +111,10 @@ class StartHubParser(NodeParser):
                 raise ParsingError(f"Invalid key '{k}' for start_hub.")
         return Start_hub(name, y, x, meta_dict)
 
+    @append.register(Start_hub)
+    def _(data, graph: Graph) -> None:
+        graph.start_hub = data
+
 
 class HubParser(NodeParser):
     def parse(self) -> Hub:
@@ -113,6 +128,10 @@ class HubParser(NodeParser):
                 raise ParsingError(f"Invalid key '{k}' for hub.")
         return Hub(name, y, x, meta_dict)
 
+    @append.register(Hub)
+    def _(data, graph: Graph) -> None:
+        graph.hubs  .append(data)
+
 
 class EndHubParser(NodeParser):
     def parse(self) -> End_hub:
@@ -123,6 +142,10 @@ class EndHubParser(NodeParser):
             if k not in ["color", "max_drones"]:
                 raise ParsingError(f"Invalid key '{k}' for end_hub.")
         return End_hub(name, y, x, meta_dict)
+
+    @append.register(End_hub)
+    def _(data, graph: Graph) -> None:
+        graph.end_hub = data
 
 
 class ConnectionParser(BaseParser):
@@ -157,6 +180,10 @@ class ConnectionParser(BaseParser):
                         )
         return Connection(node1.strip(), node2.strip(), meta_dict)
 
+    @append.register(Connection)
+    def _(data, graph: Graph) -> None:
+        graph.connections.append(data)
+
 
 class LineValidator:
     def __init__(self, name_file: str) -> None:
@@ -164,13 +191,13 @@ class LineValidator:
         self.line_number = 0
         self.error_string: str = None
 
-    def next_parser(self, errors: List[str]
+    def next_parser(self
                     ) -> Tuple[Optional[BaseParser] | str, Optional[str]]:
         line = self.fd.readline()
+        self.line_number += 1
         if not line:
             self.fd.close()
             return None, "EOF"
-        self.line_number += 1
         clean_line = line.strip()
         if not clean_line or clean_line.startswith("#"):
             return None, "COMMENT_OR_EMPTY"
@@ -190,21 +217,14 @@ class LineValidator:
         if key in parsers:
             return parsers[key](value, self.line_number), "SUCCESS"
         else:
-            errors.append(
-                f"Line {self.line_number}: "
+            raise ParsingError(
                 f"Unknown configuration token '{key}'")
-            return None, "ERROR"
 
 
 class ConfigParser:
-    def __init__(self, name_file: str) -> None:
-        self.file_name = name_file
-        self.drones: Optional[Drones] = None
-        self.start_hub: Optional[Start_hub] = None
-        self.hubs: List[Hub] = []
-        self.end_hub: Optional[End_hub] = None
-        self.connections: List[Connection] = []
-        self.errors: List[str] = []
+    def __init__(self) -> None:
+        self.graph = Graph()
+        self.errors: List = list()
 
     def print_report(self) -> bool:
         if self.errors:
@@ -215,12 +235,13 @@ class ConfigParser:
                 string_error += (f" ⚠️  + {error}\n")
             string_error += ("\n❌ Pipeline Status: FAILED\n")
             raise ParsingError(string_error)
+        return (self.graph)
 
-    def parse_pipeline(self) -> bool:
-        validator = LineValidator(self.file_name)
+    def parse_pipeline(self, name_file: str) -> bool:
+        validator = LineValidator(name_file)
         while True:
             try:
-                parser, status = validator.next_parser(self.errors)
+                parser, status = validator.next_parser()
                 if status == "EOF":
                     break
                 if status == "COMMENT_OR_EMPTY" or not parser:
@@ -228,39 +249,21 @@ class ConfigParser:
                 if status == "ERROR":
                     continue
                 result = parser.parse()
-                if isinstance(parser, DroneParser):
-                    self.drones = result
-                elif isinstance(parser, StartHubParser):
-                    self.start_hub = result
-                elif isinstance(parser, EndHubParser):
-                    self.end_hub = result
-                elif isinstance(parser, HubParser):
-                    self.hubs.append(result)
-                elif isinstance(parser, ConnectionParser):
-                    self.connections.append(result)
+                append(result, self.graph)
             except (ParsingError, ValueError) as err:
-                self.errors.append(f"Line {parser.line_number}: " + str(err))
-
+                self.errors.append(f"Line {validator.line_number}"
+                                   ": " + str(err))
         self.validate_structural_rules()
-
         return self.print_report()
 
     def validate_structural_rules(self) -> None:
-        if self.drones is None:
+        if self.graph.drones is None:
             self.errors.append("Global Error: Missing 'nb_drones' "
                                "definition in the file.")
-        if self.start_hub is None:
+        if self.graph.start_hub is None:
             self.errors.append("Global Error: Missing 'start_hub' definition. "
                                "The simulation needs a starting point.")
-        if self.end_hub is None:
+        if self.graph.end_hub is None:
             self.errors.append(
                 "Global Error: Missing 'end_hub' definition. "
                 "The simulation needs a destination point (goal).")
-
-
-# parser
-# example errors
-# -1
-# zone not valid
-# hub: maze_trap1 1 2 ##[color=
-# hub: : 1 2 [color=red]
