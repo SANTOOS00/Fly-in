@@ -7,13 +7,9 @@ from hub import Hub
 from drones import Drones
 
 
-class Path:
-    def __init__(self, name: str) -> None:
-        self.name_zone = name
-        self.connected_zones: tuple[Hub] = tuple()
-
-    def add_connected_zone(self, ins_hub: Hub) -> None:
-        self.connected_zones.append(ins_hub)
+class Zone:
+    def __init__(self) -> None:
+        pass
 
 
 class Graph:
@@ -25,4 +21,5 @@ class Graph:
         self.connections: List[Connection] = []
 
     def start_connected_zone(self) -> None:
-        pass
+        for hub in self.connections:
+            print(hub.node1)

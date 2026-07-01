@@ -1,4 +1,4 @@
-SCRIPT = map_parser.py
+SCRIPT = main.py
 
 MAP ?= maps/easy/02_simple_fork.txt
 

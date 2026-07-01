@@ -10,8 +10,8 @@ def main() -> None:
     map_parser = ConfigParser()
     graph: Graph = map_parser.parse_pipeline(sys.argv[1])
     # graph = Graph()
-    # graph.start_connected_zone(map_parser)
-    print(graph.drones.drones[0]["id"])
+    graph.start_connected_zone()
+    # print(graph.drones.drones[0]["id"])
 
 
 if __name__ == "__main__":
