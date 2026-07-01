@@ -221,6 +221,119 @@ class LineValidator:
                 f"Unknown configuration token '{key}'")
 
 
+#|------------------------------------------------------------------|
+#|          -----    parmeter in simulation   ------                |
+#|------------------------------------------------------------------|
+
+
+
+
+class Drones:
+    def __init__(self, number_drones: int) -> None:
+        self.drones: List[Dict[str, Any]] = [
+            {
+                "id": num + 1,
+                "name_zone": None,
+                "zone_visited_path": [],
+            }
+            for num in range(number_drones)
+            ]
+
+
+class End_hub:
+    _instance: "End_hub" = None
+
+    def __new__(cls, name: str, y: int, x: int, meta: Dict[str, Any] = None
+                ) -> "End_hub":
+        if cls._instance is not None:
+            raise ParsingError(
+                "Duplicate 'end_hub' defined. Only one start hub is allowed.")
+
+        cls._instance = super().__new__(cls)
+        cls._instance.name = name
+        cls._instance.y = y
+        cls._instance.x = x
+        cls._instance.meta = meta
+        return cls._instance
+
+
+
+class Start_hub:
+    _instance: "Start_hub" = None
+
+    def __new__(cls, name: str, y: int, x: int, meta: Dict[str, Any] = None
+                ) -> "Start_hub":
+        if cls._instance is not None:
+            raise ParsingError(
+                "Duplicate 'start_hub' defined. Only "
+                "one start hub is allowed.")
+
+        cls._instance = super().__new__(cls)
+        cls._instance.name = name
+        cls._instance.y = y
+        cls._instance.x = x
+        cls._instance.meta = meta
+        return cls._instance
+
+
+
+
+
+
+
+#|------------------------------------------------------------------|
+#|                  -----    PARSER ARGS   ------                   |
+#|------------------------------------------------------------------|
+class BaseParser(ABC):
+    def __init__(self, line_str: str) -> None:
+        self.number_line: int = 0
+        self.line_str: str = line_str
+        self.
+
+    def parser() -> None:
+        pass
+
+    @singledispatch
+    def append(self, data: ) -> None:
+        pass
+
+    @append.register(Hub)
+    def _(self, test_name) -> None:
+
+    @append.register(Start_hub)
+    def _(self, test_name) -> None:
+        pass
+
+class MetaParser(BaseParser):
+    def parser(self) -> None:
+        pass
+
+class DroneParser(BaseParser):
+    def parser():
+        pass
+
+class ZoneWithCoordsParser(BaseParser):
+    pass
+
+class StartHubParser(ZoneWithCoordsParser, MetaParser):
+    pass
+
+class EndHubParser(ZoneWithCoordsParser, MetaParser):
+    pass
+
+class HubParser(ZoneWithCoordsParser, MetaParser):
+    pass
+
+
+class ConnectionParser(MetaParser):
+    pass
+
+
+
+class LineValidator:
+    pass
+
+
 class ConfigParser:
     def __init__(self) -> None:
         self.graph = Graph()
@@ -267,3 +380,12 @@ class ConfigParser:
             self.errors.append(
                 "Global Error: Missing 'end_hub' definition. "
                 "The simulation needs a destination point (goal).")
+
+def main() -> None:
+    pass
+
+if __name__ == "__main__":
+    try:
+        main()
+    except Exception as error:
+        print(error)
