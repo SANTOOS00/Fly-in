@@ -3,7 +3,7 @@ from abc import ABC, abstractmethod
 from enum import Enum
 from pathlib import Path
 import os
-
+import sys
 #|------------------------------------------------------------------|
 #|            ----- custom errors in project ------                 |
 #|------------------------------------------------------------------|
@@ -20,19 +20,17 @@ class BaseError(Exception, ABC):
         self.type_error = type_error
         
     @abstractmethod
-    def _get_error(self) -> str:
-        if self.number_line is None:
-            return f"[{self.type_error.value}]: {self.message}"
-        else
-            return f"[{self.type_error.value}] line {self.number_line}: {self.message}"
+    def get_error(self) -> str:
+        return f"[{self.type_error.value}] line {self.number_line}: {self.message}"
 
 
 class PathError(BaseError):
     def __init__(self, message: str, type_error: Type_Error | None = None) -> None:
         super().__init__(message, None, type_error)
     
-    def _get_error(self):
-        return super()._get_error()
+    def get_error(self) -> str:
+        return f"[{self.type_error.value}]: {self.message}"
+
 
 
 class HubError(BaseError):
@@ -40,7 +38,7 @@ class HubError(BaseError):
         super().__init__(message, number_line, type_error)
     
 
-    def _get_error(self):
+    def get_error(self):
         return super()._get_error()
 
 
@@ -48,14 +46,14 @@ class HubError(BaseError):
     def __init__(self, message: str, number_line: int, type_error: Type_Error) -> None:
         super().__init__(message, number_line, type_error)
     
-    def _get_error(self):
+    def get_error(self):
         return super()._get_error()
 
 class ConnectionError(BaseError):
     def __init__(self, message: str, number_line: int, type_error: Type_Error) -> None:
         super().__init__(message, number_line, type_error)
     
-    def _get_error(self):
+    def get_error(self):
         return super()._get_error()
 
 
@@ -183,21 +181,24 @@ class LineValidator:
 
 
 class ConfigParser:
+    def __init__(self, path_file: Path) -> None:
+        self.valid_path = path_file
+
+    @property
     def valid_path(self, path_file: Path) -> None:
         if not path_file.exists is not True:
             raise PathError(f"File not found: {path_file}", Type_Error.Error)
         if not os.access(path_file, os.R_OK):
              raise PathError(f"No read permission: {path_file}", Type_Error.Error)
-        
+        self.path = Path(path_file)
 
 
 def main() -> None:
-    name_test = ConfigParser()
-
-
+    name_test = ConfigParser(sys.argv[1])
+    print(name_test.path)
 
 if __name__ == "__main__":
-    try:
-        main()
-    except Exception as error:
-        print(error._get_error())
+    # try:
+    main()
+    # except Exception as error:
+    #     print(error.get_error())

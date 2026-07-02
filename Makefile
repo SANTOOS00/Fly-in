@@ -1,4 +1,4 @@
-SCRIPT = main.py
+SCRIPT = main_test.py
 
 MAP ?= maps/easy/02_simple_fork.txt
 
