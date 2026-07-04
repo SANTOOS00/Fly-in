@@ -6,9 +6,6 @@ import os
 import sys
 from typing import TextIO
 
-#|------------------------------------------------------------------|
-#|            ----- custom errors in project ------                 |
-#|------------------------------------------------------------------|
 
 class Type_Error(Enum):
     Warning = "Warning"
@@ -16,65 +13,68 @@ class Type_Error(Enum):
 
 
 class BaseError(Exception, ABC):
-    def __init__(self, message: str, number_line: int | None = None, type_error: Type_Error | None = None) -> None:
+    """
+    #|------------------------------------------------------------------|
+    #|            ----- custom errors in project ------                 |
+    #|------------------------------------------------------------------|
+    """
+
+    def __init__(self, message: str, number_line: int | None = None,
+                 type_error: Type_Error | None = None) -> None:
         super().__init__(message)
         self.message = message
         self.number_line = number_line
         self.type_error = type_error
-        
+
     @abstractmethod
     def get_error(self) -> str:
-        return f"[{self.type_error.value}] line {self.number_line}: {self.message}"
+        return (
+            f"[{self.type_error.value}] line {self.number_line}: "
+            f"{self.message}")
 
 
 class PathError(BaseError):
-    def __init__(self, message: str, type_error: Type_Error | None = None) -> None:
+    def __init__(self, message: str, type_error: Type_Error | None = None
+                 ) -> None:
         super().__init__(message, type_error=type_error)
-    
+
     def get_error(self) -> str:
         return f"[{self.type_error.value}]: {self.message}"
 
 
-
 class HubError(BaseError):
-    def __init__(self, message: str, number_line, type_error: Type_Error) -> None:
+    def __init__(self, message: str, number_line, type_error: Type_Error
+                 ) -> None:
         super().__init__(message, number_line, type_error)
-    
 
     def get_error(self):
         return super()._get_error()
 
-
-class HubError(BaseError):
-    def __init__(self, message: str, number_line: int, type_error: Type_Error) -> None:
-        super().__init__(message, number_line, type_error)
-    
-    def get_error(self):
-        return super()._get_error()
 
 class ConnectionError(BaseError):
-    def __init__(self, message: str, number_line: int, type_error: Type_Error) -> None:
+    def __init__(self, message: str, number_line: int, type_error: Type_Error
+                 ) -> None:
         super().__init__(message, number_line, type_error)
-    
+
     def get_error(self):
         return super()._get_error()
 
+
 class UtilsError(BaseError):
-    def __init__(self, message: str, number_line: int | None = None, type_error: Type_Error | None = None)-> None:
+    def __init__(self, message: str, number_line: int | None = None,
+                 type_error: Type_Error | None = None) -> None:
         super().__init__(message, number_line, type_error)
-    
+
     def get_error(self):
         return super().get_error()
 
 
-#|------------------------------------------------------------------|
-#|          -----    parmeter in simulation   ------                |
-#|------------------------------------------------------------------|
-
-
-
-
 class Drones:
+    """
+    |------------------------------------------------------------------|
+    |          -----    parmeter in simulation   ------                |
+    |------------------------------------------------------------------|
+    """
     def __init__(self, number_drones: int) -> None:
         self.drones: List[Dict[str, Any]] = [
             {
@@ -100,7 +100,6 @@ class End_hub:
         cls._instance.x = x
         cls._instance.meta = meta
         return cls._instance
-
 
 
 class Start_hub:
@@ -135,70 +134,95 @@ class Connection:
         self.meta = meta
 
 
-
-
-#|------------------------------------------------------------------|
-#|                  -----    PARSER ARGS   ------                   |
-#|------------------------------------------------------------------|
-
-
 class BaseParser(ABC):
-    def __init__(self, line_str: str) -> None:
-        self.number_line: int = 0
+    """
+    |------------------------------------------------------------------|
+    |                  -----    PARSER ARGS   ------                   |
+    |------------------------------------------------------------------|
+    """
+    def __init__(self, line_str: str, nu_line: int) -> None:
+        self.nu_line: int = nu_line
         self.line_str: str = line_str
-        self.errors: List = []
 
-    def parser() -> None:
-        pass
-
-
-class MetaParser(BaseParser):
+    @abstractmethod
     def parser(self) -> None:
         pass
 
 
+class MetaParser:
+    pass
+
+
 class DroneParser(BaseParser):
-    def parser():
+    def __init__(self, line_str: str, nu_line: int) -> None:
+        super().__init__(line_str, nu_line)
+
+    def parser(self) -> None:
         pass
 
 
 class ZoneWithCoordsParser(BaseParser):
-    pass
+    def __init__(self, line_str: str, nu_line: int) -> None:
+        super().__init__(line_str, nu_line)
+
+    def parser(self) -> None:
+        pass
 
 
 class StartHubParser(ZoneWithCoordsParser, MetaParser):
-    pass
+    def __init__(self, line_str: str, nu_line: int) -> None:
+        super().__init__(line_str, nu_line)
+
+    def parser(self) -> None:
+        pass
 
 
 class EndHubParser(ZoneWithCoordsParser, MetaParser):
-    pass
+    def __init__(self, line_str: str, nu_line: int) -> None:
+        super().__init__(line_str, nu_line)
+
+    def parser(self) -> None:
+        pass
 
 
 class HubParser(ZoneWithCoordsParser, MetaParser):
-    pass
+    def __init__(self, line_str: str, nu_line: int) -> None:
+        super().__init__(line_str, nu_line)
+
+    def parser(self) -> None:
+        pass
 
 
-class ConnectionParser(MetaParser):
-    pass
+class ConnectionParser:
+    def __init__(self, line_str: str, nu_line: int) -> None:
+        self.line_str = line_str
+        self.nu_line = nu_line
+
+    def parser(self) -> None:
+        pass
 
 
 class LineValidator:
     pass
 
+
 class SafeFileReader:
     def __init__(self, path_file: Path) -> None:
         self.valid_path: Path = path_file
         self.number_line: int = 0
+
     @property
     def valid_path(self) -> Path:
-        return self._path
+        return self._fd
 
-    @valid_path.setter 
+    @valid_path.setter
     def valid_path(self, path_file: Path) -> None:
         if not path_file.exists():
-            raise PathError(f"File not found: {path_file}", Type_Error.Error)
+            raise PathError(
+                f"File not found: {path_file}", Type_Error.Error)
         if not os.access(path_file, os.R_OK):
-             raise PathError(f"No read permission: {path_file}", Type_Error.Error)
+            raise PathError(
+                f"No read permission: {path_file}", Type_Error.Error)
         self._fd: TextIO = open(path_file, encoding="utf-8")
 
     def get_validated_line(self) -> Dict[str, str] | str:
@@ -209,23 +233,27 @@ class SafeFileReader:
             self.number_line += 1
             self.data_str = raw_line.split("#", maxsplit=1)[0].strip()
             if self.data_str == "":
-                continue                
+                continue
             if self._get_type_line():
-                return {
-                    self.key: self.val
-                }
+                return (
+                    self.key(self.val, self.number_line)
+                )
             else:
-                raise UtilsError(f"Unknown configuration token '{self.key}'", self.number_line, Type_Error.Error)
-
+                raise UtilsError(
+                    f"Unknown configuration token '{self.key}'",
+                    self.number_line, Type_Error.Error)
 
     def __del__(self) -> None:
         self._fd.close()
-    
+
     def _get_type_line(self) -> bool:
         if self.data_str.count(":") != 1:
-            raise UtilsError("The line type must match one of the allowed formats {nb_drones, start_hub, etc.}. Example: [type : ,,, ]", self.number_line, Type_Error.Error)
+            raise UtilsError(
+                "The line type must match one of the allowed formats "
+                "{nb_drones, start_hub, etc.}. Example: [type : ,,, ]",
+                self.number_line, Type_Error.Error)
         key_raw, self.val = self.data_str.split(":", 1)
-        self.key = key_raw.lower()
+        key = key_raw.lower()
         parsers = {
             "nb_drones": DroneParser,
             "start_hub": StartHubParser,
@@ -233,7 +261,8 @@ class SafeFileReader:
             "end_hub": EndHubParser,
             "connection": ConnectionParser
         }
-        if self.key.lower() in parsers:
+        if parsers.get(key):
+            self.key = parsers[key]
             return True
         return False
 
@@ -243,14 +272,13 @@ class ParserConfig:
         self.errors: List[str] | None = []
 
     def parse_in_type_line(self) -> None:
-        test_name = SafeFileReader(Path(sys.argv[1]))
-        
-        while(True):
+        fileread = SafeFileReader(Path(sys.argv[1]))
+        while (True):
             try:
-                data_dict = test_name.get_validated_line()
-                if data_dict == "EOF":
+                isinstance_parser = fileread.get_validated_line()
+                if isinstance_parser == "EOF":
                     break
-                print(data_dict)
+                print(isinstance_parser)
             except Exception as error:
                 if isinstance(error, BaseError):
                     self.errors.append(error.get_error())
@@ -272,10 +300,15 @@ class ParserConfig:
 def main() -> None:
     parser = ParserConfig()
     parser.parse_in_type_line()
+    print("is ok")
+    pass
+
 
 if __name__ == "__main__":
-    try:
-        main()
-    except Exception as error:
-        print(error)
-        
+    # try:
+	main()
+    # except Exception as error:
+    #     if isinstance(error, BaseError):
+    #         print(error.get_error())
+    #     else:
+    #         print(error)
