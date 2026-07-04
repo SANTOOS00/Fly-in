@@ -163,17 +163,18 @@ class ZoneWithCoordsParser(BaseParser):
         super().__init__(line_str, nu_line)
 
     def parser(self) -> None:
-        line = self.line.strip()
-        if not line:
-            return None
+        pass
+        # line = self.line.strip()
+        # if not line:
+        #     return None
 
-        pattern = r'^(\w+)\s+(\d+)\s+(\d+)\s+(\w+)'
-        match = re.match(pattern, line)
-        print(match)
-        if match:
-            name, x, y, options_raw = match.groups()
-            # is_valid_x_and_y(x, y):
-            return Hub(name, x, y, options_raw)
+        # pattern = r'^(\w+)\s+(\d+)\s+(\d+)\s+(\w+)'
+        # match = re.match(pattern, line)
+        # print(match)
+        # if match:
+        #     name, x, y, options_raw = match.groups()
+        #     # is_valid_x_and_y(x, y):
+        #     return Hub(name, x, y, options_raw)
 
 
 class DroneParser(BaseParser):
@@ -305,9 +306,7 @@ class ParserConfig:
             try:
                 component = fileread.get_validated_line()
                 if component == "EOF":
-                    print("sss")
                     break
-                print(component)
                 self.update_graph(component)
             except Exception as error:
                 if isinstance(error, BaseError):
@@ -356,8 +355,6 @@ class ParserConfig:
 def mainparser() -> None:
     parser = ParserConfig()
     parser.parse_in_type_line()
-    print("is ok")
-    pass
 
 
 def maingraph() -> None:
