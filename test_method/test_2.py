@@ -64,13 +64,19 @@
 
 
 
-from pathlib import Path
-import os
+# from pathlib import Path
+# import os
 
-path = Path("../ain.py")
+# path = Path("../ain.py")
 
-if path.exists:
-    print("is ok")
+# if path.exists:
+#     print("is ok")
 
-if os.access(path, os.R_OK):
-    print("you can read")
+# if os.access(path, os.R_OK):
+#     print("you can read")
+
+test2 = "# test tprint(text.split(sep=, maxsplit=2))"
+test1 = "test tprint(text.split#(sep="
+
+print(test1.split("#", maxsplit=1)[0])
+# print(test2.split("#", maxsplit=1))
