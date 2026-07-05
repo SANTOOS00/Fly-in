@@ -339,7 +339,7 @@ class ConfigParser:
         self.graph = Graph()
         self.errors: List = list()
 
-    def print_report(self) -> bool:
+    def print_report(self) -> None:
         if self.errors:
             string_error = ""
             print(f"\n💥 Found {len(self.errors)} Error(s) in "
@@ -348,7 +348,6 @@ class ConfigParser:
                 string_error += (f" ⚠️  + {error}\n")
             string_error += ("\n❌ Pipeline Status: FAILED\n")
             raise ParsingError(string_error)
-        return (self.graph)
 
     def parse_pipeline(self, name_file: str) -> bool:
         validator = LineValidator(name_file)
@@ -364,10 +363,10 @@ class ConfigParser:
                 result = parser.parse()
                 append(result, self.graph)
             except (ParsingError, ValueError) as err:
-                self.errors.append(f"Line {validator.line_number}"
-                                   ": " + str(err))
+                self.errors.append(error)
         self.validate_structural_rules()
-        return self.print_report()
+        self.print_report()
+        return "m" 
 
     def validate_structural_rules(self) -> None:
         if self.graph.drones is None:

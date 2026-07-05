@@ -93,4 +93,8 @@
 
 for is_not_valid, type_error in enumerate(self._patterns.values(), ErrorLocation):
             if is_not_valid:
+
+            #  r'^(\w+)\s+(-?\d+)\s+(-?\d+)\s+\[(\w+)=(\d+)\]$': True,
+
+
                 raise ZeroDivisionError(f""  , self.nu_line, ErrorSeverity.Error, ErrorLocation(type_error))

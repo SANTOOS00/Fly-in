@@ -13,75 +13,97 @@ class ErrorSeverity(Enum):
     Warning = "Warning"
     Error = "Error"
 
+
 class ErrorLocation(Enum):
     ZONE = "Zone name is not valid"
     X_AXIS = "X coordinate is not valid"
     Y_AXIS = "Y coordinate is not valid"
 
-class BaseError(Exception, ABC):
+
+class BaseError(Exception):
     """
     #|------------------------------------------------------------------|
     #|            ----- custom errors in project ------                 |
     #|------------------------------------------------------------------|
     """
 
-    def __init__(self, message: str, number_line: int | None = None,
-                 type_error: ErrorSeverity | None = None) -> None:
+    def __init__(self, message: str, line_number: int | None = None,
+                 severity: ErrorSeverity | None = None) -> None:
         super().__init__(message)
         self.message = message
-        self.number_line = number_line
-        self.type_error = type_error
+        self.line_number = line_number
+        self.severity = severity
 
-    @abstractmethod
-    def get_error(self) -> str:
+    def __str__(self) -> str:
         return (
-            f"[{self.type_error.value}] line {self.number_line}: "
+            f"[{self.severity.value}] line {self.line_number}: "
             f"{self.message}")
 
 
 class PathError(BaseError):
-    def __init__(self, message: str, type_error: ErrorSeverity | None = None
+    def __init__(self, message: str, severity: ErrorSeverity | None = None
                  ) -> None:
-        super().__init__(message, type_error=type_error)
+        super().__init__(message, severity=severity)
 
-    def get_error(self) -> str:
+    def __str__(self) -> str:
         return f"[{self.type_error.value}]: {self.message}"
 
 
 class HubError(BaseError):
-    def __init__(self, message: str, number_line, type_error: ErrorSeverity
+    def __init__(self, message: str, line_number: int, severity: ErrorSeverity
                  ) -> None:
-        super().__init__(message, number_line, type_error)
+        super().__init__(message, line_number, severity)
 
-    def get_error(self):
+    def __str__(self):
         return super()._get_error()
 
 
 class ConnectionError(BaseError):
-    def __init__(self, message: str, number_line: int, type_error: ErrorSeverity
-                 ) -> None:
-        super().__init__(message, number_line, type_error)
+    def __init__(self, message: str, line_number: int,
+                 severity: ErrorSeverity) -> None:
+        super().__init__(message, line_number, severity)
 
-    def get_error(self):
+    def __str__(self):
         return super()._get_error()
 
 
 class UtilsError(BaseError):
-    def __init__(self, message: str, number_line: int | None = None,
-                 type_error: ErrorSeverity | None = None) -> None:
-        super().__init__(message, number_line, type_error)
+    def __init__(self, message: str, line_number: int | None = None,
+                 severity: ErrorSeverity | None = None) -> None:
+        super().__init__(message, line_number, severity)
 
     def __str___(self):
         return f"{self.message}"
 
+
 class ZoneWithCoordsParserError(BaseError):
-    def __init__(self, message: str, number_line: int | None = None,
-                 type_error: ErrorSeverity | None = None, test: ErrorLocation = None) -> None:
-        super().__init__(message, number_line, type_error)
-        self.test = test
+    def __init__(self,
+                 message: str,
+                 line_number: int | None = None,
+                 severity: ErrorSeverity | None = None,
+                 location: ErrorLocation | None = None) -> None:
+        super().__init__(message, line_number, severity)
+        self.location = location
 
     def __str__(self) -> None:
-        return f"{self.number_line}  line  {self.test}"
+        if self.location == ErrorLocation.ZONE:
+            return (
+                f"\n[{self.severity.value}] Line {self.line_number}"
+                f" at {self.location.value}:\n"
+                f"  ➜ Input Error: {self.message}\n"
+                f"  ⚠  Fix: {self.severity.value} ⚠  Fix: Zone format "
+                "is invalid. It must be an alphanumeric identifier "
+                "(e.g., 's_0').\n"
+            )
+        else:
+            return (
+                f"\n[{self.severity.value}] Line {self.line_number}"
+                f" at {self.location.value}:\n"
+                f"  ➜ Input Error: {self.message}\n"
+                f"  ⚠  Fix: {self.severity.value} coordinates must be integers"
+                " or negative numbers only.\n"
+            )
+
 
 class Drones:
     """
@@ -166,7 +188,6 @@ class BaseParser(ABC):
         pass
 
 
-
 class MetaParser:
     pass
 
@@ -181,16 +202,11 @@ class DroneParser(BaseParser):
             if int(self.line_str) > 0:
                 return Drones(int(self.line_str))
             else:
-                raise UtilsError("'nb_drones' value must be a valid integer.", 
+                raise UtilsError("'nb_drones' value must be a valid integer.",
                                  self.nu_line, ErrorSeverity.Error)
         except ValueError:
             raise UtilsError("'nb_drones' value must be a valid integer.",
                              self.nu_line, ErrorSeverity.Error)
-
-
-
-            #  r'^(\w+)\s+(-?\d+)\s+(-?\d+)\s+\[(\w+)=(\d+)\]$': True,
-
 
 
 class ZoneWithCoordsParser(BaseParser):
@@ -200,22 +216,23 @@ class ZoneWithCoordsParser(BaseParser):
         self._patterns = {
             r'^(\w+)': False,
             r'^(\w+)\s+(-?\d+)': False,
-            r'^(\w+)\s+(-?\d+)\s+(-?\d+)(.*)': False,
+            r'^(\w+)\s+(-?\d+)\s+(-?\d+)(\s)(.*)': False,
         }
 
     def parser(self) -> None:
-        # print("ssss")make
         line = self.line_str.strip()
         for key in self._patterns.keys():
             match = re.match(key, line)
             if match is None:
                 self._patterns[key] = True
-        error  = list(ErrorLocation)
+        errors = list(ErrorLocation)
         for index, is_not_valid in enumerate(self._patterns.values()):
 
             if is_not_valid:
-                print(error[index])
-                raise ZoneWithCoordsParserError("sssssssssssss" , self.nu_line, ErrorSeverity.Error, error[index])
+                raise ZoneWithCoordsParserError("",
+                                                self.nu_line,
+                                                ErrorSeverity.Error,
+                                                errors[index - 1])
 
 
 class StartHubParser(ZoneWithCoordsParser):
@@ -240,7 +257,6 @@ class HubParser(ZoneWithCoordsParser):
 
     def parser(self) -> Hub:
         super().parser()
-        print("is ok valid hub")
 
 
 class ConnectionParser:
@@ -325,7 +341,7 @@ class ParserConfig:
     def __init__(self) -> None:
         self.errors: List[str] | None = []
         self.graph = Graph()
- 
+
     def parse_in_type_line(self) -> None:
         fileread = SafeFileReader(Path(sys.argv[1]))
         while (True):
@@ -333,12 +349,9 @@ class ParserConfig:
                 component = fileread.get_validated_line()
                 if component == "EOF":
                     break
-                self.update_graph(component)
             except Exception as error:
-                if isinstance(error, BaseError):
-                    self.errors.append(error.get_error())
-                else:
-                    print(error)
+                self.errors.append(error)
+            self.update_graph(component)
         self.print_report()
 
     def print_report(self) -> None:
@@ -350,13 +363,11 @@ class ParserConfig:
             for error in self.errors:
                 string_error += (f" ⚠️  + {error}\n")
             string_error += ("\n❌ Pipeline Status: FAILED\n")
-            raise UtilsError(string_error)
+            raise Exception(string_error)
 
     @singledispatchmethod
     def update_graph(self, data):
-        raise UtilsError(
-                    f"Unknown configuration token '{data}'",
-                    self.number_line, ErrorSeverity.Error)
+        pass
 
     @update_graph.register(Drones)
     def _(self, component: Drones):
@@ -392,7 +403,4 @@ if __name__ == "__main__":
     try:
         mainparser()
     except Exception as error:
-        if isinstance(error, BaseError):
-            print(error.get_error())
-        else:
-            print(error)
+        print(error, file=sys.stderr)
