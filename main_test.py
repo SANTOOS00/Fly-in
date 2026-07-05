@@ -217,7 +217,6 @@ class MetaParser(BaseError):
 
 class DroneParser(BaseParser):
     def __init__(self, line_str: str, nu_line: int) -> None:
-
         super().__init__(line_str, nu_line)
 
     def parser(self) -> Drones:
@@ -237,9 +236,9 @@ class ZoneWithCoordsParser(BaseParser):
         self.line_str = line_str
         self.nu_line = nu_line
         self._patterns = {
-            r'^(\w+)': False,
-            r'^(\w+)\s+(-?\d+)': False,
-            r'^(\w+)\s+(-?\d+)\s+(-?\d+)(.*)': False,
+            r'^(\w+)(\s)': False,
+            r'^(\w+)(\s+)(-?\d+)(\s)': False,
+            r'^(\w+)(\s+)(-?\d+)(\s+)(-?\d+)(.*)': False,
         }
 
     def parser(self) -> Dict[str, Any]:
@@ -260,13 +259,14 @@ class ZoneWithCoordsParser(BaseParser):
             match = re.match(key, line)
             if match is None:
                 self._patterns[key] = True
+
         errors = list(ErrorLocation)
         for index, is_not_valid in enumerate(self._patterns.values()):
             if is_not_valid:
                 raise ZoneWithCoordsParserError("",
                                                 self.nu_line,
                                                 ErrorSeverity.Error,
-                                                errors[index - 1])
+                                                errors[index])
 
 
 class StartHubParser(ZoneWithCoordsParser, MetaParser):
