@@ -9,10 +9,14 @@ from functools import singledispatchmethod
 import re
 
 
-class Type_Error(Enum):
+class ErrorSeverity(Enum):
     Warning = "Warning"
     Error = "Error"
 
+class ErrorLocation(Enum):
+    ZONE = "Zone name is not valid"
+    X_AXIS = "X coordinate is not valid"
+    Y_AXIS = "Y coordinate is not valid"
 
 class BaseError(Exception, ABC):
     """
@@ -22,7 +26,7 @@ class BaseError(Exception, ABC):
     """
 
     def __init__(self, message: str, number_line: int | None = None,
-                 type_error: Type_Error | None = None) -> None:
+                 type_error: ErrorSeverity | None = None) -> None:
         super().__init__(message)
         self.message = message
         self.number_line = number_line
@@ -36,7 +40,7 @@ class BaseError(Exception, ABC):
 
 
 class PathError(BaseError):
-    def __init__(self, message: str, type_error: Type_Error | None = None
+    def __init__(self, message: str, type_error: ErrorSeverity | None = None
                  ) -> None:
         super().__init__(message, type_error=type_error)
 
@@ -45,7 +49,7 @@ class PathError(BaseError):
 
 
 class HubError(BaseError):
-    def __init__(self, message: str, number_line, type_error: Type_Error
+    def __init__(self, message: str, number_line, type_error: ErrorSeverity
                  ) -> None:
         super().__init__(message, number_line, type_error)
 
@@ -54,7 +58,7 @@ class HubError(BaseError):
 
 
 class ConnectionError(BaseError):
-    def __init__(self, message: str, number_line: int, type_error: Type_Error
+    def __init__(self, message: str, number_line: int, type_error: ErrorSeverity
                  ) -> None:
         super().__init__(message, number_line, type_error)
 
@@ -64,12 +68,21 @@ class ConnectionError(BaseError):
 
 class UtilsError(BaseError):
     def __init__(self, message: str, number_line: int | None = None,
-                 type_error: Type_Error | None = None) -> None:
+                 type_error: ErrorSeverity | None = None) -> None:
         super().__init__(message, number_line, type_error)
 
     def get_error(self):
         return super().get_error()
 
+class ZoneWithCoordsParserError(BaseError):
+    def __init__(self, message: str, number_line: int | None = None,
+                 type_error: ErrorSeverity | None = None, test = None) -> None:
+        super().__init__(message, number_line, type_error)
+        self.test = test    
+
+
+    def get_error(self) -> None:
+        return f"{self.test}"
 
 class Drones:
     """
@@ -154,27 +167,9 @@ class BaseParser(ABC):
         pass
 
 
+
 class MetaParser:
     pass
-
-
-class ZoneWithCoordsParser(BaseParser):
-    def __init__(self, line_str: str, nu_line: int) -> None:
-        super().__init__(line_str, nu_line)
-
-    def parser(self) -> None:
-        pass
-        # line = self.line.strip()
-        # if not line:
-        #     return None
-
-        # pattern = r'^(\w+)\s+(\d+)\s+(\d+)\s+(\w+)'
-        # match = re.match(pattern, line)
-        # print(match)
-        # if match:
-        #     name, x, y, options_raw = match.groups()
-        #     # is_valid_x_and_y(x, y):
-        #     return Hub(name, x, y, options_raw)
 
 
 class DroneParser(BaseParser):
@@ -183,37 +178,70 @@ class DroneParser(BaseParser):
 
     def parser(self) -> Drones:
         try:
-            if int(self.raw_line) > 0:
-                return Drones(int(self.raw_line))
+            if int(self.line_str) > 0:
+                return Drones(int(self.line_str))
             else:
                 raise UtilsError("'nb_drones' value must be a valid integer.", 
-                                 self.nu_line, Type_Error.Error)
+                                 self.nu_line, ErrorSeverity.Error)
         except ValueError:
             raise UtilsError("'nb_drones' value must be a valid integer.",
-                             self.nu_line, Type_Error.Error)
+                             self.nu_line, ErrorSeverity.Error)
 
 
-class StartHubParser(ZoneWithCoordsParser, MetaParser):
+
+            #  r'^(\w+)\s+(-?\d+)\s+(-?\d+)\s+\[(\w+)=(\d+)\]$': True,
+
+
+
+class ZoneWithCoordsParser:
+    def __init__(self, line_str: str, nu_line: int) -> None:
+        self.line_str = line_str
+        self.nu_line = nu_line
+        self._patterns = {
+            r'^(\w+)': False,
+            r'^(\w+)\s+(-?\d+)': False,
+            r'^(\w+)\s+(-?\d+)\s+(-?\d+)(.*)': False,
+        }
+
+    def parser(self) -> None:
+        # print("ssss")
+        line = self.line.strip()
+        for key in self._patterns.keys():
+            match = re.match(key, line)
+            if match is None:
+                self._patterns[key] = True
+        error  = List(ErrorLocation)
+        for index, is_not_valid in enumerate(self._patterns.values()):
+            if is_not_valid:
+                raise ZoneWithCoordsParserError("hamid" , self.nu_line, ErrorSeverity.Error, error[index])
+        
+
+        print("is ok")
+
+
+class StartHubParser(ZoneWithCoordsParser):
     def __init__(self, line_str: str, nu_line: int) -> None:
         super().__init__(line_str, nu_line)
 
     def parser(self) -> Start_hub:
-        print("is ok valid start")
+        super().parser()
 
 
-class EndHubParser(ZoneWithCoordsParser, MetaParser):
+class EndHubParser(ZoneWithCoordsParser):
     def __init__(self, line_str: str, nu_line: int) -> None:
         super().__init__(line_str, nu_line)
 
     def parser(self) -> End_hub:
-        print("is ok valid End")
+        super().parser()
 
 
-class HubParser(ZoneWithCoordsParser, MetaParser):
+class HubParser(ZoneWithCoordsParser):
     def __init__(self, line_str: str, nu_line: int) -> None:
+        print("is hub ")
         super().__init__(line_str, nu_line)
 
     def parser(self) -> Hub:
+        super().parser()
         print("is ok valid hub")
 
 
@@ -223,7 +251,7 @@ class ConnectionParser:
         self.nu_line = nu_line
 
     def parser(self) -> Connection:
-        Connection("name_zone_end", "name_zone_start", "[dd]")
+        pass
 
 
 class SafeFileReader:
@@ -239,10 +267,10 @@ class SafeFileReader:
     def valid_path(self, path_file: Path) -> None:
         if not path_file.exists():
             raise PathError(
-                f"File not found: {path_file}", Type_Error.Error)
+                f"File not found: {path_file}", ErrorSeverity.Error)
         if not os.access(path_file, os.R_OK):
             raise PathError(
-                f"No read permission: {path_file}", Type_Error.Error)
+                f"No read permission: {path_file}", ErrorSeverity.Error)
         self._fd: TextIO = open(path_file, encoding="utf-8")
 
     def get_validated_line(self) -> Dict[str, str] | str:
@@ -260,7 +288,7 @@ class SafeFileReader:
             else:
                 raise UtilsError(
                     f"Unknown configuration token '{self.key}'",
-                    self.number_line, Type_Error.Error)
+                    self.number_line, ErrorSeverity.Error)
 
     def __del__(self) -> None:
         self._fd.close()
@@ -270,7 +298,7 @@ class SafeFileReader:
             raise UtilsError(
                 "The line type must match one of the allowed formats "
                 "{nb_drones, start_hub, etc.}. Example: [type: ,,, ]",
-                self.number_line, Type_Error.Error)
+                self.number_line, ErrorSeverity.Error)
         key_raw, self.val = self.data_str.split(":", 1)
         key = key_raw.lower()
         parsers = {
@@ -302,20 +330,21 @@ class ParserConfig:
  
     def parse_in_type_line(self) -> None:
         fileread = SafeFileReader(Path(sys.argv[1]))
-        while (True):
-            try:
-                component = fileread.get_validated_line()
-                if component == "EOF":
-                    break
-                self.update_graph(component)
-            except Exception as error:
-                if isinstance(error, BaseError):
-                    self.errors.append(error.get_error())
-                else:
-                    print(error)
+        # while (True):
+        #     try:
+        component = fileread.get_validated_line()
+        # if component == "EOF":
+        #     break
+        self.update_graph(component)
+            # except Exception as error:
+            #     if isinstance(error, BaseError):
+            #         self.errors.append(error.get_error())
+            #     else:
+            #         print(error)
         self.print_report()
 
     def print_report(self) -> None:
+
         if self.errors:
             string_error = ""
             print(f"\n💥 Found {len(self.errors)} Error(s) in "
@@ -329,7 +358,7 @@ class ParserConfig:
     def update_graph(self, data):
         raise UtilsError(
                     f"Unknown configuration token '{data}'",
-                    self.number_line, Type_Error.Error)
+                    self.number_line, ErrorSeverity.Error)
 
     @update_graph.register(Drones)
     def _(self, component: Drones):
