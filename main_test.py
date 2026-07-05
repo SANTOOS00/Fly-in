@@ -71,18 +71,17 @@ class UtilsError(BaseError):
                  type_error: ErrorSeverity | None = None) -> None:
         super().__init__(message, number_line, type_error)
 
-    def get_error(self):
-        return super().get_error()
+    def __str___(self):
+        return f"{self.message}"
 
 class ZoneWithCoordsParserError(BaseError):
     def __init__(self, message: str, number_line: int | None = None,
-                 type_error: ErrorSeverity | None = None, test = None) -> None:
+                 type_error: ErrorSeverity | None = None, test: ErrorLocation = None) -> None:
         super().__init__(message, number_line, type_error)
-        self.test = test    
+        self.test = test
 
-
-    def get_error(self) -> None:
-        return f"{self.test}"
+    def __str__(self) -> None:
+        return f"{self.number_line}  line  {self.test}"
 
 class Drones:
     """
@@ -174,6 +173,7 @@ class MetaParser:
 
 class DroneParser(BaseParser):
     def __init__(self, line_str: str, nu_line: int) -> None:
+
         super().__init__(line_str, nu_line)
 
     def parser(self) -> Drones:
@@ -193,7 +193,7 @@ class DroneParser(BaseParser):
 
 
 
-class ZoneWithCoordsParser:
+class ZoneWithCoordsParser(BaseParser):
     def __init__(self, line_str: str, nu_line: int) -> None:
         self.line_str = line_str
         self.nu_line = nu_line
@@ -204,19 +204,18 @@ class ZoneWithCoordsParser:
         }
 
     def parser(self) -> None:
-        # print("ssss")
-        line = self.line.strip()
+        # print("ssss")make
+        line = self.line_str.strip()
         for key in self._patterns.keys():
             match = re.match(key, line)
             if match is None:
                 self._patterns[key] = True
-        error  = List(ErrorLocation)
+        error  = list(ErrorLocation)
         for index, is_not_valid in enumerate(self._patterns.values()):
-            if is_not_valid:
-                raise ZoneWithCoordsParserError("hamid" , self.nu_line, ErrorSeverity.Error, error[index])
-        
 
-        print("is ok")
+            if is_not_valid:
+                print(error[index])
+                raise ZoneWithCoordsParserError("sssssssssssss" , self.nu_line, ErrorSeverity.Error, error[index])
 
 
 class StartHubParser(ZoneWithCoordsParser):
@@ -237,7 +236,6 @@ class EndHubParser(ZoneWithCoordsParser):
 
 class HubParser(ZoneWithCoordsParser):
     def __init__(self, line_str: str, nu_line: int) -> None:
-        print("is hub ")
         super().__init__(line_str, nu_line)
 
     def parser(self) -> Hub:
@@ -330,17 +328,17 @@ class ParserConfig:
  
     def parse_in_type_line(self) -> None:
         fileread = SafeFileReader(Path(sys.argv[1]))
-        # while (True):
-        #     try:
-        component = fileread.get_validated_line()
-        # if component == "EOF":
-        #     break
-        self.update_graph(component)
-            # except Exception as error:
-            #     if isinstance(error, BaseError):
-            #         self.errors.append(error.get_error())
-            #     else:
-            #         print(error)
+        while (True):
+            try:
+                component = fileread.get_validated_line()
+                if component == "EOF":
+                    break
+                self.update_graph(component)
+            except Exception as error:
+                if isinstance(error, BaseError):
+                    self.errors.append(error.get_error())
+                else:
+                    print(error)
         self.print_report()
 
     def print_report(self) -> None:
@@ -391,10 +389,10 @@ def maingraph() -> None:
 
 
 if __name__ == "__main__":
-    mainparser()
-    # try:
-    # except Exception as error:
-    #     if isinstance(error, BaseError):
-    #         print(error.get_error())
-    #     else:
-    #         print(error)
+    try:
+        mainparser()
+    except Exception as error:
+        if isinstance(error, BaseError):
+            print(error.get_error())
+        else:
+            print(error)
