@@ -1,4 +1,4 @@
-from typing import List, Dict, Any
+from typing import Protocol, List, Dict, Any
 from abc import ABC, abstractmethod
 from enum import Enum
 from pathlib import Path
@@ -6,6 +6,7 @@ import os
 import sys
 from typing import TextIO
 from functools import singledispatchmethod
+
 import re
 
 
@@ -54,8 +55,11 @@ class HubError(BaseError):
                  ) -> None:
         super().__init__(message, line_number, severity)
 
-    def __str__(self):
-        return super()._get_error()
+    def __str__(self) -> str:
+        return (
+                f"\n[{self.severity.value}] Line {self.line_number}\n"
+                f"  ➜ Input : {self.message}\n"
+            )
 
 
 class ConnectionError(BaseError):
@@ -90,7 +94,7 @@ class ZoneWithCoordsParserError(BaseError):
             return (
                 f"\n[{self.severity.value}] Line {self.line_number}"
                 f" at {self.location.value}:\n"
-                f"  ➜ Input Error: {self.message}\n"
+                f"  ➜ Input : {self.message}\n"
                 f"  ⚠  Fix: {self.severity.value} ⚠  Fix: Zone format "
                 "is invalid. It must be an alphanumeric identifier "
                 "(e.g., 's_0').\n"
@@ -99,13 +103,17 @@ class ZoneWithCoordsParserError(BaseError):
             return (
                 f"\n[{self.severity.value}] Line {self.line_number}"
                 f" at {self.location.value}:\n"
-                f"  ➜ Input Error: {self.message}\n"
+                f"  ➜ Input : {self.message}\n"
                 f"  ⚠  Fix: {self.severity.value} coordinates must be integers"
                 " or negative numbers only.\n"
             )
 
 
-class Drones:
+class NetworkNode(Protocol):
+    ...
+
+
+class Drones(NetworkNode):
     """
     |------------------------------------------------------------------|
     |          -----    parmeter in simulation   ------                |
@@ -122,16 +130,23 @@ class Drones:
             ]
 
 
-class End_hub:
+class End_hub(NetworkNode):
+    _number_line_start = None
     _instance: "End_hub" = None
 
     def __new__(cls, name: str, y: int, x: int,
-                meta: Dict[str, Any] | None = None
-                ) -> "End_hub":
+                meta: Dict[str, Any] | None = None,
+                line_number: int | None = None) -> "End_hub":
         if cls._instance is not None:
-            raise HubError()
+            raise HubError(
+                "Duplicate End hub at lines "
+                f"{cls._instance._number_line_start} "
+                f"and {line_number}. Only one is allowed.",
+                line_number,
+                ErrorSeverity.Error)
 
         cls._instance = super().__new__(cls)
+        cls._number_line_start = line_number
         cls._instance.name = name
         cls._instance.y = y
         cls._instance.x = x
@@ -139,15 +154,22 @@ class End_hub:
         return cls._instance
 
 
-class Start_hub:
+class Start_hub(NetworkNode):
+    _number_line_start = None
     _instance: "Start_hub" = None
 
     def __new__(cls, name: str, y: int, x: int,
-                meta: Dict[str, Any] | None = None
-                ) -> "Start_hub":
+                meta: Dict[str, Any] | None = None,
+                line_number: int | None = None) -> "Start_hub":
         if cls._instance is not None:
-            raise HubError()
+            raise HubError(
+                "Duplicate Start hub at lines "
+                f"{cls._instance._number_line_start} "
+                f"and {line_number}. Only one is allowed.",
+                line_number,
+                ErrorSeverity.Error)
 
+        Start_hub._number_line_start = line_number
         cls._instance = super().__new__(cls)
         cls._instance.name = name
         cls._instance.y = y
@@ -156,7 +178,7 @@ class Start_hub:
         return cls._instance
 
 
-class Hub:
+class Hub(NetworkNode):
     def __init__(self, name: str, y: int, x: int,
                  meta: Dict[str, Any] | None = None
                  ) -> None:
@@ -166,7 +188,7 @@ class Hub:
         self.meta: Dict[str: Any] | None = meta
 
 
-class Connection:
+class Connection(NetworkNode):
     def __init__(self, node1, node2, meta):
         self.node1 = node1
         self.node2 = node2
@@ -188,8 +210,9 @@ class BaseParser(ABC):
         pass
 
 
-class MetaParser:
-    pass
+class MetaParser(BaseError):
+    def parse_metadata(self) -> NetworkNode:
+        pass
 
 
 class DroneParser(BaseParser):
@@ -216,10 +239,22 @@ class ZoneWithCoordsParser(BaseParser):
         self._patterns = {
             r'^(\w+)': False,
             r'^(\w+)\s+(-?\d+)': False,
-            r'^(\w+)\s+(-?\d+)\s+(-?\d+)(\s)(.*)': False,
+            r'^(\w+)\s+(-?\d+)\s+(-?\d+)(.*)': False,
         }
 
-    def parser(self) -> None:
+    def parser(self) -> Dict[str, Any]:
+        self._check_syntax(self.line_str.strip())
+        match = re.match(r'^(\w+)\s+(-?\d+)\s+(-?\d+)(.*)',
+                         self.line_str.strip())
+        name, x, y, *meta = match.groups()
+        return {
+            "zone_name": name,
+            "x_coordinate": int(x),
+            "y_coordinate": int(y),
+            "metadata": meta[0] if meta else None
+        }
+
+    def _check_syntax(self, line: str) -> None:
         line = self.line_str.strip()
         for key in self._patterns.keys():
             match = re.match(key, line)
@@ -227,7 +262,6 @@ class ZoneWithCoordsParser(BaseParser):
                 self._patterns[key] = True
         errors = list(ErrorLocation)
         for index, is_not_valid in enumerate(self._patterns.values()):
-
             if is_not_valid:
                 raise ZoneWithCoordsParserError("",
                                                 self.nu_line,
@@ -235,37 +269,57 @@ class ZoneWithCoordsParser(BaseParser):
                                                 errors[index - 1])
 
 
-class StartHubParser(ZoneWithCoordsParser):
+class StartHubParser(ZoneWithCoordsParser, MetaParser):
     def __init__(self, line_str: str, nu_line: int) -> None:
         super().__init__(line_str, nu_line)
 
     def parser(self) -> Start_hub:
-        super().parser()
+        data: Dict[str, Any] = super().parser()
+        return Start_hub(
+            data["zone_name"],
+            data["x_coordinate"],
+            data["y_coordinate"],
+            data["metadata"],
+            self.nu_line
+        )
 
 
-class EndHubParser(ZoneWithCoordsParser):
+class EndHubParser(ZoneWithCoordsParser, MetaParser):
     def __init__(self, line_str: str, nu_line: int) -> None:
         super().__init__(line_str, nu_line)
 
     def parser(self) -> End_hub:
-        super().parser()
+        data: Dict[str, Any] = super().parser()
+        return End_hub(
+            data["zone_name"],
+            data["x_coordinate"],
+            data["y_coordinate"],
+            data["metadata"],
+            self.nu_line
+        )
 
 
-class HubParser(ZoneWithCoordsParser):
+class HubParser(ZoneWithCoordsParser, MetaParser):
     def __init__(self, line_str: str, nu_line: int) -> None:
         super().__init__(line_str, nu_line)
 
     def parser(self) -> Hub:
-        super().parser()
+        data: Dict[str, Any] = super().parser()
+        return Hub(
+            data["zone_name"],
+            data["x_coordinate"],
+            data["y_coordinate"],
+            data["metadata"],
+        )
 
 
-class ConnectionParser:
+class ConnectionParser(MetaParser):
     def __init__(self, line_str: str, nu_line: int) -> None:
         self.line_str = line_str
         self.nu_line = nu_line
 
-    def parser(self) -> Connection:
-        pass
+    def parser(cls) -> Connection:
+        return (None)
 
 
 class SafeFileReader:
@@ -355,7 +409,6 @@ class ParserConfig:
         self.print_report()
 
     def print_report(self) -> None:
-
         if self.errors:
             string_error = ""
             print(f"\n💥 Found {len(self.errors)} Error(s) in "
