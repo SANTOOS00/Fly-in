@@ -195,7 +195,7 @@ class Connection(NetworkNode):
         self.meta = meta
 
 
-class BaseParser(ABC):
+class BaseParser(Protocol):
     """
     |------------------------------------------------------------------|
     |                  -----    PARSER ARGS   ------                   |
@@ -205,12 +205,15 @@ class BaseParser(ABC):
         self.nu_line: int = nu_line
         self.line_str: str = line_str
 
-    @abstractmethod
-    def parser(self) -> None:
-        pass
 
 
-class MetaParser(BaseError):
+class MetaParser:
+    def __init__(self, line_str: str, nu_line: int) -> None:
+        self.line_str = line_str
+        self.nu_line = nu_line
+        self.__patterns = {
+            r'^(\s+)(\[)(.*)(\])(\s)': False,
+        }
     def parse_metadata(self) -> NetworkNode:
         pass
 
