@@ -1,6 +1,6 @@
 SCRIPT = main_test.py
 
-MAP ?= maps/easy/02_simple_fork.txt
+MAP ?= maps/challenger/01_the_impossible_dream.txt
 
 # .PHONY: all run clean lint install debug
 

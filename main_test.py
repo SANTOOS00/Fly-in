@@ -47,7 +47,7 @@ class PathError(BaseError):
         super().__init__(message, severity=severity)
 
     def __str__(self) -> str:
-        return f"[{self.type_error.value}]: {self.message}"
+        return f"[{self.severity.value}]: {self.message}"
 
 
 class HubError(BaseError):
@@ -178,6 +178,8 @@ class Start_hub(NetworkNode):
                 f"and {line_number}. Only one is allowed.",
                 line_number,
                 ErrorSeverity.Error)
+        else:
+            cls._instance = super().__new__(cls)
 
         Start_hub._number_line_start = line_number
         cls._instance = super().__new__(cls)
@@ -222,11 +224,20 @@ class MetaParser:
         r'^\s*\w+=\w+(?:\s+\w+=\w+)*\s*$': False,
     }
 
-    def parse_metadata(self, meta_data: str) -> NetworkNode:
+    def parse_metadata(self, meta_data: str) -> Dict[str, str]:
         if len(meta_data) <= 3 or meta_data == "[]":
             return (self._default_val())
         meta_data = self.validate_metadata_format(meta_data)
-        self._check_syntax_meta(meta_data)
+        match = self._check_syntax_meta(meta_data)
+        return (self._split_key_values(match))
+
+    @staticmethod
+    def _split_key_values(match: re.Match[str]) -> dict[str, str]:
+        data_set: set = match.group().split(" ")
+
+        return {key: val
+                for data in data_set
+                for key, val in [data.split("=")]}
 
     def validate_metadata_format(self, meta_data: str) -> str:
         meta_string = meta_data.strip()
@@ -248,6 +259,7 @@ class MetaParser:
             else:
                 MetaParser.patternsmetadata[pattern] = False
         self._validate_syntax_meta()
+        return (match)
 
     def _default_val(self) -> dict[str, int]:
         if isinstance(self, ConnectionParser):
@@ -272,9 +284,6 @@ class MetaParser:
 
 
 class DroneParser(BaseParser):
-    def __init__(self, line_str: str, line_number: int) -> None:
-        super().__init__(line_str, line_number)
-
     def parser(self) -> Drones:
         try:
             if int(self.line_str) > 0:
@@ -328,9 +337,6 @@ class ZoneWithCoordsParser(BaseParser):
 
 
 class StartHubParser(ZoneWithCoordsParser, MetaParser):
-    def __init__(self, line_str: str, line_number: int) -> None:
-        super().__init__(line_str, line_number)
-
     def parser(self) -> Start_hub:
         data: Dict[str, Any] = super().parser()
         return Start_hub(
@@ -381,9 +387,14 @@ class ConnectionParser:
 
 
 class SafeFileReader:
+    fd: TextIO = None
+
     def __init__(self, path_file: Path) -> None:
         self.valid_path: Path = path_file
         self.number_line: int = 0
+        self.base_parser: BaseParser
+        self.clean_line: str
+        self.raw_line: str
 
     @property
     def valid_path(self) -> Path:
@@ -397,11 +408,11 @@ class SafeFileReader:
         if not os.access(path_file, os.R_OK):
             raise PathError(
                 f"No read permission: {path_file}", ErrorSeverity.Error)
-        self._fd: TextIO = open(path_file, encoding="utf-8")
+        SafeFileReader.fd: TextIO = open(path_file, encoding="utf-8")
 
     def get_validated_line(self) -> Dict[str, str] | str:
         while True:
-            raw_line = self._fd.readline()
+            raw_line = SafeFileReader.fd.readline()
             if not raw_line:
                 return "EOF"
             self.number_line += 1
@@ -409,15 +420,12 @@ class SafeFileReader:
             if self.data_str == "":
                 continue
             if self._get_type_line():
-                parser_component = self.key(self.val, self.number_line)
+                parser_component = self.base_parser(self.val, self.number_line)
                 return (parser_component.parser())
             else:
                 raise UtilsError(
-                    f"Unknown configuration token '{self.key}'",
+                    f"Unknown configuration token '{self.base_parser}'",
                     self.number_line, ErrorSeverity.Error)
-
-    def __del__(self) -> None:
-        self._fd.close()
 
     def _get_type_line(self) -> bool:
         if self.data_str.count(":") != 1:
@@ -435,7 +443,7 @@ class SafeFileReader:
             "connection": ConnectionParser
         }
         if parsers.get(key):
-            self.key = parsers[key]
+            self.base_parser = parsers[key]
             return True
         return False
 
@@ -463,8 +471,14 @@ class ParserConfig:
                     break
             except Exception as error:
                 self.errors.append(error)
+                continue
             self.update_graph(component)
         self.print_report()
+        return (self.graph)
+
+    @property
+    def get_graph(self) -> Graph:
+        return self.graph
 
     def print_report(self) -> None:
         if self.errors:
@@ -475,6 +489,7 @@ class ParserConfig:
                 string_error += (f" ⚠️  + {error}\n")
             string_error += ("\n❌ Pipeline Status: FAILED\n")
             raise Exception(string_error)
+        SafeFileReader.fd.close()
 
     @singledispatchmethod
     def update_graph(self, data):
@@ -503,8 +518,9 @@ class ParserConfig:
 
 def mainparser() -> None:
     parser = ParserConfig()
-    parser.parse_in_type_line()
-
+    graph = parser.parse_in_type_line()
+    for hub in graph.hubs:
+        print(hub.meta)
 
 def maingraph() -> None:
     pass
