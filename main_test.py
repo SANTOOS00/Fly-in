@@ -109,6 +109,16 @@ class ZoneWithCoordsParserError(BaseError):
             )
 
 
+class MetaDataParserError(BaseError):
+    def __init__(self, message: str, line_number: int, location: ErrorLocation
+                 ) -> None:
+        super().__init__(message, line_number, location)
+
+    def __str__(self) -> str:
+        return (f"\n[{self.severity.value}] Line {self.line_number}\n"
+                f"  ➜ Input : {self.message}\n")
+
+
 class NetworkNode(Protocol):
     ...
 
@@ -195,32 +205,75 @@ class Connection(NetworkNode):
         self.meta = meta
 
 
-class BaseParser(Protocol):
+class BaseParser(ABC):
     """
     |------------------------------------------------------------------|
     |                  -----    PARSER ARGS   ------                   |
     |------------------------------------------------------------------|
     """
-    def __init__(self, line_str: str, nu_line: int) -> None:
-        self.nu_line: int = nu_line
+    def __init__(self, line_str: str, line_number: int) -> None:
+        self.line_number: int = line_number
         self.line_str: str = line_str
 
 
-
 class MetaParser:
-    def __init__(self, line_str: str, nu_line: int) -> None:
-        self.line_str = line_str
-        self.nu_line = nu_line
-        self.__patterns = {
-            r'^(\s+)(\[)(.*)(\])(\s)': False,
-        }
-    def parse_metadata(self) -> NetworkNode:
-        pass
+    patternsmetadata = {
+        r'^\s*\w+=\w+': False,
+        r'^\s*\w+=\w+(?:\s+\w+=\w+)*\s*$': False,
+    }
+
+    def parse_metadata(self, meta_data: str) -> NetworkNode:
+        if len(meta_data) <= 3 or meta_data == "[]":
+            return (self._default_val())
+        meta_data = self.validate_metadata_format(meta_data)
+        self._check_syntax_meta(meta_data)
+
+    def validate_metadata_format(self, meta_data: str) -> str:
+        meta_string = meta_data.strip()
+        if not meta_string.startswith("["):
+            raise MetaDataParserError("MetaData must start with '['",
+                                      self.line_number,
+                                      ErrorSeverity.Error)
+        if not meta_string.endswith("]"):
+            raise MetaDataParserError("MetaData missing closing bracket ']'",
+                                      self.line_number,
+                                      ErrorSeverity.Error)
+        return (meta_string[1:-1])
+
+    def _check_syntax_meta(self, meta_data) -> None:
+        for pattern in MetaParser.patternsmetadata:
+            match = re.match(pattern, meta_data)
+            if match is None:
+                MetaParser.patternsmetadata[pattern] = True
+            else:
+                MetaParser.patternsmetadata[pattern] = False
+        self._validate_syntax_meta()
+
+    def _default_val(self) -> dict[str, int]:
+        if isinstance(self, ConnectionParser):
+            return {
+                "max_link_capacity": 1
+            }
+        else:
+            return {
+                "max_drones": 1
+            }
+
+    def _validate_syntax_meta(self) -> None:
+        for index, is_not_valid in enumerate(MetaParser.patternsmetadata.
+                                             values()):
+            if is_not_valid:
+                raise MetaDataParserError("Invalid MetaData property syntax at"
+                                          f" position {index + 1}. Expected "
+                                          "format: 'key=value'.",
+                                          self.line_number,
+                                          ErrorSeverity.Error,
+                                          )
 
 
 class DroneParser(BaseParser):
-    def __init__(self, line_str: str, nu_line: int) -> None:
-        super().__init__(line_str, nu_line)
+    def __init__(self, line_str: str, line_number: int) -> None:
+        super().__init__(line_str, line_number)
 
     def parser(self) -> Drones:
         try:
@@ -228,20 +281,17 @@ class DroneParser(BaseParser):
                 return Drones(int(self.line_str))
             else:
                 raise UtilsError("'nb_drones' value must be a valid integer.",
-                                 self.nu_line, ErrorSeverity.Error)
+                                 self.line_number, ErrorSeverity.Error)
         except ValueError:
             raise UtilsError("'nb_drones' value must be a valid integer.",
-                             self.nu_line, ErrorSeverity.Error)
+                             self.line_number, ErrorSeverity.Error)
 
 
 class ZoneWithCoordsParser(BaseParser):
-    def __init__(self, line_str: str, nu_line: int) -> None:
-        self.line_str = line_str
-        self.nu_line = nu_line
-        self._patterns = {
+    patterns = {
             r'^(\w+)(\s)': False,
-            r'^(\w+)(\s+)(-?\d+)(\s)': False,
-            r'^(\w+)(\s+)(-?\d+)(\s+)(-?\d+)(.*)': False,
+            r'^(\w+)\s+(-?\d+)': False,
+            r'^(\w+)\s+(-?\d+)\s+(-?\d+)(.*)': False,
         }
 
     def parser(self) -> Dict[str, Any]:
@@ -253,28 +303,33 @@ class ZoneWithCoordsParser(BaseParser):
             "zone_name": name,
             "x_coordinate": int(x),
             "y_coordinate": int(y),
-            "metadata": meta[0] if meta else None
+            "metadata": meta[0]
         }
 
     def _check_syntax(self, line: str) -> None:
         line = self.line_str.strip()
-        for key in self._patterns.keys():
-            match = re.match(key, line)
+        for pattern in ZoneWithCoordsParser.patterns.keys():
+            match = re.match(pattern, line)
             if match is None:
-                self._patterns[key] = True
+                ZoneWithCoordsParser.patterns[pattern] = True
+            else:
+                ZoneWithCoordsParser.patterns[pattern] = False
+        self._validate_syntax()
 
+    def _validate_syntax(self) -> None:
         errors = list(ErrorLocation)
-        for index, is_not_valid in enumerate(self._patterns.values()):
+        for index, is_not_valid in enumerate(ZoneWithCoordsParser.patterns.
+                                             values()):
             if is_not_valid:
                 raise ZoneWithCoordsParserError("",
-                                                self.nu_line,
+                                                self.line_number,
                                                 ErrorSeverity.Error,
                                                 errors[index])
 
 
 class StartHubParser(ZoneWithCoordsParser, MetaParser):
-    def __init__(self, line_str: str, nu_line: int) -> None:
-        super().__init__(line_str, nu_line)
+    def __init__(self, line_str: str, line_number: int) -> None:
+        super().__init__(line_str, line_number)
 
     def parser(self) -> Start_hub:
         data: Dict[str, Any] = super().parser()
@@ -282,14 +337,14 @@ class StartHubParser(ZoneWithCoordsParser, MetaParser):
             data["zone_name"],
             data["x_coordinate"],
             data["y_coordinate"],
-            data["metadata"],
-            self.nu_line
+            self.parse_metadata(data["metadata"]),
+            self.line_number
         )
 
 
 class EndHubParser(ZoneWithCoordsParser, MetaParser):
-    def __init__(self, line_str: str, nu_line: int) -> None:
-        super().__init__(line_str, nu_line)
+    def __init__(self, line_str: str, line_number: int) -> None:
+        super().__init__(line_str, line_number)
 
     def parser(self) -> End_hub:
         data: Dict[str, Any] = super().parser()
@@ -297,14 +352,14 @@ class EndHubParser(ZoneWithCoordsParser, MetaParser):
             data["zone_name"],
             data["x_coordinate"],
             data["y_coordinate"],
-            data["metadata"],
-            self.nu_line
+            self.parse_metadata(data["metadata"]),
+            self.line_number
         )
 
 
 class HubParser(ZoneWithCoordsParser, MetaParser):
-    def __init__(self, line_str: str, nu_line: int) -> None:
-        super().__init__(line_str, nu_line)
+    def __init__(self, line_str: str, line_number: int) -> None:
+        super().__init__(line_str, line_number)
 
     def parser(self) -> Hub:
         data: Dict[str, Any] = super().parser()
@@ -312,14 +367,14 @@ class HubParser(ZoneWithCoordsParser, MetaParser):
             data["zone_name"],
             data["x_coordinate"],
             data["y_coordinate"],
-            data["metadata"],
+            self.parse_metadata(data["metadata"]),
         )
 
 
-class ConnectionParser(MetaParser):
-    def __init__(self, line_str: str, nu_line: int) -> None:
+class ConnectionParser:
+    def __init__(self, line_str: str, line_number: int) -> None:
         self.line_str = line_str
-        self.nu_line = nu_line
+        self.line_number = line_number
 
     def parser(cls) -> Connection:
         return (None)

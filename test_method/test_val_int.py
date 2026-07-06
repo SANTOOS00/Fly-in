@@ -91,84 +91,10 @@
 
 # print(test_type(1)) 
 
-# for is_not_valid, type_error in enumerate(self._patterns.values(), ErrorLocation):
-#             if is_not_valid:
+for is_not_valid, type_error in enumerate(self._patterns.values(), ErrorLocation):
+            if is_not_valid:
 
-#             #  r'^(\w+)\s+(-?\d+)\s+(-?\d+)\s+\[(\w+)=(\d+)\]$': True,
-
-
-#                 raise ZeroDivisionError(f""  , self.nu_line, ErrorSeverity.Error, ErrorLocation(type_error))
+            #  r'^(\w+)\s+(-?\d+)\s+(-?\d+)\s+\[(\w+)=(\d+)\]$': True,
 
 
-
-import re
-
-
-
-str_arry = " [ke_di=dnienie wnd=idnwienJ wnd=idnwienJ]" #true
-str_arry = " [ke_di=dnienie wnd=idnwienJ]" #true
-str_arry = " [ke_di=dnienie]" #true
-str_arry = " []" #true
-
-str_arry = " [ke_di=dnien=ie wnd=idnwienJ]"#false
-str_arry = " [ke_di=d[[]]nienie wnd=idnwienJ]"#false
-str_arry = " [ke_di=dnienie wndidnwienJ]"#false
-str_arry = " [ke_di=dnienie wnd=idnw[]ienJ]"#false
-
-
-import re
-
-pattern = re.compile(r'^ \[(?:[^\]=\[\]]+=[^\]=\[\]]+)(?: [^\]=\[\]]+=[^\]=\[\]]+)*\]$')
-
-test_cases = [
-    (" [ke_di=dnienie wnd=idnwienJ wnd=idnwienJ]", True),
-    (" [ke_di=dnienie wnd=idnwienJ]", True),
-    (" [ke_di=dnienie]", True),
-    (" []", False),  # Fails: Requires at least one key=value pair
-    (" [ke_di=dnien=ie wnd=idnwienJ]", False), # Fails: Extra '=' in key/value
-    (" [ke_di=d[[]]nienie wnd=idnwienJ]", False), # Fails: Nested brackets
-    (" [ke_di=dnienie wndidnwienJ]", False), # Fails: Missing '=' in second pair
-    (" [ke_di=dnienie wnd=idnw[]ienJ]", False), # Fails: Brackets in value
-]
-
-for text, expected in test_cases:
-    result = bool(pattern.match(text))
-    status = "✓" if result == expected else "✗"
-    print(f"{status} '{text}' -> {result} (Expected: {expected})")   
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+                raise ZeroDivisionError(f""  , self.nu_line, ErrorSeverity.Error, ErrorLocation(type_error))

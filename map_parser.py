@@ -33,6 +33,7 @@ class BaseParser(ABC):
             raise ParsingError("MetaData must start with '['")
         if not meta_string.endswith("]"):
             raise ParsingError("MetaData missing closing bracket ']'")
+
         content = meta_string[1:-1].strip()
         result_dict = {}
         if not content:
