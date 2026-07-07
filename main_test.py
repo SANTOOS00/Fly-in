@@ -131,9 +131,8 @@ class MetaParser:
         return (self._check_data_is_valid(match))
 
     @staticmethod
-    def _split_key_values(match: re.Match[str]) -> dict[str, str]:
-        data: set = match.group().split(" ")
-        MetaParser._check_data_is_valid()
+    def _split_key_values(match: re.Match[str]) -> Dict[str, str]:
+        data: set = match.group().split(" ")    
         return (
             {key: val
                 for keyval in data
@@ -141,8 +140,13 @@ class MetaParser:
         )
 
     @staticmethod
-    def _check_data_is_valid(data: Dict[str, str]) -> Dict[str, Any]:
-        
+    def _check_data_is_valid(match: re.Match[str]) -> Dict[str, Any]:
+        data: Dict[str , str] = MetaParser._split_key_values(match)
+        print(data)
+
+        """
+        hellllllllllllllllllllllllllllllo
+        """
 
     def _validate_metadata_format(self, meta_data: str) -> str:
         meta_string = meta_data.strip()
@@ -370,12 +374,12 @@ class ParserConfig:
     def parse_in_type_line(self) -> Graph:
         fileread = SafeFileReader(Path(sys.argv[1]))
         while (True):
-            # try:
-            component = fileread.get_validated_line()
-            if component == "EOF":
-                break
-            # except Exception as error:
-            #     self.errors.append(error)
+            try:
+                component = fileread.get_validated_line()
+                if component == "EOF":
+                    break
+            except Exception as error:
+                self.errors.append(error)
                 continue
             self.update_graph(component)
         self.print_report()
@@ -424,8 +428,8 @@ class ParserConfig:
 def mainparser() -> None:
     parser = ParserConfig()
     graph = parser.parse_in_type_line()
-    for hub in graph.hubs:
-        print(hub.)
+    # for hub in graph.hubs:
+    #     print(hub.)
 
 def maingraph() -> None:
     pass
