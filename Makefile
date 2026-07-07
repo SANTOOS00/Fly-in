@@ -1,5 +1,6 @@
 SCRIPT = main_test.py
 
+
 MAP ?= maps/challenger/01_the_impossible_dream.txt
 
 # .PHONY: all run clean lint install debug
@@ -7,7 +8,7 @@ MAP ?= maps/challenger/01_the_impossible_dream.txt
 all: run
 
 run:
-	@python3  $(SCRIPT) $(MAP)
+	@python3 $(SCRIPT) $(MAP)
 
 # debug:
 # 	@python3 -m pdb $(SCRIPT) $(MAP)

@@ -6,117 +6,10 @@ import os
 import sys
 from typing import TextIO
 from functools import singledispatchmethod
-
+from typing import Literal, TypedDict
+from custom_error import *
+# from pydantic import BaseModel, Field
 import re
-
-
-class ErrorSeverity(Enum):
-    Warning = "Warning"
-    Error = "Error"
-
-
-class ErrorLocation(Enum):
-    ZONE = "Zone name is not valid"
-    X_AXIS = "X coordinate is not valid"
-    Y_AXIS = "Y coordinate is not valid"
-
-
-class BaseError(Exception):
-    """
-    #|------------------------------------------------------------------|
-    #|            ----- custom errors in project ------                 |
-    #|------------------------------------------------------------------|
-    """
-
-    def __init__(self, message: str, line_number: int | None = None,
-                 severity: ErrorSeverity | None = None) -> None:
-        super().__init__(message)
-        self.message = message
-        self.line_number = line_number
-        self.severity = severity
-
-    def __str__(self) -> str:
-        return (
-            f"[{self.severity.value}] line {self.line_number}: "
-            f"{self.message}")
-
-
-class PathError(BaseError):
-    def __init__(self, message: str, severity: ErrorSeverity | None = None
-                 ) -> None:
-        super().__init__(message, severity=severity)
-
-    def __str__(self) -> str:
-        return f"[{self.severity.value}]: {self.message}"
-
-
-class HubError(BaseError):
-    def __init__(self, message: str, line_number: int, severity: ErrorSeverity
-                 ) -> None:
-        super().__init__(message, line_number, severity)
-
-    def __str__(self) -> str:
-        return (
-                f"\n[{self.severity.value}] Line {self.line_number}\n"
-                f"  ➜ Input : {self.message}\n"
-            )
-
-
-class ConnectionError(BaseError):
-    def __init__(self, message: str, line_number: int,
-                 severity: ErrorSeverity) -> None:
-        super().__init__(message, line_number, severity)
-
-    def __str__(self):
-        return super()._get_error()
-
-
-class UtilsError(BaseError):
-    def __init__(self, message: str, line_number: int | None = None,
-                 severity: ErrorSeverity | None = None) -> None:
-        super().__init__(message, line_number, severity)
-
-    def __str___(self):
-        return f"{self.message}"
-
-
-class ZoneWithCoordsParserError(BaseError):
-    def __init__(self,
-                 message: str,
-                 line_number: int | None = None,
-                 severity: ErrorSeverity | None = None,
-                 location: ErrorLocation | None = None) -> None:
-        super().__init__(message, line_number, severity)
-        self.location = location
-
-    def __str__(self) -> None:
-        if self.location == ErrorLocation.ZONE:
-            return (
-                f"\n[{self.severity.value}] Line {self.line_number}"
-                f" at {self.location.value}:\n"
-                f"  ➜ Input : {self.message}\n"
-                f"  ⚠  Fix: {self.severity.value} ⚠  Fix: Zone format "
-                "is invalid. It must be an alphanumeric identifier "
-                "(e.g., 's_0').\n"
-            )
-        else:
-            return (
-                f"\n[{self.severity.value}] Line {self.line_number}"
-                f" at {self.location.value}:\n"
-                f"  ➜ Input : {self.message}\n"
-                f"  ⚠  Fix: {self.severity.value} coordinates must be integers"
-                " or negative numbers only.\n"
-            )
-
-
-class MetaDataParserError(BaseError):
-    def __init__(self, message: str, line_number: int, location: ErrorLocation
-                 ) -> None:
-        super().__init__(message, line_number, location)
-
-    def __str__(self) -> str:
-        return (f"\n[{self.severity.value}] Line {self.line_number}\n"
-                f"  ➜ Input : {self.message}\n")
 
 
 class NetworkNode(Protocol):
@@ -218,6 +111,12 @@ class BaseParser(ABC):
         self.line_str: str = line_str
 
 
+# class start_metadata_hubs(BaseModel):
+#     zono = Literal[""]
+#     color = Literal[""]
+#     age: int = Field(ge=1, le=sys.maxsize)
+
+
 class MetaParser:
     patternsmetadata = {
         r'^\s*\w+=\w+': False,
@@ -227,19 +126,25 @@ class MetaParser:
     def parse_metadata(self, meta_data: str) -> Dict[str, str]:
         if len(meta_data) <= 3 or meta_data == "[]":
             return (self._default_val())
-        meta_data = self.validate_metadata_format(meta_data)
+        meta_data = self._validate_metadata_format(meta_data)
         match = self._check_syntax_meta(meta_data)
-        return (self._split_key_values(match))
+        return (self._check_data_is_valid(match))
 
     @staticmethod
     def _split_key_values(match: re.Match[str]) -> dict[str, str]:
-        data_set: set = match.group().split(" ")
+        data: set = match.group().split(" ")
+        MetaParser._check_data_is_valid()
+        return (
+            {key: val
+                for keyval in data
+                for key, val in [keyval.split("=")]}
+        )
 
-        return {key: val
-                for data in data_set
-                for key, val in [data.split("=")]}
+    @staticmethod
+    def _check_data_is_valid(data: Dict[str, str]) -> Dict[str, Any]:
+        
 
-    def validate_metadata_format(self, meta_data: str) -> str:
+    def _validate_metadata_format(self, meta_data: str) -> str:
         meta_string = meta_data.strip()
         if not meta_string.startswith("["):
             raise MetaDataParserError("MetaData must start with '['",
@@ -420,11 +325,11 @@ class SafeFileReader:
             if self.data_str == "":
                 continue
             if self._get_type_line():
-                parser_component = self.base_parser(self.val, self.number_line)
+                parser_component = self.base_parser(self.clean_line, self.number_line)
                 return (parser_component.parser())
             else:
                 raise UtilsError(
-                    f"Unknown configuration token '{self.base_parser}'",
+                    f"Unknown configuration token '{self.raw_line}'",
                     self.number_line, ErrorSeverity.Error)
 
     def _get_type_line(self) -> bool:
@@ -433,8 +338,8 @@ class SafeFileReader:
                 "The line type must match one of the allowed formats "
                 "{nb_drones, start_hub, etc.}. Example: [type: ,,, ]",
                 self.number_line, ErrorSeverity.Error)
-        key_raw, self.val = self.data_str.split(":", 1)
-        key = key_raw.lower()
+        key_raw, self.clean_line = self.data_str.split(":", 1)
+        self.base_parser = key_raw.lower()
         parsers = {
             "nb_drones": DroneParser,
             "start_hub": StartHubParser,
@@ -442,8 +347,8 @@ class SafeFileReader:
             "end_hub": EndHubParser,
             "connection": ConnectionParser
         }
-        if parsers.get(key):
-            self.base_parser = parsers[key]
+        if parsers.get(self.base_parser):
+            self.base_parser = parsers[self.base_parser]
             return True
         return False
 
@@ -462,15 +367,15 @@ class ParserConfig:
         self.errors: List[str] | None = []
         self.graph = Graph()
 
-    def parse_in_type_line(self) -> None:
+    def parse_in_type_line(self) -> Graph:
         fileread = SafeFileReader(Path(sys.argv[1]))
         while (True):
-            try:
-                component = fileread.get_validated_line()
-                if component == "EOF":
-                    break
-            except Exception as error:
-                self.errors.append(error)
+            # try:
+            component = fileread.get_validated_line()
+            if component == "EOF":
+                break
+            # except Exception as error:
+            #     self.errors.append(error)
                 continue
             self.update_graph(component)
         self.print_report()
@@ -520,7 +425,7 @@ def mainparser() -> None:
     parser = ParserConfig()
     graph = parser.parse_in_type_line()
     for hub in graph.hubs:
-        print(hub.meta)
+        print(hub.)
 
 def maingraph() -> None:
     pass

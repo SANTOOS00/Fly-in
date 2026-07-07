@@ -55,3 +55,11 @@ class Utils:
                 f"Allowed values: {', '.join(allowed)}"
             )
         return status
+
+
+if __name__ == "__main__":
+    try:
+        test = Utils()
+        print(test.get_hex("red"))
+    except Exception as err:
+        print(err)
