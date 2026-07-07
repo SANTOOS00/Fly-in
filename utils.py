@@ -1,6 +1,7 @@
-from custom_error import ParsingError
 from enum import Enum
 
+
+from enum import Enum
 
 class Color(Enum):
     BLACK = "black"
@@ -17,6 +18,13 @@ class Color(Enum):
     LIME = "lime"
     GOLD = "gold"
 
+    # Added colors
+    MAROON = "maroon"
+    DARKRED = "darkred"
+    VIOLET = "violet"
+    CRIMSON = "crimson"
+    RAINBOW = "rainbow"
+
 
 COLOR_HEX = {
     Color.BLACK: "#000000",
@@ -32,34 +40,14 @@ COLOR_HEX = {
     Color.BROWN: "#A52A2A",
     Color.LIME: "#00FF00",
     Color.GOLD: "#FFD700",
+
+    # Added colors
+    Color.MAROON: "#800000",
+    Color.DARKRED: "#8B0000",
+    Color.VIOLET: "#EE82EE",
+    Color.CRIMSON: "#DC143C",
+
+    # Rainbow has no single hex color, so choose a representative value
+    Color.RAINBOW: "#FF69B4",
 }
 
-
-class Utils:
-    def get_hex(color: str) -> str:
-        try:
-            c = Color(color.lower())
-            return COLOR_HEX[c]
-        except ValueError:
-            raise ParsingError(
-                f"invalid color '{color}'. "
-                f"Allowed: {[c.value for c in Color]}"
-            )
-
-    def allowed_status(status_zone: str) -> str:
-        allowed = ["normal", "blocked", "restricted", "priority"]
-        status = status_zone.lower()
-        if status not in allowed:
-            raise ParsingError(
-                f"Invalid status_zone '{status}'. "
-                f"Allowed values: {', '.join(allowed)}"
-            )
-        return status
-
-
-if __name__ == "__main__":
-    try:
-        test = Utils()
-        print(test.get_hex("red"))
-    except Exception as err:
-        print(err)

@@ -59,7 +59,7 @@ class ConnectionError(BaseError):
         super().__init__(message, line_number, severity)
 
     def __str__(self):
-        return super()._get_error()
+        print("error in connection")
 
 
 class UtilsError(BaseError):
@@ -68,7 +68,10 @@ class UtilsError(BaseError):
         super().__init__(message, line_number, severity)
 
     def __str___(self):
-        return f"{self.message}"
+        return (
+                f"\n[{self.severity.value}] Line {self.line_number}\n"
+                f"  ➜ Input : {self.message}\n"
+            )
 
 
 class ZoneWithCoordsParserError(BaseError):

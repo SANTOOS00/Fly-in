@@ -1,6 +1,5 @@
 from typing import Protocol, List, Dict, Any
 from abc import ABC, abstractmethod
-from enum import Enum
 from pathlib import Path
 import os
 import sys
@@ -8,6 +7,7 @@ from typing import TextIO
 from functools import singledispatchmethod
 from typing import Literal, TypedDict
 from custom_error import *
+from utils import Color, COLOR_HEX
 # from pydantic import BaseModel, Field
 import re
 
@@ -111,10 +111,36 @@ class BaseParser(ABC):
         self.line_str: str = line_str
 
 
-# class start_metadata_hubs(BaseModel):
-#     zono = Literal[""]
-#     color = Literal[""]
-#     age: int = Field(ge=1, le=sys.maxsize)
+
+class MetadataValidator:
+    def __init__(self, line_number: int) -> None:
+        self.line_number = line_number
+
+    def validate_metadata(self, data: Dict[str, str]) -> Dict[str, Any]:
+        pass
+
+    def get_hex(self, color: str) -> str:
+        try:
+            c = Color(color.lower())
+            return COLOR_HEX[c]
+        except ValueError:
+            raise UtilsError(
+                f"invalid color '{color}'. "
+                f"Allowed: {[c.value for c in Color]}",
+                self.line_number,
+                ErrorSeverity.Error,
+            )
+
+    def allowed_status(self, status_zone: str) -> str:
+        allowed = ["normal", "blocked", "restricted", "priority"]
+        status = status_zone.lower()
+        if status not in allowed:
+            raise UtilsError(
+                f"Invalid status_zone '{status}'. Allowed values: {', '.join(allowed)}",
+                self.line_number,
+                ErrorSeverity.Error,
+            )
+        return status
 
 
 class MetaParser:
@@ -122,31 +148,28 @@ class MetaParser:
         r'^\s*\w+=\w+': False,
         r'^\s*\w+=\w+(?:\s+\w+=\w+)*\s*$': False,
     }
+    def __init__(self) -> None:
+        self.match: re.Match
+        self.typ_obj: BaseError
 
     def parse_metadata(self, meta_data: str) -> Dict[str, str]:
         if len(meta_data) <= 3 or meta_data == "[]":
             return (self._default_val())
         meta_data = self._validate_metadata_format(meta_data)
-        match = self._check_syntax_meta(meta_data)
-        return (self._check_data_is_valid(match))
+        self.match = self._check_syntax_meta(meta_data)
+        valid_meta: MetadataValidator = MetadataValidator(self.line_number)
+        return (valid_meta.validate_metadata(
+            MetaParser._split_key_values(self.match)
+            ))
 
     @staticmethod
     def _split_key_values(match: re.Match[str]) -> Dict[str, str]:
         data: set = match.group().split(" ")    
         return (
-            {key: val
+            {key.lower(): val
                 for keyval in data
                 for key, val in [keyval.split("=")]}
         )
-
-    @staticmethod
-    def _check_data_is_valid(match: re.Match[str]) -> Dict[str, Any]:
-        data: Dict[str , str] = MetaParser._split_key_values(match)
-        print(data)
-
-        """
-        hellllllllllllllllllllllllllllllo
-        """
 
     def _validate_metadata_format(self, meta_data: str) -> str:
         meta_string = meta_data.strip()
@@ -429,7 +452,7 @@ def mainparser() -> None:
     parser = ParserConfig()
     graph = parser.parse_in_type_line()
     # for hub in graph.hubs:
-    #     print(hub.)
+    #     print(hub.meta)
 
 def maingraph() -> None:
     pass
