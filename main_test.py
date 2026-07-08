@@ -111,13 +111,15 @@ class BaseParser(ABC):
         self.line_str: str = line_str
 
 
-
 class MetadataValidator:
-    def __init__(self, line_number: int) -> None:
+    def __init__(self, line_number: int, in_type: BaseParser, data: Dict[str, Any]) -> None:
         self.line_number = line_number
+        self.in_type = in_type
+        self.data = data
 
-    def validate_metadata(self, data: Dict[str, str]) -> Dict[str, Any]:
-        pass
+    def validate_metadata(self) -> Dict[str, Any]:
+        self.allowed_status_meta()
+        return (self.data)
 
     def get_hex(self, color: str) -> str:
         try:
@@ -131,7 +133,7 @@ class MetadataValidator:
                 ErrorSeverity.Error,
             )
 
-    def allowed_status(self, status_zone: str) -> str:
+    def allowed_status_zone(self, status_zone: str) -> str:
         allowed = ["normal", "blocked", "restricted", "priority"]
         status = status_zone.lower()
         if status not in allowed:
@@ -141,6 +143,34 @@ class MetadataValidator:
                 ErrorSeverity.Error,
             )
         return status
+
+    def allowed_status_meta(self) -> None:
+        allowed = ["zone", "color", "max_drones"]
+        if isinstance(self.in_type, Connection):
+            for key in self.data.keys():
+                if key not in "max_link_capacity":
+                    raise MetaDataParserError(
+                        f"Invalid connection metadata\n \n ⚠ Fix: key '{self.data}'"
+                        f"allowed \n 'max_link_capacity' just",
+                        self.line_number,
+                        ErrorSeverity.Error)
+        else:
+            for key in self.data.keys():
+                if key not in allowed:
+                    raise MetaDataParserError(
+                        f"Invalid connection metadata\n \n ⚠ Fix: key '{self.data}'"
+                        f"\n           allowed       \n'{allowed}'\n "
+                        "           just",
+                        self.line_number,
+                        ErrorSeverity.Error)
+
+    def _valid_int(self, number_str: str) -> int:
+        try:
+            return int(number_str)
+        except ValueError:
+            raise MetaDataParserError("",
+                                      self.line_number,
+                                      ErrorSeverity.Error)
 
 
 class MetaParser:
@@ -153,18 +183,34 @@ class MetaParser:
         self.typ_obj: BaseError
 
     def parse_metadata(self, meta_data: str) -> Dict[str, str]:
-        if len(meta_data) <= 3 or meta_data == "[]":
+        if meta_data == "[]":
             return (self._default_val())
         meta_data = self._validate_metadata_format(meta_data)
         self.match = self._check_syntax_meta(meta_data)
-        valid_meta: MetadataValidator = MetadataValidator(self.line_number)
-        return (valid_meta.validate_metadata(
-            MetaParser._split_key_values(self.match)
-            ))
+        valid_meta: MetadataValidator = MetadataValidator(self.line_number,
+                                                          self,
+                                                          self._split_key_values())
+        return (valid_meta.validate_metadata())
+
 
     @staticmethod
-    def _split_key_values(match: re.Match[str]) -> Dict[str, str]:
-        data: set = match.group().split(" ")    
+    def check_duplicates(data: List[str], line_nu: int) -> None:
+        seen = set()
+        for itm in [k.split("=")[0].strip() for k in data]:
+            if itm in seen:
+                raise MetaDataParserError("test test test est tevetgdjhdgdef",
+                                          line_nu,
+                                          ErrorSeverity.Warning
+                                          )
+            else:
+                seen.add(itm)
+
+    def _split_key_values(self) -> Dict[str, str]:
+        data: List[str] = self.match.group().split(" ")
+        try:
+            MetaParser.check_duplicates(data, self.line_number)
+        except Exception as error:
+            ParserConfig.instance.append_warning(error)
         return (
             {key.lower(): val
                 for keyval in data
@@ -181,7 +227,7 @@ class MetaParser:
             raise MetaDataParserError("MetaData missing closing bracket ']'",
                                       self.line_number,
                                       ErrorSeverity.Error)
-        return (meta_string[1:-1])
+        return (meta_string[1:-1].strip())
 
     def _check_syntax_meta(self, meta_data) -> None:
         for pattern in MetaParser.patternsmetadata:
@@ -315,7 +361,8 @@ class ConnectionParser:
         self.line_number = line_number
 
     def parser(cls) -> Connection:
-        return (None)
+        # print("sss")
+        pass
 
 
 class SafeFileReader:
@@ -390,9 +437,13 @@ class Graph:
 
 
 class ParserConfig:
+    instance = None
+
     def __init__(self) -> None:
         self.errors: List[str] | None = []
+        self.warning: List[str] | None = []
         self.graph = Graph()
+        ParserConfig.instance = self
 
     def parse_in_type_line(self) -> Graph:
         fileread = SafeFileReader(Path(sys.argv[1]))
@@ -412,7 +463,20 @@ class ParserConfig:
     def get_graph(self) -> Graph:
         return self.graph
 
+    def append_errors(self, error) -> None:
+        self.errors.append(error)
+
+    def append_warning(self, error) -> None:
+        self.warning.append(error)
+
     def print_report(self) -> None:
+        if self.warning:
+            string_error = ""
+            print(f"\n💥 Found {len(self.warning)} Warning(s) in "
+                  "configuration file:", file=sys.stderr)
+            for error in self.warning:
+                string_error += (f" ⚠️  + {error}\n")
+            print(string_error, file=sys.stderr)
         if self.errors:
             string_error = ""
             print(f"\n💥 Found {len(self.errors)} Error(s) in "
@@ -420,9 +484,8 @@ class ParserConfig:
             for error in self.errors:
                 string_error += (f" ⚠️  + {error}\n")
             string_error += ("\n❌ Pipeline Status: FAILED\n")
-            raise Exception(string_error)
-        SafeFileReader.fd.close()
-
+            raise ValueError(string_error)
+        
     @singledispatchmethod
     def update_graph(self, data):
         pass
@@ -443,16 +506,16 @@ class ParserConfig:
     def _(self, component: End_hub):
         self.graph.end_hub = component
 
-    @update_graph.register(Connection)
-    def _(self, component: Connection):
-        self.graph.connections.append(component)
+    # @update_graph.register(Connection)
+    # def _(self, component: Connection):
+    #     self.graph.connections.append(component)
 
 
 def mainparser() -> None:
     parser = ParserConfig()
     graph = parser.parse_in_type_line()
-    # for hub in graph.hubs:
-    #     print(hub.meta)
+    for hub in graph.hubs:
+        print(hub.name, hub.meta)
 
 def maingraph() -> None:
     pass
@@ -463,3 +526,6 @@ if __name__ == "__main__":
         mainparser()
     except Exception as error:
         print(error, file=sys.stderr)
+    finally:
+        if SafeFileReader.fd is not None:
+            SafeFileReader.fd.close()

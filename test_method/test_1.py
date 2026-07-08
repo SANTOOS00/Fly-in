@@ -24,3 +24,26 @@
 #     obj2 = MyClass('test99') 
 # except ValueError as e:
 #     print(f"خطأ: {e}")   
+# seen = set()
+
+# data = ["test 1", "test 2", "test 3"]
+# for itm in [k.split("=")[0].strip() for k in data]:
+#     print(itm)
+
+
+
+    
+
+
+class x:
+    test = None
+    def __init__(self):
+        self.nu = 0
+        x.test = self
+
+    def test_method(self):
+        print(self.nu)
+
+te = x()
+print(id(te))
+print(id(x.test))
