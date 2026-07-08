@@ -75,8 +75,22 @@
 # if os.access(path, os.R_OK):
 #     print("you can read")
 
-test2 = "# test tprint(text.split(sep=, maxsplit=2))"
-test1 = "test tprint(text.split#(sep="
+# test2 = "# test tprint(text.split(sep=, maxsplit=2))"
+# test1 = "test tprint(text.split#(sep="
 
-print(test1.split("#", maxsplit=1)[0])
+# print(test1.split("#", maxsplit=1)[0])
 # print(test2.split("#", maxsplit=1))
+
+
+ss = [{13, 24}, {24, 32}, {22, 25}]
+sss = {24, 3}
+
+
+print(sss not in ss)
+
+# def test():
+#     return False
+
+# if __name__ == "__main__":
+#     if test():
+#         print("is ok")

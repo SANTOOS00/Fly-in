@@ -95,9 +95,6 @@ class Hub(NetworkNode):
         self.meta: Dict[str: Any] | None = meta
 
 
-
-
-
 class BaseParser(ABC):
     """
     |------------------------------------------------------------------|
@@ -118,8 +115,52 @@ class MetadataValidator:
         self.in_type = in_type
         self.data = data
 
+    @property
+    def get_color(self) -> str:
+        return self.data['color']
+
+    @property
+    def get_name_zone(self) -> str:
+        return self.data['zone']
+
+    @property
+    def get_max_drones(self) -> int:
+        try:
+            return int(self.data['max_drones'])
+        except Exception:
+            raise MetaDataParserError(
+                "Invalid value for 'max_drones' in metadata: "
+                f"{self.data['max_drones']}",
+                self.line_number,
+                ErrorSeverity.Error
+            )
+
+    @property
+    def get_link_capacity(self) -> int:
+        try:
+            return int(self.data['max_link_capacity'])
+        except Exception:
+            raise MetaDataParserError(
+                "Invalid value for 'max_drones' in metadata: "
+                f"{self.data['max_drones']}",
+                self.line_number,
+                ErrorSeverity.Error
+            )
+
+    @property
+    def get_max_capacity(self) -> str:
+        return self.data['max_link_capacity']
+
     def validate_metadata(self) -> Dict[str, Any]:
         self.allowed_status_meta()
+        if self.data.get("color"):
+            self.data["color"] = self.get_hex(self.get_color)
+        if self.data.get("zone"):
+            self.data['zone'] = self.allowed_status_zone(self.get_name_zone)
+        if self.data.get('max_drones'):
+            self.data['max_drones'] = self.get_max_drones
+        if self.data.get('max_link_capacity'):
+            self.data['max_link_capacity'] = self.get_link_capacity
         return (self.data)
 
     def get_hex(self, color: str) -> str:
@@ -148,7 +189,6 @@ class MetadataValidator:
 
     def allowed_status_meta(self) -> None:
         allowed = ["zone", "color", "max_drones"]
-        print(self.in_type)
         if isinstance(self.in_type, ConnectionParser):
             for key in self.data.keys():
                 if key not in "max_link_capacity":
@@ -168,14 +208,6 @@ class MetadataValidator:
                         "           just",
                         self.line_number,
                         ErrorSeverity.Error)
-
-    def _valid_int(self, number_str: str) -> int:
-        try:
-            return int(number_str)
-        except ValueError:
-            raise MetaDataParserError("",
-                                      self.line_number,
-                                      ErrorSeverity.Error)
 
 
 class MetaParser:
@@ -217,7 +249,7 @@ class MetaParser:
         try:
             MetaParser.check_duplicates(data, self.line_number)
         except Exception as error:
-            ParserConfig.instance.append_warning(error)
+            ParserConfig.append_warning(error)
         return (
             {key.lower(): val
                 for keyval in data
@@ -361,6 +393,12 @@ class ConnectionParser(MetaParser):
     def parser(self) -> Connection:
         self._check_syntax()
         zone_1, zone_2, *meta = self.match.groups()
+        if ParserConfig.instance.validate_connection(zone_1, zone_2):
+            raise UtilsError(
+                f"Duplicate connection detected: {zone_1}-{zone_2}",
+                self.line_number,
+                ErrorSeverity.Error
+            )
         connection: set = {zone_1, zone_2}
         return (
             Connection(
@@ -373,7 +411,7 @@ class StartHubParser(ZoneWithCoordsParser, MetaParser):
     def parser(self) -> Start_hub:
         data: Dict[str, Any] = super().parser()
         return Start_hub(
-            data["zone_name"], 
+            data["zone_name"],
             data["x_coordinate"],
             data["y_coordinate"],
             self.parse_metadata(data["metadata"]),
@@ -485,6 +523,20 @@ class ParserConfig:
         self.graph = Graph()
         ParserConfig.instance = self
 
+    def has_invalid_zone_names(self, zone_1, zone_2: set) -> bool:
+        if zone_1 not in [zone.name for zone in self.graph.hubs]:
+            return True
+        if zone_2 not in [zone.name for zone in self.graph.hubs]:
+            return True
+        return False
+
+    def validate_connection(cls, zone_1, zone_2: Connection) -> bool:
+        # if cls.instance.has_invalid_zone_names(zone_2, zone_1):
+            # return True
+        if cls.instance.is_duplicate_connection({zone_2, zone_1}):
+            return True
+        return False
+
     def parse_in_type_line(self) -> Graph:
         fileread = SafeFileReader(Path(sys.argv[1]))
         while (True):
@@ -492,10 +544,10 @@ class ParserConfig:
                 component = fileread.get_validated_line()
                 if component == "EOF":
                     break
+                self.update_graph(component)
             except Exception as error:
                 self.errors.append(error)
                 continue
-            self.update_graph(component)
         self.print_report()
         return (self.graph)
 
@@ -503,11 +555,13 @@ class ParserConfig:
     def get_graph(self) -> Graph:
         return self.graph
 
-    def append_errors(self, error) -> None:
-        self.errors.append(error)
+    @staticmethod
+    def append_errors(error) -> None:
+        ParserConfig.instance.errors.append(error)
 
-    def append_warning(self, error) -> None:
-        self.warning.append(error)
+    @staticmethod
+    def append_warning(error) -> None:
+        ParserConfig.instance.warning.append(error)
 
     def print_report(self) -> None:
         if self.warning:
@@ -548,19 +602,32 @@ class ParserConfig:
 
     @update_graph.register(Connection)
     def _(self, component: Connection):
-        self.valid_deblukest_connection(component)
         self.graph.connections.append(component)
 
-    def valid_deblukest_connection(self, component: Connection) -> None:
-        print(component.connection)
+    @property
+    def get_conn(self) -> None:
+        return (
+            [conn.connection for conn in self.graph.connections]
+        )
+
+    def is_duplicate_connection(self, component: Connection) -> bool:
+        if component in [connection.connection for connection in self.graph.connections]:
+            return True
+
+    @staticmethod
+    def check_duplicate_zone(name_zone: str) -> bool:
+        instan = ParserConfig.instance
+        if name_zone in [hub.name for hub in instan.graph.hubs]:
+            return True
+        return False
 
 
 def mainparser() -> None:
     parser = ParserConfig()
     graph = parser.parse_in_type_line()
-    for hub in graph.hubs:
+    for hub in graph.connections:
         pass
-        # print(hub.name, hub.meta)
+        # print(hub.connection, hub.meta)
 
 
 def maingraph() -> None:
