@@ -325,6 +325,13 @@ class ZoneWithCoordsParser(BaseParser):
         match = re.match(r'^(\w+)\s+(-?\d+)\s+(-?\d+)(.*)',
                          self.line_str.strip())
         name, x, y, *meta = match.groups()
+        if not ParserConfig.instance.has_invalid_zone_names(name):
+            raise UtilsError(
+                f"Duplicate zone name '{name}' detected. Each "
+                "zone name must be unique.",
+                self.line_number,
+                ErrorSeverity.Error
+            )
         return {
             "zone_name": name,
             "x_coordinate": int(x),
@@ -523,16 +530,12 @@ class ParserConfig:
         self.graph = Graph()
         ParserConfig.instance = self
 
-    def has_invalid_zone_names(self, zone_1, zone_2: set) -> bool:
-        if zone_1 not in [zone.name for zone in self.graph.hubs]:
-            return True
-        if zone_2 not in [zone.name for zone in self.graph.hubs]:
+    def has_invalid_zone_names(self, zone_name) -> bool:
+        if zone_name not in [zone.name for zone in self.graph.hubs]:
             return True
         return False
 
     def validate_connection(cls, zone_1, zone_2: Connection) -> bool:
-        # if cls.instance.has_invalid_zone_names(zone_2, zone_1):
-            # return True
         if cls.instance.is_duplicate_connection({zone_2, zone_1}):
             return True
         return False
@@ -556,12 +559,12 @@ class ParserConfig:
         return self.graph
 
     @staticmethod
-    def append_errors(error) -> None:
-        ParserConfig.instance.errors.append(error)
+    def append_errors(cls, error) -> None:
+        cls.instance.errors.append(error)
 
     @staticmethod
-    def append_warning(error) -> None:
-        ParserConfig.instance.warning.append(error)
+    def append_warning(cls, error) -> None:
+        cls.instance.warning.append(error)
 
     def print_report(self) -> None:
         if self.warning:
@@ -590,6 +593,7 @@ class ParserConfig:
 
     @update_graph.register(Hub)
     def _(self, component: Hub) -> None:
+        self.has_invalid_zone_names(component.name)
         self.graph.hubs.append(component)
 
     @update_graph.register(Start_hub)
@@ -604,15 +608,11 @@ class ParserConfig:
     def _(self, component: Connection):
         self.graph.connections.append(component)
 
-    @property
-    def get_conn(self) -> None:
-        return (
-            [conn.connection for conn in self.graph.connections]
-        )
-
     def is_duplicate_connection(self, component: Connection) -> bool:
-        if component in [connection.connection for connection in self.graph.connections]:
+        if component in [connection.connection
+                         for connection in self.graph.connections]:
             return True
+        return False
 
     @staticmethod
     def check_duplicate_zone(name_zone: str) -> bool:
