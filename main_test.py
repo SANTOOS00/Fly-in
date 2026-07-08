@@ -353,8 +353,9 @@ class ConnectionParser(MetaParser):
         for is_not_valid in ConnectionParser._patterns.values():
             if is_not_valid:
                 raise ConnectionError(
-                    "The connection syntax is invalid. The "
-                    f"issue is in this line: {self.line_str}",
+                    "Invalid connection syntax. Expected"
+                    "format: 'zoneA-zoneB',\n \n"
+                    f" > but got:       {self.line_str}.",
                     self.line_number,
                     ErrorSeverity.Error)
 
