@@ -30,20 +30,18 @@
 # for itm in [k.split("=")[0].strip() for k in data]:
 #     print(itm)
 
+import re
+
+tet = "final_merge-final_tortur- -[e1kdqendned]"
+patterns = {
+        r'^(\w+)': False,
+        r'^(\w+)-(\w+)': False,
+        r'^(\w+)-(\w+)(.*)': False
+    }
 
 
-    
-
-
-class x:
-    test = None
-    def __init__(self):
-        self.nu = 0
-        x.test = self
-
-    def test_method(self):
-        print(self.nu)
-
-te = x()
-print(id(te))
-print(id(x.test))
+e = re.match(r'^(\w+)', tet)
+if e is None:
+    print("not valid")
+else:
+    print(e.groups())

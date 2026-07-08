@@ -67,7 +67,6 @@ hub: priority_dead2 12 -1 [color=black]
 hub: conv_restricted1 13 2 [zone=restricted color=darkred max_drones=1]
 hub: conv_restricted2 14 2 [zone=restricted color=darkred max_drones=1]
 hub: conv_restricted3 15 2 [zone=restricted color=darkred max_drones=1]
-
 hub: conv_restricted4 13 0 [zone=restricted color=darkred max_drones=1]
 hub: conv_restricted5 14 0 [zone=restricted color=darkred max_drones=1]
 hub: conv_restricted6 15 0 [zone=restricted color=darkred max_drones=1]
@@ -81,7 +80,7 @@ hub: final_merge 16 0 [color=violet max_drones=5]
 hub: final_torture1 17 0 [color=crimson max_drones=2]
 hub: final_torture2 18 0 [coLor=crimson]
 hub: final_torture3 19 0 [color=crimson max_drones=1]
-hub: final_torture4 20 0 [color=crimson max_drones=1]
+hub: final_torture4 20 2 [color=crimson max_drones=1]
 hub: final_torture5 21 0 [color=crimson max_drones=1 max_drones=1]
 
 # The ultimate goal

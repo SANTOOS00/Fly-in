@@ -1,15 +1,17 @@
 from typing import Protocol, List, Dict, Any
-from abc import ABC, abstractmethod
+from abc import ABC
 from pathlib import Path
 import os
 import sys
 from typing import TextIO
 from functools import singledispatchmethod
-from typing import Literal, TypedDict
-from custom_error import *
+from custom_error import ErrorSeverity, ErrorLocation, PathError, HubError
+from custom_error import ConnectionError, UtilsError, BaseError
+from custom_error import ZoneWithCoordsParserError, MetaDataParserError
 from utils import Color, COLOR_HEX
-# from pydantic import BaseModel, Field
 import re
+# from pydantic import BaseModel, Field
+# from typing import Literal, TypedDict
 
 
 class NetworkNode(Protocol):
@@ -112,7 +114,10 @@ class BaseParser(ABC):
 
 
 class MetadataValidator:
-    def __init__(self, line_number: int, in_type: BaseParser, data: Dict[str, Any]) -> None:
+    def __init__(self,
+                 line_number: int,
+                 in_type: BaseParser,
+                 data: Dict[str, Any]) -> None:
         self.line_number = line_number
         self.in_type = in_type
         self.data = data
@@ -138,7 +143,8 @@ class MetadataValidator:
         status = status_zone.lower()
         if status not in allowed:
             raise UtilsError(
-                f"Invalid status_zone '{status}'. Allowed values: {', '.join(allowed)}",
+                f"Invalid status_zone '{status}'. Allowed values: "
+                f"{', '.join(allowed)}",
                 self.line_number,
                 ErrorSeverity.Error,
             )
@@ -150,7 +156,8 @@ class MetadataValidator:
             for key in self.data.keys():
                 if key not in "max_link_capacity":
                     raise MetaDataParserError(
-                        f"Invalid connection metadata\n \n ⚠ Fix: key '{self.data}'"
+                        "Invalid connection metadata\n \n ⚠ Fix: "
+                        f"key '{self.data}'"
                         f"allowed \n 'max_link_capacity' just",
                         self.line_number,
                         ErrorSeverity.Error)
@@ -158,7 +165,8 @@ class MetadataValidator:
             for key in self.data.keys():
                 if key not in allowed:
                     raise MetaDataParserError(
-                        f"Invalid connection metadata\n \n ⚠ Fix: key '{self.data}'"
+                        "Invalid connection metadata\n \n ⚠ "
+                        f"Fix: key '{self.data}'"
                         f"\n           allowed       \n'{allowed}'\n "
                         "           just",
                         self.line_number,
@@ -178,6 +186,7 @@ class MetaParser:
         r'^\s*\w+=\w+': False,
         r'^\s*\w+=\w+(?:\s+\w+=\w+)*\s*$': False,
     }
+
     def __init__(self) -> None:
         self.match: re.Match
         self.typ_obj: BaseError
@@ -186,19 +195,20 @@ class MetaParser:
         if meta_data == "[]":
             return (self._default_val())
         meta_data = self._validate_metadata_format(meta_data)
-        self.match = self._check_syntax_meta(meta_data)
-        valid_meta: MetadataValidator = MetadataValidator(self.line_number,
-                                                          self,
-                                                          self._split_key_values())
+        self._check_syntax_meta(meta_data)
+        valid_meta = MetadataValidator(self.line_number,
+                                       self,
+                                       self._split_key_values())
         return (valid_meta.validate_metadata())
-
 
     @staticmethod
     def check_duplicates(data: List[str], line_nu: int) -> None:
         seen = set()
         for itm in [k.split("=")[0].strip() for k in data]:
             if itm in seen:
-                raise MetaDataParserError("test test test est tevetgdjhdgdef",
+                raise MetaDataParserError(f"Duplicate metadata item '{itm}',"
+                                          " The first occurrence will "
+                                          "be used.",
                                           line_nu,
                                           ErrorSeverity.Warning
                                           )
@@ -237,7 +247,7 @@ class MetaParser:
             else:
                 MetaParser.patternsmetadata[pattern] = False
         self._validate_syntax_meta()
-        return (match)
+        self.match = match
 
     def _default_val(self) -> dict[str, int]:
         if isinstance(self, ConnectionParser):
@@ -314,6 +324,41 @@ class ZoneWithCoordsParser(BaseParser):
                                                 errors[index])
 
 
+class ConnectionParser(MetaParser):
+    _patterns = {
+        r'^(\w+)': False,
+        r'^(\w+)-(\w+)': False,
+        r'^(\w+)-(\w+)(.*)': False
+    }
+
+    def __init__(self, line_str: str, line_number: int) -> None:
+        self.line_str = line_str
+        self.line_number = line_number
+        self.match: re.Match
+
+    def _check_syntax(self):
+        for pattern in ConnectionParser._patterns.keys():
+            self.match = re.match(pattern, self.line_str.strip())
+            if self.match is None:
+                ConnectionParser._patterns[pattern] = True
+            else:
+                ConnectionParser._patterns[pattern] = False
+        self._validate_syntax()
+
+    def parser(self) -> Connection:
+        self._check_syntax()
+        ## droro nzi wahd alhaja hnaya
+
+    def _validate_syntax(self) -> None:
+        for is_not_valid in ConnectionParser._patterns.values():
+            if is_not_valid:
+                raise ConnectionError(
+                    "The connection syntax is invalid. The "
+                    f"issue is in this line: {self.line_str}",
+                    self.line_number,
+                    ErrorSeverity.Error)
+
+
 class StartHubParser(ZoneWithCoordsParser, MetaParser):
     def parser(self) -> Start_hub:
         data: Dict[str, Any] = super().parser()
@@ -327,9 +372,6 @@ class StartHubParser(ZoneWithCoordsParser, MetaParser):
 
 
 class EndHubParser(ZoneWithCoordsParser, MetaParser):
-    def __init__(self, line_str: str, line_number: int) -> None:
-        super().__init__(line_str, line_number)
-
     def parser(self) -> End_hub:
         data: Dict[str, Any] = super().parser()
         return End_hub(
@@ -342,9 +384,6 @@ class EndHubParser(ZoneWithCoordsParser, MetaParser):
 
 
 class HubParser(ZoneWithCoordsParser, MetaParser):
-    def __init__(self, line_str: str, line_number: int) -> None:
-        super().__init__(line_str, line_number)
-
     def parser(self) -> Hub:
         data: Dict[str, Any] = super().parser()
         return Hub(
@@ -353,16 +392,6 @@ class HubParser(ZoneWithCoordsParser, MetaParser):
             data["y_coordinate"],
             self.parse_metadata(data["metadata"]),
         )
-
-
-class ConnectionParser:
-    def __init__(self, line_str: str, line_number: int) -> None:
-        self.line_str = line_str
-        self.line_number = line_number
-
-    def parser(cls) -> Connection:
-        # print("sss")
-        pass
 
 
 class SafeFileReader:
@@ -399,7 +428,8 @@ class SafeFileReader:
             if self.data_str == "":
                 continue
             if self._get_type_line():
-                parser_component = self.base_parser(self.clean_line, self.number_line)
+                parser_component = self.base_parser(self.clean_line,
+                                                    self.number_line)
                 return (parser_component.parser())
             else:
                 raise UtilsError(
@@ -485,7 +515,7 @@ class ParserConfig:
                 string_error += (f" ⚠️  + {error}\n")
             string_error += ("\n❌ Pipeline Status: FAILED\n")
             raise ValueError(string_error)
-        
+
     @singledispatchmethod
     def update_graph(self, data):
         pass
@@ -515,7 +545,9 @@ def mainparser() -> None:
     parser = ParserConfig()
     graph = parser.parse_in_type_line()
     for hub in graph.hubs:
-        print(hub.name, hub.meta)
+        pass
+        # print(hub.name, hub.meta)
+
 
 def maingraph() -> None:
     pass

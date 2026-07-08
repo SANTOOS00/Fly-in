@@ -59,7 +59,10 @@ class ConnectionError(BaseError):
         super().__init__(message, line_number, severity)
 
     def __str__(self):
-        print("error in connection")
+        return (
+                f"\n[{self.severity.value}] Line {self.line_number}\n"
+                f"  ➜ Input : {self.message}\n"
+        )
 
 
 class UtilsError(BaseError):
