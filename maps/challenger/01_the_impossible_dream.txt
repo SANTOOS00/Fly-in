@@ -93,7 +93,7 @@ connection: start-gate_hell1 [max_link_capacity=1]
 connection: gate_hell1-gate_hell2 [max_link_capacity=1]
 connection: gate_hell2-gate_hell3 [max_link_capacity=1]
 connection: gate_hell3-gate_hell4 [max_link_capacity=1]
-connection: gate_hell4gate_hell5 [max_link_capacity=1]
+connection: gate_hell4-gate_hell5 [max_link_capacity=12]
 
 # Layer 1 connections (maze of despair)
 connection: gate_hell1-maze_trap_a1

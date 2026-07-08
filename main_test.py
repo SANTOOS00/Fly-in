@@ -95,11 +95,7 @@ class Hub(NetworkNode):
         self.meta: Dict[str: Any] | None = meta
 
 
-class Connection(NetworkNode):
-    def __init__(self, node1, node2, meta):
-        self.node1 = node1
-        self.node2 = node2
-        self.meta = meta
+
 
 
 class BaseParser(ABC):
@@ -152,7 +148,8 @@ class MetadataValidator:
 
     def allowed_status_meta(self) -> None:
         allowed = ["zone", "color", "max_drones"]
-        if isinstance(self.in_type, Connection):
+        print(self.in_type)
+        if isinstance(self.in_type, ConnectionParser):
             for key in self.data.keys():
                 if key not in "max_link_capacity":
                     raise MetaDataParserError(
@@ -192,7 +189,7 @@ class MetaParser:
         self.typ_obj: BaseError
 
     def parse_metadata(self, meta_data: str) -> Dict[str, str]:
-        if meta_data == "[]":
+        if len(meta_data) < 4:
             return (self._default_val())
         meta_data = self._validate_metadata_format(meta_data)
         self._check_syntax_meta(meta_data)
@@ -324,6 +321,12 @@ class ZoneWithCoordsParser(BaseParser):
                                                 errors[index])
 
 
+class Connection(NetworkNode):
+    def __init__(self, connection: set, meta) -> None:
+        self.connection = connection
+        self.meta = meta
+
+
 class ConnectionParser(MetaParser):
     _patterns = {
         r'^(\w+)': False,
@@ -345,10 +348,6 @@ class ConnectionParser(MetaParser):
                 ConnectionParser._patterns[pattern] = False
         self._validate_syntax()
 
-    def parser(self) -> Connection:
-        self._check_syntax()
-        ## droro nzi wahd alhaja hnaya
-
     def _validate_syntax(self) -> None:
         for is_not_valid in ConnectionParser._patterns.values():
             if is_not_valid:
@@ -359,12 +358,22 @@ class ConnectionParser(MetaParser):
                     self.line_number,
                     ErrorSeverity.Error)
 
+    def parser(self) -> Connection:
+        self._check_syntax()
+        zone_1, zone_2, *meta = self.match.groups()
+        connection: set = {zone_1, zone_2}
+        return (
+            Connection(
+                connection, self.parse_metadata(meta[0])
+            )
+        )
+
 
 class StartHubParser(ZoneWithCoordsParser, MetaParser):
     def parser(self) -> Start_hub:
         data: Dict[str, Any] = super().parser()
         return Start_hub(
-            data["zone_name"],
+            data["zone_name"], 
             data["x_coordinate"],
             data["y_coordinate"],
             self.parse_metadata(data["metadata"]),
@@ -455,7 +464,7 @@ class SafeFileReader:
         if parsers.get(self.base_parser):
             self.base_parser = parsers[self.base_parser]
             return True
-        return False
+        raise Exception()
 
 
 class Graph:
@@ -537,9 +546,13 @@ class ParserConfig:
     def _(self, component: End_hub):
         self.graph.end_hub = component
 
-    # @update_graph.register(Connection)
-    # def _(self, component: Connection):
-    #     self.graph.connections.append(component)
+    @update_graph.register(Connection)
+    def _(self, component: Connection):
+        self.valid_deblukest_connection(component)
+        self.graph.connections.append(component)
+
+    def valid_deblukest_connection(self, component: Connection) -> None:
+        print(component.connection)
 
 
 def mainparser() -> None:
