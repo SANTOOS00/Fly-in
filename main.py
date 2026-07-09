@@ -1,21 +1,26 @@
+from parserconfig import ParserConfig, SafeFileReader
 import sys
-from map_parser import ConfigParser
-from graph import Graph
 
 
-def main() -> None:
-    if (len(sys.argv) != 2):
-        print("Usage: python3 <name_file>.txt", file=sys.stderr)
-        return
-    map_parser = ConfigParser()
-    graph: Graph = map_parser.parse_pipeline(sys.argv[1])
-    # graph = Graph()
-    graph.start_connected_zone()
-    # print(graph.drones.drones[0]["id"])
+def mainparser() -> None:
+    parser = ParserConfig()
+    graph = parser.parse_in_type_line()
+    for hub in graph.hubs:
+        pass
+        print(hub.name, hub.meta)
+    for conn in graph.connections:
+        print(conn.connection, conn)
+
+
+def maingraph() -> None:
+    pass
 
 
 if __name__ == "__main__":
     try:
-        main()
+        mainparser()
     except Exception as error:
-        print(error)
+        print(error, file=sys.stderr)
+    finally:
+        if SafeFileReader.fd is not None:
+            SafeFileReader.fd.close()

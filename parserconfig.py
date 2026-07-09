@@ -1,99 +1,17 @@
-from typing import Protocol, List, Dict, Any
-from abc import ABC
 from pathlib import Path
+from networknode import *
 import os
 import sys
 from typing import TextIO
+from utils import Color, COLOR_HEX
 from functools import singledispatchmethod
-from custom_error import ErrorSeverity, ErrorLocation, PathError, HubError
+from custom_error import ErrorLocation, PathError
 from custom_error import ConnectionError, UtilsError, BaseError
 from custom_error import ZoneWithCoordsParserError, MetaDataParserError
-from utils import Color, COLOR_HEX
 import re
-# from pydantic import BaseModel, Field
-# from typing import Literal, TypedDict
 
 
-class NetworkNode(Protocol):
-    ...
-
-
-class Drones(NetworkNode):
-    """
-    |------------------------------------------------------------------|
-    |          -----    parmeter in simulation   ------                |
-    |------------------------------------------------------------------|
-    """
-    def __init__(self, number_drones: int) -> None:
-        self.drones: List[Dict[str, Any]] = [
-            {
-                "id": num + 1,
-                "name_zone": None,
-                "zone_visited_path": [],
-            }
-            for num in range(number_drones)
-            ]
-
-class End_hub(NetworkNode):
-    _number_line_start = None
-    _instance: bool = False
-
-    def __init__(self, name: str, y: int, x: int,
-                meta: Dict[str, Any] | None = None,
-                line_number: int | None = None) -> "Start_hub":
-        if End_hub._instance:
-            raise HubError(
-                "Duplicate Start hub at lines "
-                f"{Start_hub._instance._number_line_start} "
-                f"and {line_number}. Only one is allowed.",
-                line_number,
-                ErrorSeverity.Error)
-        End_hub._number_line_start = line_number
-        End_hub._instance = True
-        self.name = name
-        self.y = y
-        self.x = x
-        self.meta = meta
-    
-    def get_name_end_zone(self) -> str:
-        return self.name
-
-class Start_hub(NetworkNode):
-    _number_line_start = None
-    _instance: bool = False
-
-    def __init__(self, name: str, y: int, x: int,
-                meta: Dict[str, Any] | None = None,
-                line_number: int | None = None) -> "Start_hub":
-        if Start_hub._instance:
-            raise HubError(
-                "Duplicate Start hub at lines "
-                f"{Start_hub._instance._number_line_start} "
-                f"and {line_number}. Only one is allowed.",
-                line_number,
-                ErrorSeverity.Error)
-        Start_hub._number_line_start = line_number
-        Start_hub._instance = True
-        self.name = name
-        self.y = y
-        self.x = x
-        self.meta = meta
-    
-    def get_name_start_zone(self) -> str:
-        return self.name
-
-
-class Hub(NetworkNode):
-    def __init__(self, name: str, y: int, x: int,
-                 meta: Dict[str, Any] | None = None
-                 ) -> None:
-        self.name = name
-        self.x = x
-        self.y = y
-        self.meta: Dict[str: Any] | None = meta
-
-
-class BaseParser(ABC):
+class BaseParser:
     """
     |------------------------------------------------------------------|
     |                  -----    PARSER ARGS   ------                   |
@@ -382,12 +300,6 @@ class ZoneWithCoordsParser(BaseParser):
                                                 errors[index])
 
 
-class Connection(NetworkNode):
-    def __init__(self, connection: set, meta) -> None:
-        self.connection = connection
-        self.meta = meta
-
-
 class ConnectionParser(MetaParser):
     _patterns = {
         r'^(\w+)': False,
@@ -664,27 +576,3 @@ class ParserConfig:
     @classmethod
     def get_connection(cls) -> List[set[str, str]]:
         return [con.connection for con in cls.instance.graph.connections]
-
-
-def mainparser() -> None:
-    parser = ParserConfig()
-    graph = parser.parse_in_type_line()
-    for hub in graph.hubs:
-        pass
-        print(hub.name, hub.meta)
-    for conn in graph.connections:
-        print(conn.connection, conn)
-
-
-def maingraph() -> None:
-    pass
-
-
-if __name__ == "__main__":
-    try:
-        mainparser()
-    except Exception as error:
-        print(error, file=sys.stderr)
-    finally:
-        if SafeFileReader.fd is not None:
-            SafeFileReader.fd.close()

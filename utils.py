@@ -1,8 +1,6 @@
 from enum import Enum
 
 
-from enum import Enum
-
 class Color(Enum):
     BLACK = "black"
     RED = "red"
@@ -17,8 +15,6 @@ class Color(Enum):
     BROWN = "brown"
     LIME = "lime"
     GOLD = "gold"
-
-    # Added colors
     MAROON = "maroon"
     DARKRED = "darkred"
     VIOLET = "violet"
@@ -40,14 +36,10 @@ COLOR_HEX = {
     Color.BROWN: "#A52A2A",
     Color.LIME: "#00FF00",
     Color.GOLD: "#FFD700",
-
-    # Added colors
     Color.MAROON: "#800000",
     Color.DARKRED: "#8B0000",
     Color.VIOLET: "#EE82EE",
     Color.CRIMSON: "#DC143C",
-
-    # Rainbow has no single hex color, so choose a representative value
     Color.RAINBOW: "#FF69B4",
 }
 

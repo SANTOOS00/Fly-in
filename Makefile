@@ -1,4 +1,4 @@
-SCRIPT = main_test.py
+SCRIPT = main.py
 
 
 MAP ?= maps/challenger/01_the_impossible_dream.txt
