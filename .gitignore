@@ -3,7 +3,7 @@
 *.pyc
 
 # test files
-test_method
+.test_method
 
 # maps files
-*maps
+.maps
