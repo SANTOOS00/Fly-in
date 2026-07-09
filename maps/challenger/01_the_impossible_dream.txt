@@ -71,7 +71,7 @@ hub: conv_restricted4 13 0 [zone=restricted color=darkred max_drones=1]
 hub: conv_restricted5 14 0 [zone=restricted color=darkred max_drones=1]
 hub: conv_restricted6 15 0 [zone=restricted color=darkred max_drones=1]
 
-hub: conv_restricted7 13 -2 [zone=restricted color=darkred max_drones=1]
+hub: conv_restricted7 13 -2 [zone=restricted color=darkred max_drones=2]
 hub: conv_restricted8 14 -2 [zone=restricted color=darkred max_drones=1]
 hub: conv_restricted9 15 -2 [zone=restricted color=darkred max_drones=1]
 
@@ -81,7 +81,7 @@ hub: final_torture1 17 0 [color=crimson max_drones=2]
 hub: final_torture2 18 0 [coLor=crimson]
 hub: final_torture3 19 0 [color=crimson max_drones=1]
 hub: final_torture4 20 2 [color=crimson max_drones=1]
-hub: final_torture5 21 0 [color=crimson max_drones=1]
+hub: final_torture5 21 0 
 
 # The ultimate goal
 end_hub: impossible_goal 23 0 [color=rainbow max_drones=25]
@@ -90,7 +90,7 @@ end_hub: impossible_goal 23 0 [color=rainbow max_drones=25]
 
 # Layer 0 connections (bottleneck hell)
 connection: start-gate_hell1 [max_link_capacity=1]
-connection: gate_hell1-gate_hell2 [max_link_capacity=1]
+connection: gate_hell1-gate_hell2 [max_link_capacity=2]
 connection: gate_hell2-gate_hell3 [max_link_capacity=1]
 connection: gate_hell3-gate_hell4 [max_link_capacity=1]
 connection: gate_hell4-gate_hell5 [max_link_capacity=12]

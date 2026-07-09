@@ -126,7 +126,15 @@ class MetadataValidator:
     @property
     def get_max_drones(self) -> int:
         try:
-            return int(self.data['max_drones'])
+            val = int(self.data['max_drones'])
+            if val < 0:
+                raise MetaDataParserError(
+                "Invalid value for 'max_drones' in metadata: "
+                f"{self.data['max_drones']}",
+                self.line_number,
+                ErrorSeverity.Error
+            )    
+            return val 
         except Exception:
             raise MetaDataParserError(
                 "Invalid value for 'max_drones' in metadata: "
@@ -138,11 +146,21 @@ class MetadataValidator:
     @property
     def get_link_capacity(self) -> int:
         try:
-            return int(self.data['max_link_capacity'])
+            val = int(self.data['max_link_capacity'])
+            if val < 0:
+                raise MetaDataParserError(
+                "Invalid value for 'max_link_capacity' in metadata: "
+                f"{self.data['max_link_capacity']}. "
+                "It must be an integer greater than or equal to 1.",
+                self.line_number,
+                ErrorSeverity.Error
+            )    
+            return val
         except Exception:
             raise MetaDataParserError(
-                "Invalid value for 'max_drones' in metadata: "
-                f"{self.data['max_drones']}",
+                "Invalid value for 'max_link_capacity' in metadata: "
+                f"{self.data['max_link_capacity']}. "
+                "It must be an integer greater than or equal to 1.",
                 self.line_number,
                 ErrorSeverity.Error
             )
@@ -212,8 +230,8 @@ class MetadataValidator:
 
 class MetaParser:
     patternsmetadata = {
-        r'^\s*\w+=\w+': False,
-        r'^\s*\w+=\w+(?:\s+\w+=\w+)*\s*$': False,
+        r'^\s*\w+=-?\w+': False,
+        r'^\s*\w+=-?\w+(?:\s+\w+=-?\w+)*\s*$': False,
     }
 
     def __init__(self) -> None:
@@ -221,9 +239,11 @@ class MetaParser:
         self.typ_obj: BaseError
 
     def parse_metadata(self, meta_data: str) -> Dict[str, str]:
-        if len(meta_data) < 4:
+        if len(meta_data) == 0:
             return (self._default_val())
         meta_data = self._validate_metadata_format(meta_data)
+        if len(meta_data) == 0:
+            return (self._default_val())
         self._check_syntax_meta(meta_data)
         valid_meta = MetadataValidator(self.line_number,
                                        self,
@@ -354,8 +374,9 @@ class ZoneWithCoordsParser(BaseParser):
         for index, is_not_valid in enumerate(ZoneWithCoordsParser.patterns.
                                              values()):
             if is_not_valid:
+                print("ssss")
                 raise ZoneWithCoordsParserError("",
-                                                self.line_number,
+                                                self.line_number,   
                                                 ErrorSeverity.Error,
                                                 errors[index])
 
@@ -625,9 +646,11 @@ class ParserConfig:
 def mainparser() -> None:
     parser = ParserConfig()
     graph = parser.parse_in_type_line()
-    for hub in graph.connections:
+    for hub in graph.hubs:
         pass
-        # print(hub.connection, hub.meta)
+        print(hub.name, hub.meta)
+    for conn in graph.connections:
+        print(conn.connection, conn)
 
 
 def maingraph() -> None:
