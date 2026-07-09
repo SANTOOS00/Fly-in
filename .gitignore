@@ -1,9 +1,9 @@
 # Python cache
-__pycache__/
+/__pycache__
 *.pyc
 
 # test files
-.test_method
+test_method
 
 # maps files
-*.maps
+*maps
