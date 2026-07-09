@@ -5,6 +5,7 @@ import sys
 from typing import TextIO
 from utils import Color, COLOR_HEX
 from functools import singledispatchmethod
+from network import Graph
 from custom_error import ErrorLocation, PathError
 from custom_error import ConnectionError, UtilsError, BaseError
 from custom_error import ZoneWithCoordsParserError, MetaDataParserError
@@ -477,15 +478,6 @@ class SafeFileReader:
         raise Exception()
 
 
-class Graph:
-    def __init__(self) -> None:
-        self.drones: Drones = None
-        self.start_hub: Start_hub = None
-        self.hubs: List[Hub] = []
-        self.end_hub: End_hub = None
-        self.connections: List[Connection] = []
-
-
 class ParserConfig:
     instance = None
 
@@ -495,7 +487,7 @@ class ParserConfig:
         self.graph = Graph()
         ParserConfig.instance = self
 
-    def parse_in_type_line(self) -> Graph:
+    def parse_in_type_line(self) -> None:
         fileread = SafeFileReader(Path(sys.argv[1]))
         while (True):
             try:
@@ -507,7 +499,6 @@ class ParserConfig:
                 self.errors.append(error)
                 continue
         self.print_report()
-        return (self.graph)
 
     @property
     def get_graph(self) -> Graph:

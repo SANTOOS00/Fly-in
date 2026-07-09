@@ -1,24 +1,20 @@
 from parserconfig import ParserConfig, SafeFileReader
+from network import Graph
 import sys
 
 
-def mainparser() -> None:
+def parse_and_print_graph() -> None:
     parser = ParserConfig()
-    graph = parser.parse_in_type_line()
-    for hub in graph.hubs:
-        pass
-        print(hub.name, hub.meta)
-    for conn in graph.connections:
-        print(conn.connection, conn)
+    parser.parse_in_type_line()
 
+    return parser.get_graph
 
-def maingraph() -> None:
-    pass
-
+def run_graph(graph : Graph) -> None:
+    graph.run()
 
 if __name__ == "__main__":
     try:
-        mainparser()
+        run_graph(parse_and_print_graph())
     except Exception as error:
         print(error, file=sys.stderr)
     finally:

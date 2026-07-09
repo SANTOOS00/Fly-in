@@ -7,3 +7,6 @@ class Graph:
         self.hubs: List[Hub] = []
         self.end_hub: End_hub = None
         self.connections: List[Connection] = []
+    
+    def run(self) -> None:
+        pass
