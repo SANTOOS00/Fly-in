@@ -651,35 +651,29 @@ class ParserConfig:
         # print(id(self.graph))
         self.graph.connections.append(component)
 
-    # @classmethod
-    # def get_hubs(cls) -> List[str]:   
-    #     # start_zone = cls.instance.graph.start_hub.name
-    #     # end_zone = cls.instance.graph.end_hub.name
-    #     return [hub.name for hub in cls.instance.graph.hubs]
-    
     @classmethod
     def get_all_zone_names(cls) -> List[str]:
         graph = cls.instance.graph
-        # print(id(graph))
-        return ([hub.name for hub in graph.hubs])
+        zone_end_start = []
+        if graph.start_hub is not None:
+            zone_end_start.append(graph.start_hub.name)
+        if graph.end_hub is not None:
+            zone_end_start.append(graph.end_hub.name)
+        return ([hub.name for hub in graph.hubs] + zone_end_start)
     
     @classmethod
     def get_connection(cls) -> List[set[str, str]]:
         return [con.connection for con in cls.instance.graph.connections]
 
 
-
-
-
-
 def mainparser() -> None:
     parser = ParserConfig()
     graph = parser.parse_in_type_line()
-    # for hub in graph.hubs:
-    #     pass
-    #     print(hub.name, hub.meta)
-    # for conn in graph.connections:
-    #     print(conn.connection, conn)
+    for hub in graph.hubs:
+        pass
+        print(hub.name, hub.meta)
+    for conn in graph.connections:
+        print(conn.connection, conn)
 
 
 def maingraph() -> None:
