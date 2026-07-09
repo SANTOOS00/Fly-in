@@ -428,6 +428,7 @@ class ConnectionParser(MetaParser):
                 ErrorSeverity.Error
             )
         connection: set = {zone_1, zone_2}
+        if ParserConfig.instance.wax_connection_kaynin_3ndi_f_zones_li_save(zone_1, zone_2):
         return (
             Connection(
                 connection, self.parse_metadata(meta[0])
@@ -551,16 +552,6 @@ class ParserConfig:
         self.graph = Graph()
         ParserConfig.instance = self
 
-    def has_invalid_zone_names(self, zone_name) -> bool:
-        if zone_name not in [zone.name for zone in self.graph.hubs]:
-            return True
-        return False
-
-    def validate_connection(cls, zone_1, zone_2: Connection) -> bool:
-        if cls.instance.is_duplicate_connection({zone_2, zone_1}):
-            return True
-        return False
-
     def parse_in_type_line(self) -> Graph:
         fileread = SafeFileReader(Path(sys.argv[1]))
         while (True):
@@ -629,11 +620,14 @@ class ParserConfig:
     def _(self, component: Connection):
         self.graph.connections.append(component)
 
-    def is_duplicate_connection(self, component: Connection) -> bool:
-        if component in [connection.connection
-                         for connection in self.graph.connections]:
-            return True
-        return False
+    @staticmethod
+    def get_hubs(cls) -> List[str]:
+        return [hub.name for hub in cls.instance.graph.hubs]
+    
+    @staticmethod
+    def get_connection(cls) -> List[set[str, str]]:
+        return [con.connection for con in cls.instance.graph.connections]
+
 
     @staticmethod
     def check_duplicate_zone(name_zone: str) -> bool:
@@ -642,7 +636,31 @@ class ParserConfig:
             return True
         return False
 
+    def is_duplicate_connection(self, component: Connection) -> bool:
+        if component in [connection.connection
+                         for connection in self.graph.connections]:
+            return True
+        return False
+    
+    def check_connections_in_zones(self, zone_1, zone_2) -> bool:
+        zones = self.get_hubs()
+        if zone_1 not in zones:
+            return True
+        if zone_2 not in zones:
+            return True
+        return False
+    
+    def has_invalid_zone_names(self, zone_name) -> bool:
+        if zone_name not in [zone.name for zone in self.graph.hubs]:
+            return True
+        return False
 
+    def validate_connection(cls, zone_1, zone_2: Connection) -> bool:
+        if cls.instance.is_duplicate_connection({zone_2, zone_1}):
+            return True
+        if cls.instance.check_connections_in_zones():
+            return True
+        return False
 def mainparser() -> None:
     parser = ParserConfig()
     graph = parser.parse_in_type_line()
