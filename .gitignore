@@ -1,3 +1,9 @@
+# Python cache
+__pycache__/
+*.pyc
+
+# test files
 .test_method
-.__pycache__
-.maps
+
+# maps files
+*.maps
