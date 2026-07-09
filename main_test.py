@@ -34,55 +34,53 @@ class Drones(NetworkNode):
             for num in range(number_drones)
             ]
 
-
 class End_hub(NetworkNode):
     _number_line_start = None
-    _instance: "End_hub" = None
+    _instance: bool = False
 
-    def __new__(cls, name: str, y: int, x: int,
+    def __init__(self, name: str, y: int, x: int,
                 meta: Dict[str, Any] | None = None,
-                line_number: int | None = None) -> "End_hub":
-        if cls._instance is not None:
+                line_number: int | None = None) -> "Start_hub":
+        if End_hub._instance:
             raise HubError(
-                "Duplicate End hub at lines "
-                f"{cls._instance._number_line_start} "
+                "Duplicate Start hub at lines "
+                f"{Start_hub._instance._number_line_start} "
                 f"and {line_number}. Only one is allowed.",
                 line_number,
                 ErrorSeverity.Error)
-
-        cls._instance = super().__new__(cls)
-        cls._number_line_start = line_number
-        cls._instance.name = name
-        cls._instance.y = y
-        cls._instance.x = x
-        cls._instance.meta = meta
-        return cls._instance
-
+        End_hub._number_line_start = line_number
+        End_hub._instance = True
+        self.name = name
+        self.y = y
+        self.x = x
+        self.meta = meta
+    
+    def get_name_end_zone(self) -> str:
+        return self.name
 
 class Start_hub(NetworkNode):
     _number_line_start = None
-    _instance: "Start_hub" = None
+    _instance: bool = False
 
-    def __new__(cls, name: str, y: int, x: int,
+    def __init__(self, name: str, y: int, x: int,
                 meta: Dict[str, Any] | None = None,
                 line_number: int | None = None) -> "Start_hub":
-        if cls._instance is not None:
+        if Start_hub._instance:
             raise HubError(
                 "Duplicate Start hub at lines "
-                f"{cls._instance._number_line_start} "
+                f"{Start_hub._instance._number_line_start} "
                 f"and {line_number}. Only one is allowed.",
                 line_number,
                 ErrorSeverity.Error)
-        else:
-            cls._instance = super().__new__(cls)
-
         Start_hub._number_line_start = line_number
-        cls._instance = super().__new__(cls)
-        cls._instance.name = name
-        cls._instance.y = y
-        cls._instance.x = x
-        cls._instance.meta = meta
-        return cls._instance
+        Start_hub._instance = True
+        self.name = name
+        self.y = y
+        self.x = x
+        self.meta = meta
+    
+    def get_name_start_zone(self) -> str:
+        return self.name
 
 
 class Hub(NetworkNode):
@@ -345,19 +343,23 @@ class ZoneWithCoordsParser(BaseParser):
         match = re.match(r'^(\w+)\s+(-?\d+)\s+(-?\d+)(.*)',
                          self.line_str.strip())
         name, x, y, *meta = match.groups()
-        if not ParserConfig.instance.has_invalid_zone_names(name):
-            raise UtilsError(
-                f"Duplicate zone name '{name}' detected. Each "
-                "zone name must be unique.",
-                self.line_number,
-                ErrorSeverity.Error
-            )
+        self.has_invalid_zone_names(name)
         return {
             "zone_name": name,
             "x_coordinate": int(x),
             "y_coordinate": int(y),
             "metadata": meta[0]
         }
+    
+    def has_invalid_zone_names(self, zone_name) -> None:
+        zones: List[str] = ParserConfig.get_all_zone_names()
+        if zone_name in zones:
+            raise UtilsError(
+                f"Duplicate zone name '{zone_name}' detected. Each "
+                "zone name must be unique.",
+                self.line_number,
+                ErrorSeverity.Error
+            )
 
     def _check_syntax(self, line: str) -> None:
         line = self.line_str.strip()
@@ -374,7 +376,6 @@ class ZoneWithCoordsParser(BaseParser):
         for index, is_not_valid in enumerate(ZoneWithCoordsParser.patterns.
                                              values()):
             if is_not_valid:
-                print("ssss")
                 raise ZoneWithCoordsParserError("",
                                                 self.line_number,   
                                                 ErrorSeverity.Error,
@@ -421,19 +422,49 @@ class ConnectionParser(MetaParser):
     def parser(self) -> Connection:
         self._check_syntax()
         zone_1, zone_2, *meta = self.match.groups()
-        if ParserConfig.instance.validate_connection(zone_1, zone_2):
-            raise UtilsError(
-                f"Duplicate connection detected: {zone_1}-{zone_2}",
-                self.line_number,
-                ErrorSeverity.Error
-            )
+        self.validate_connection(zone_1, zone_2)
         connection: set = {zone_1, zone_2}
-        if ParserConfig.instance.wax_connection_kaynin_3ndi_f_zones_li_save(zone_1, zone_2):
         return (
             Connection(
                 connection, self.parse_metadata(meta[0])
             )
         )
+
+    def validate_connection(self, zone_1, zone_2: Connection):
+        if self.is_duplicate_connection({zone_2, zone_1}):
+            raise UtilsError(
+                f"Duplicate connection detected: {zone_1}-{zone_2}",
+                self.line_number,
+                ErrorSeverity.Error
+            )
+        self.validate_connection_zones(zone_1, zone_2)
+
+    def is_duplicate_connection(self, component: Connection) -> bool:
+        connes = ParserConfig.get_connection()
+        if component in connes:
+            return True
+        return False
+
+    def validate_connection_zones(self, source_zone: str, destination_zone: str) -> None:
+        """
+        Validate that both zones exist before creating a connection.
+        Raises UtilsError if any zone is invalid.
+        """
+        zones = ParserConfig.get_all_zone_names()
+        if source_zone not in zones:
+            raise UtilsError(
+                f"Invalid source zone: '{source_zone}' does not exist.",
+                self.line_number,
+                ErrorSeverity.Error
+            )
+
+        if destination_zone not in zones:
+            raise UtilsError(
+                f"Invalid destination zone: '{destination_zone}' does not exist.",
+                self.line_number,
+                ErrorSeverity.Error
+            )
+
 
 
 class StartHubParser(ZoneWithCoordsParser, MetaParser):
@@ -570,11 +601,11 @@ class ParserConfig:
     def get_graph(self) -> Graph:
         return self.graph
 
-    @staticmethod
+    @classmethod
     def append_errors(cls, error) -> None:
         cls.instance.errors.append(error)
 
-    @staticmethod
+    @classmethod
     def append_warning(cls, error) -> None:
         cls.instance.warning.append(error)
 
@@ -582,7 +613,7 @@ class ParserConfig:
         if self.warning:
             string_error = ""
             print(f"\n💥 Found {len(self.warning)} Warning(s) in "
-                  "configuration file:", file=sys.stderr)
+                  "configuration file:", file=sys.stderr)       
             for error in self.warning:
                 string_error += (f" ⚠️  + {error}\n")
             print(string_error, file=sys.stderr)
@@ -605,7 +636,6 @@ class ParserConfig:
 
     @update_graph.register(Hub)
     def _(self, component: Hub) -> None:
-        self.has_invalid_zone_names(component.name)
         self.graph.hubs.append(component)
 
     @update_graph.register(Start_hub)
@@ -618,57 +648,38 @@ class ParserConfig:
 
     @update_graph.register(Connection)
     def _(self, component: Connection):
+        # print(id(self.graph))
         self.graph.connections.append(component)
 
-    @staticmethod
-    def get_hubs(cls) -> List[str]:
-        return [hub.name for hub in cls.instance.graph.hubs]
+    # @classmethod
+    # def get_hubs(cls) -> List[str]:   
+    #     # start_zone = cls.instance.graph.start_hub.name
+    #     # end_zone = cls.instance.graph.end_hub.name
+    #     return [hub.name for hub in cls.instance.graph.hubs]
     
-    @staticmethod
+    @classmethod
+    def get_all_zone_names(cls) -> List[str]:
+        graph = cls.instance.graph
+        # print(id(graph))
+        return ([hub.name for hub in graph.hubs])
+    
+    @classmethod
     def get_connection(cls) -> List[set[str, str]]:
         return [con.connection for con in cls.instance.graph.connections]
 
 
-    @staticmethod
-    def check_duplicate_zone(name_zone: str) -> bool:
-        instan = ParserConfig.instance
-        if name_zone in [hub.name for hub in instan.graph.hubs]:
-            return True
-        return False
 
-    def is_duplicate_connection(self, component: Connection) -> bool:
-        if component in [connection.connection
-                         for connection in self.graph.connections]:
-            return True
-        return False
-    
-    def check_connections_in_zones(self, zone_1, zone_2) -> bool:
-        zones = self.get_hubs()
-        if zone_1 not in zones:
-            return True
-        if zone_2 not in zones:
-            return True
-        return False
-    
-    def has_invalid_zone_names(self, zone_name) -> bool:
-        if zone_name not in [zone.name for zone in self.graph.hubs]:
-            return True
-        return False
 
-    def validate_connection(cls, zone_1, zone_2: Connection) -> bool:
-        if cls.instance.is_duplicate_connection({zone_2, zone_1}):
-            return True
-        if cls.instance.check_connections_in_zones():
-            return True
-        return False
+
+
 def mainparser() -> None:
     parser = ParserConfig()
     graph = parser.parse_in_type_line()
-    for hub in graph.hubs:
-        pass
-        print(hub.name, hub.meta)
-    for conn in graph.connections:
-        print(conn.connection, conn)
+    # for hub in graph.hubs:
+    #     pass
+    #     print(hub.name, hub.meta)
+    # for conn in graph.connections:
+    #     print(conn.connection, conn)
 
 
 def maingraph() -> None:

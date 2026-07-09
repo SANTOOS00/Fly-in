@@ -10,7 +10,7 @@ start_hub: start 0 0 [color=green max_drones=25]
 # Single-file entry gates (extreme bottleneck)
 hub: gate_hell1 2 0 [color=red max_drones=1]
 hub: gate_hell2 3 0 [color=red max_drones=1]
-connection: gate_hell4-gate_hell5 [max_link_capacity=12]
+
 hub: gate_hell3 4 0 [color=red max_drones=1]
 hub: gate_hell4 5 0 [color=red max_drones=1]
 hub: gate_hell5 6 0 [color=red max_drones=1]
@@ -26,7 +26,7 @@ hub: maze_trap_b1 2 -1 [color=purple]
 hub: maze_trap_b2 3 -1 [color=purple]
 hub: maze_trap_b3 4 -1 [color=purple]
 hub: maze_dead_b 5 -1 [color=black]
-
+connection: gate_hell4-gate_hell5 [max_link_capacity=12]
 hub: maze_loop1 2 2 [zone=restricted color=brown]
 hub: maze_loop2 3 2 [zone=restricted color=brown]
 hub: maze_loop3 4 2 [zone=restricted color=brown]
