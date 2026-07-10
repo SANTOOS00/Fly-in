@@ -9,8 +9,10 @@ def parse_and_print_graph() -> None:
 
     return parser.get_graph
 
-def run_graph(graph : Graph) -> None:
+
+def run_graph(graph: Graph) -> None:
     graph.run()
+
 
 if __name__ == "__main__":
     try:

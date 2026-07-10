@@ -1,12 +1,13 @@
 from pathlib import Path
-from networknode import *
+from networknode import Connection, Hub, Start_hub, End_hub, Drones
+from typing import List, Dict, Any
 import os
 import sys
 from typing import TextIO
 from utils import Color, COLOR_HEX
 from functools import singledispatchmethod
 from network import Graph
-from custom_error import ErrorLocation, PathError
+from custom_error import ErrorLocation, PathError, ErrorSeverity
 from custom_error import ConnectionError, UtilsError, BaseError
 from custom_error import ZoneWithCoordsParserError, MetaDataParserError
 import re
@@ -46,12 +47,12 @@ class MetadataValidator:
             val = int(self.data['max_drones'])
             if val < 0:
                 raise MetaDataParserError(
-                "Invalid value for 'max_drones' in metadata: "
-                f"{self.data['max_drones']}",
-                self.line_number,
-                ErrorSeverity.Error
-            )    
-            return val 
+                    "Invalid value for 'max_drones' in metadata: "
+                    f"{self.data['max_drones']}",
+                    self.line_number,
+                    ErrorSeverity.Error
+                    )
+            return val
         except Exception:
             raise MetaDataParserError(
                 "Invalid value for 'max_drones' in metadata: "
@@ -66,12 +67,12 @@ class MetadataValidator:
             val = int(self.data['max_link_capacity'])
             if val < 0:
                 raise MetaDataParserError(
-                "Invalid value for 'max_link_capacity' in metadata: "
-                f"{self.data['max_link_capacity']}. "
-                "It must be an integer greater than or equal to 1.",
-                self.line_number,
-                ErrorSeverity.Error
-            )    
+                    "Invalid value for 'max_link_capacity' in metadata: "
+                    f"{self.data['max_link_capacity']}. "
+                    "It must be an integer greater than or equal to 1.",
+                    self.line_number,
+                    ErrorSeverity.Error
+                    )
             return val
         except Exception:
             raise MetaDataParserError(
@@ -252,9 +253,9 @@ class DroneParser(BaseParser):
 
 class ZoneWithCoordsParser(BaseParser):
     patterns = {
-            r'^(\w+)(\s)': False,
-            r'^(\w+)\s+(-?\d+)': False,
-            r'^(\w+)\s+(-?\d+)\s+(-?\d+)(.*)': False,
+            r'^([^\s-]+)(\s)': False,
+            r'^([^\s-]+)\s+(-?\d+)': False,
+            r'^([^\s-]+)\s+(-?\d+)\s+(-?\d+)(.*)': False,
         }
 
     def parser(self) -> Dict[str, Any]:
@@ -269,7 +270,7 @@ class ZoneWithCoordsParser(BaseParser):
             "y_coordinate": int(y),
             "metadata": meta[0]
         }
-    
+
     def has_invalid_zone_names(self, zone_name) -> None:
         zones: List[str] = ParserConfig.get_all_zone_names()
         if zone_name in zones:
@@ -296,16 +297,16 @@ class ZoneWithCoordsParser(BaseParser):
                                              values()):
             if is_not_valid:
                 raise ZoneWithCoordsParserError("",
-                                                self.line_number,   
+                                                self.line_number,
                                                 ErrorSeverity.Error,
                                                 errors[index])
 
 
 class ConnectionParser(MetaParser):
     _patterns = {
-        r'^(\w+)': False,
-        r'^(\w+)-(\w+)': False,
-        r'^(\w+)-(\w+)(.*)': False
+        r'^([^\s-]+)-': False,
+        r'^([^\s-]+)-([^\s-]+)': False,
+        r'^([^\s-]+)-([^\s-]+)(.*)': False
     }
 
     def __init__(self, line_str: str, line_number: int) -> None:
@@ -326,8 +327,10 @@ class ConnectionParser(MetaParser):
         for is_not_valid in ConnectionParser._patterns.values():
             if is_not_valid:
                 raise ConnectionError(
-                    "Invalid connection syntax. Expected"
-                    "format: 'zoneA-zoneB',\n \n"
+                    "Invalid connection format. Expected "
+                    "format: 'zone1-zone2' (no spaces). \n"
+                    "\n Zone names may contain any characters except spaces "
+                    "and hyphens ('-').\n"
                     f" > but got:       {self.line_str}.",
                     self.line_number,
                     ErrorSeverity.Error)
@@ -358,7 +361,8 @@ class ConnectionParser(MetaParser):
             return True
         return False
 
-    def validate_connection_zones(self, source_zone: str, destination_zone: str) -> None:
+    def validate_connection_zones(self, source_zone: str,
+                                  destination_zone: str) -> None:
         """
         Validate that both zones exist before creating a connection.
         Raises UtilsError if any zone is invalid.
@@ -373,11 +377,11 @@ class ConnectionParser(MetaParser):
 
         if destination_zone not in zones:
             raise UtilsError(
-                f"Invalid destination zone: '{destination_zone}' does not exist.",
+                f"Invalid destination zone: '{destination_zone}' "
+                "does not exist.",
                 self.line_number,
                 ErrorSeverity.Error
             )
-
 
 
 class StartHubParser(ZoneWithCoordsParser, MetaParser):
@@ -516,7 +520,7 @@ class ParserConfig:
         if self.warning:
             string_error = ""
             print(f"\n💥 Found {len(self.warning)} Warning(s) in "
-                  "configuration file:", file=sys.stderr)       
+                  "configuration file:", file=sys.stderr)
             for error in self.warning:
                 string_error += (f" ⚠️  + {error}\n")
             print(string_error, file=sys.stderr)
@@ -563,7 +567,7 @@ class ParserConfig:
         if graph.end_hub is not None:
             zone_end_start.append(graph.end_hub.name)
         return ([hub.name for hub in graph.hubs] + zone_end_start)
-    
+
     @classmethod
     def get_connection(cls) -> List[set[str, str]]:
         return [con.connection for con in cls.instance.graph.connections]

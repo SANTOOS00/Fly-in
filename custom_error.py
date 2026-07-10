@@ -92,9 +92,9 @@ class ZoneWithCoordsParserError(BaseError):
                 f"\n[{self.severity.value}] Line {self.line_number}"
                 f" at {self.location.value}:\n"
                 f"  ➜ Input : {self.message}\n"
-                f"  ⚠  Fix: {self.severity.value} ⚠  Fix: Zone format "
-                "is invalid. It must be an alphanumeric identifier "
-                "(e.g., 's_0').\n"
+                f"  ⚠  Fix: {self.severity.value} ⚠  Fix: Error: Invalid zone "
+                "format. The zone name may contain any characters "
+                "except spaces and hyphens ('-')..\n"
             )
         else:
             return (

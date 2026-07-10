@@ -1,6 +1,7 @@
 from typing import Protocol, List, Dict, Any
 from custom_error import ErrorSeverity, HubError
 
+
 class NetworkNode(Protocol):
     ...
 
@@ -16,13 +17,14 @@ class Drones(NetworkNode):
             for num in range(number_drones)
             ]
 
+
 class End_hub(NetworkNode):
     _number_line_start = None
     _instance: bool = False
 
     def __init__(self, name: str, y: int, x: int,
-                meta: Dict[str, Any] | None = None,
-                line_number: int | None = None) -> "Start_hub":
+                 meta: Dict[str, Any] | None = None,
+                 line_number: int | None = None) -> "Start_hub":
         if End_hub._instance:
             raise HubError(
                 "Duplicate Start hub at lines "
@@ -37,13 +39,14 @@ class End_hub(NetworkNode):
         self.x = x
         self.meta = meta
 
+
 class Start_hub(NetworkNode):
     _number_line_start = None
     _instance: bool = False
 
     def __init__(self, name: str, y: int, x: int,
-                meta: Dict[str, Any] | None = None,
-                line_number: int | None = None) -> "Start_hub":
+                 meta: Dict[str, Any] | None = None,
+                 line_number: int | None = None) -> "Start_hub":
         if Start_hub._instance:
             raise HubError(
                 "Duplicate Start hub at lines "
