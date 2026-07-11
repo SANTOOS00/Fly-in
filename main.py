@@ -1,22 +1,22 @@
 from parserconfig import ParserConfig, SafeFileReader
-from network import Graph
+from network import FlightNetwork, NetworkTopologyBuilder
 import sys
 
 
-def parse_and_print_graph() -> None:
+def parse() -> None:
     parser = ParserConfig()
     parser.parse_in_type_line()
+    return parser.get_network
 
-    return parser.get_graph
 
-
-def run_graph(graph: Graph) -> None:
-    graph.run()
+def run_graph(network: FlightNetwork) -> None:
+    networkbuilder = NetworkTopologyBuilder()
+    networkbuilder.build(network)
 
 
 if __name__ == "__main__":
     try:
-        run_graph(parse_and_print_graph())
+        run_graph(parse())
     except Exception as error:
         print(error, file=sys.stderr)
     finally:

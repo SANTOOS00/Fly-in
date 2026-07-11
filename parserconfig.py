@@ -6,7 +6,7 @@ import sys
 from typing import TextIO
 from utils import Color, COLOR_HEX
 from functools import singledispatchmethod
-from network import Graph
+from network import FlightNetwork
 from custom_error import ErrorLocation, PathError, ErrorSeverity
 from custom_error import ConnectionError, UtilsError, BaseError
 from custom_error import ZoneWithCoordsParserError, MetaDataParserError
@@ -14,11 +14,6 @@ import re
 
 
 class BaseParser:
-    """
-    |------------------------------------------------------------------|
-    |                  -----    PARSER ARGS   ------                   |
-    |------------------------------------------------------------------|
-    """
     def __init__(self, line_str: str, line_number: int) -> None:
         self.line_number: int = line_number
         self.line_str: str = line_str
@@ -488,7 +483,7 @@ class ParserConfig:
     def __init__(self) -> None:
         self.errors: List[str] | None = []
         self.warning: List[str] | None = []
-        self.graph = Graph()
+        self.network = FlightNetwork()
         ParserConfig.instance = self
 
     def parse_in_type_line(self) -> None:
@@ -498,15 +493,36 @@ class ParserConfig:
                 component = fileread.get_validated_line()
                 if component == "EOF":
                     break
-                self.update_graph(component)
+                self.update_network(component)
             except Exception as error:
                 self.errors.append(error)
                 continue
+        self.validate_hub_end_start
         self.print_report()
 
     @property
-    def get_graph(self) -> Graph:
-        return self.graph
+    def validate_hub_end_start(self) -> None:
+        is_valid_start = any(isinstance(hub, Start_hub)
+                             for hub in self.network.hubs)
+        if not is_valid_start:
+            raise ValueError(
+                "[Error]: Missing Start Hub! \n  You must define at least "
+                "one start hub using this format:\n"
+                "    >> start_hub: name_zone x y [key=val] <<"
+            )
+
+        is_valid_end = any(isinstance(hub, End_hub)
+                           for hub in self.network.hubs)
+        if not is_valid_end:
+            raise ValueError(
+                "[Error]: Missing End Hub! \n  You must define at least "
+                "one end hub using this format:\n"
+                "     >> start_end: name_zone x y [key=val] <<"
+            )
+
+    @property
+    def get_network(self) -> FlightNetwork:
+        return self.network
 
     @classmethod
     def append_errors(cls, error) -> None:
@@ -534,40 +550,28 @@ class ParserConfig:
             raise ValueError(string_error)
 
     @singledispatchmethod
-    def update_graph(self, data):
+    def update_network(self, component):
         pass
 
-    @update_graph.register(Drones)
+    @update_network.register(Drones)
     def _(self, component: Drones):
-        self.graph.drones = component
+        self.network.drones = component
 
-    @update_graph.register(Hub)
-    def _(self, component: Hub) -> None:
-        self.graph.hubs.append(component)
+    @update_network.register(Hub)
+    @update_network.register(End_hub)
+    @update_network.register(Start_hub)
+    def _(self, component: Hub | Start_hub | End_hub) -> None:
+        self.network.hubs.append(component)
 
-    @update_graph.register(Start_hub)
-    def _(self, component: Start_hub):
-        self.graph.start_hub = component
-
-    @update_graph.register(End_hub)
-    def _(self, component: End_hub):
-        self.graph.end_hub = component
-
-    @update_graph.register(Connection)
+    @update_network.register(Connection)
     def _(self, component: Connection):
-        # print(id(self.graph))
-        self.graph.connections.append(component)
+        self.network.connections.append(component)
 
     @classmethod
     def get_all_zone_names(cls) -> List[str]:
-        graph = cls.instance.graph
-        zone_end_start = []
-        if graph.start_hub is not None:
-            zone_end_start.append(graph.start_hub.name)
-        if graph.end_hub is not None:
-            zone_end_start.append(graph.end_hub.name)
-        return ([hub.name for hub in graph.hubs] + zone_end_start)
+        network = cls.instance.network
+        return ([hub.name for hub in network.hubs])
 
     @classmethod
     def get_connection(cls) -> List[set[str, str]]:
-        return [con.connection for con in cls.instance.graph.connections]
+        return [con.connection for con in cls.instance.network.connections]
