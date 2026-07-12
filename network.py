@@ -20,44 +20,20 @@ class NetworkTopologyBuilder:
         pass
 
 
-adj_list = {
-    "name_zone": "zone_1",
-    "data": [
-        {
-            "to": "zone_2",
-            "meta": {
-                "max_capacity": 2
-            }
-        }
-    ],
-    "zone_2": {
-        "color": "red",
-    },
-    "data": [
-        {
-            "to": "zone_1",
-            "meta": {
-                "max_capacity": 2
-            }
-        },
-        {
-            "to": "zonr_3",
-            "meta": {
-                "max_capacity": 3
-            }
-        }
-    ]
-}
+from typing import Dict, List
+
+
+class Zone:
+    pass
+
+
+class Edges:
+    pass
 
 
 adj_list = {
-    "start": {
-        "meta": {
-            "color": "green",
-            "max_drones": 12,
-            "zone": "normal"
-        },
-        "edges": [{
+    Zone : {
+        Edges: [{
             "to": "waypoint1",
             "max_link_capacity": 1
         }
@@ -80,32 +56,4 @@ adj_list = {
 
         ]
     },
-    "waypoint2": {
-        "meta": {
-            "color": "blue",
-            "max drones": 1
-        },
-        "edges": [
-            {
-                "to": "waypoint1",
-                "max_link_capacity": 1
-            },
-            {
-                "to": "goal",
-                "max_link_capcity": 1
-            }
-        ]
-    },
-    "goal": {
-        "meta": {
-            "color": "red",
-            "max_drones": 1
-        },
-        "edges": [
-            {
-                "to": "waypoint1",
-                "max_link_capackity": 1
-            }
-        ]
-    }
 }
