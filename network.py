@@ -20,40 +20,13 @@ class NetworkTopologyBuilder:
         pass
 
 
-from typing import Dict, List
-
-
-class Zone:
-    pass
-
-
-class Edges:
-    pass
 
 
 adj_list = {
-    Zone : {
-        Edges: [{
-            "to": "waypoint1",
-            "max_link_capacity": 1
-        }
-        ]
-    },
-    "waypoint1": {
-        "meta": {
-            "color": "blue",
-            "max_drones": 1,
-            "zone": "normal"
-        },
-        "edges": [{
-            "to": "waypoint2",
-            "max_link_capacity": 1
-         },
-         {
-            "to": "waypoint2",
-            "max_link_capacity": 1
-         },
-
-        ]
-    },
+    "start": {
+        "meta": ("green", 12, "normal"),
+        "edges": [
+            ("waypoint1", 1)
+        ], "drones": 34,
+    }
 }

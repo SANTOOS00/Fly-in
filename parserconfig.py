@@ -79,13 +79,26 @@ class MetadataValidator:
             )
 
     @property
+    def _set_color(self) -> None:
+        if self.data['color']:
+            self.data["color"] = self.get_hex(self.get_color)
+        else:
+            self.data["color"] = self.get_hex('white')
+
+    @property
     def get_max_capacity(self) -> str:
         return self.data['max_link_capacity']
 
+    @property
+    def _set_type_zone(self) -> None:
+        if self.data.get('zone'):
+            self.data['zone'] = self.allowed_status_zone(self.get_name_zone)
+        else:
+            pass
+
     def validate_metadata(self) -> Dict[str, Any]:
         self.allowed_status_meta()
-        if self.data.get("color"):
-            self.data["color"] = self.get_hex(self.get_color)
+        self._set_color
         if self.data.get("zone"):
             self.data['zone'] = self.allowed_status_zone(self.get_name_zone)
         if self.data.get('max_drones'):
@@ -99,12 +112,7 @@ class MetadataValidator:
             c = Color(color.lower())
             return COLOR_HEX[c]
         except ValueError:
-            raise UtilsError(
-                f"invalid color '{color}'. "
-                f"Allowed: {[c.value for c in Color]}",
-                self.line_number,
-                ErrorSeverity.Error,
-            )
+            return "#FFFFFF"
 
     def allowed_status_zone(self, status_zone: str) -> str:
         allowed = ["normal", "blocked", "restricted", "priority"]
