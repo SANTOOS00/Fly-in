@@ -8,13 +8,10 @@ class FlightNetwork:
         self.hubs: List[Hub, Start_hub, End_hub] = []
         self.connections: List[Connection] = []
 
-    def get_connections(self) -> List[set]:
-        return [conn for conn in self.connections]
-
 
 class NetworkTopologyBuilder:
     def __init__(self) -> None:
-        self.network_link = defaultdict(list)
+        self.network_link: dict[str: list[Connection]] = {}
 
     def build(self, network: FlightNetwork) -> None:
         pass
