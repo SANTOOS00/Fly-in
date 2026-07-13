@@ -18,15 +18,3 @@ class NetworkTopologyBuilder:
 
     def build(self, network: FlightNetwork) -> None:
         pass
-
-
-
-
-adj_list = {
-    "start": {
-        "meta": ("green", 12, "normal"),
-        "edges": [
-            ("waypoint1", 1)
-        ], "drones": 34,
-    }
-}

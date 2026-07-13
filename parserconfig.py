@@ -80,7 +80,7 @@ class MetadataValidator:
 
     @property
     def _set_color(self) -> None:
-        if self.data['color']:
+        if self.data.get('color'):
             self.data["color"] = self.get_hex(self.get_color)
         else:
             self.data["color"] = self.get_hex('white')
@@ -94,17 +94,26 @@ class MetadataValidator:
         if self.data.get('zone'):
             self.data['zone'] = self.allowed_status_zone(self.get_name_zone)
         else:
-            pass
+            self.data['zone'] = self.allowed_status_zone('normal')
+
+    @property
+    def _set_max_drones(self) -> None:
+        if self.data.get('max_drones'):
+            self.data['max_drones'] = self.get_max_drones
+        else:
+            self.data['max_drones'] = 1
+    
+    @property
+    def _set_max_capacity(self) -> None:
+        if self.data.get('max_link_capacity'):
+            self.data['max_link_capacity'] = self.get_max_capacity
 
     def validate_metadata(self) -> Dict[str, Any]:
         self.allowed_status_meta()
         self._set_color
-        if self.data.get("zone"):
-            self.data['zone'] = self.allowed_status_zone(self.get_name_zone)
-        if self.data.get('max_drones'):
-            self.data['max_drones'] = self.get_max_drones
-        if self.data.get('max_link_capacity'):
-            self.data['max_link_capacity'] = self.get_link_capacity
+        self._set_type_zone
+        self._set_max_drones
+        self._set_max_capacity
         return (self.data)
 
     def get_hex(self, color: str) -> str:
