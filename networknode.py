@@ -16,7 +16,7 @@ class Drones(NetworkNode):
             }
             for num in range(number_drones)
             ]
-
+     
 
 class End_hub(NetworkNode):
     _number_line_start = None

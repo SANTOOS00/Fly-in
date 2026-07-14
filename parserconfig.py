@@ -573,12 +573,19 @@ class ParserConfig:
     @update_network.register(Drones)
     def _(self, component: Drones):
         self.network.drones = component
+    
+    @update_network.register(Start_hub)
+    def _(self, component: Start_hub) -> None:
+        self.network.start_hube = component        
+        self.network.hubs.append(component)
+
+    @update_network.register(End_hub)
+    def _(self, component: End_hub) -> None:
+        self.network.end_hube = component
+        self.network.hubs.append(component)
 
     @update_network.register(Hub)
-    @update_network.register(End_hub)
-    @update_network.register(Start_hub)
     def _(self, component: Hub | Start_hub | End_hub) -> None:
-
         self.network.hubs.append(component)
 
     @update_network.register(Connection)
