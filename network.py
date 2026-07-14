@@ -1,4 +1,4 @@
-from networknode import Drones, Start_hub, List, End_hub, Connection, Hub
+from networknode import Drones, Start_hub, List, End_hub, Connection, Hub, Dict
 from collections import defaultdict
 
 class FlightNetwork:
@@ -10,11 +10,10 @@ class FlightNetwork:
 
 class NetworkTopologyBuilder:
     def __init__(self) -> None:
-        self.network_link = defaultdict(list)
+        self.network_link: Dict[str, List[str]] = defaultdict(list)
 
     def populate_network_links(self, network: FlightNetwork) -> None:
         for zone_1 in network.connections:
             edgs = list(zone_1.connection)
             self.network_link[edgs[0]].append(edgs[1])
             self.network_link[edgs[1]].append(edgs[0])
-            
