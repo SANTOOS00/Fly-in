@@ -86,10 +86,6 @@ class MetadataValidator:
             self.data["color"] = self.get_hex('white')
 
     @property
-    def get_max_capacity(self) -> str:
-        return self.data['max_link_capacity']
-
-    @property
     def _set_type_zone(self) -> None:
         if self.data.get('zone'):
             self.data['zone'] = self.allowed_status_zone(self.get_name_zone)
@@ -106,7 +102,7 @@ class MetadataValidator:
     @property
     def _set_max_capacity(self) -> None:
         if self.data.get('max_link_capacity'):
-            self.data['max_link_capacity'] = self.get_max_capacity
+            self.data['max_link_capacity'] = self.get_link_capacity
 
     def validate_metadata(self) -> Dict[str, Any]:
         self.allowed_status_meta()
@@ -160,8 +156,10 @@ class MetadataValidator:
 
 class MetaParser:
     patternsmetadata = {
-        r'^\s*\w+=-?\w+': False,
-        r'^\s*\w+=\w+(\s+\w+=\w+)*\s*$': False,
+        r'^\s*\w+=[a-zA-Z0-9]+': False,
+        r'^\s*\w+=[a-zA-Z0-9]+(\s+\w+=[a-zA-Z0-9]+)?': False,
+        r'^\s*\w+=[a-zA-Z0-9]+(\s+\w+=[a-zA-Z0-9]+)?(\s+\w+=[a-zA-Z0-9]+)?$': False,
+        r'^\s*\w+=[a-zA-Z0-9]+(\s+\w+=[a-zA-Z0-9]+)*\s*$': False,
     }
 
     def __init__(self) -> None:
@@ -201,6 +199,7 @@ class MetaParser:
             MetaParser.check_duplicates(data, self.line_number)
         except Exception as error:
             ParserConfig.append_warning(error)
+
         return (
             {key.lower().strip(): val
                 for keyval in data
@@ -226,7 +225,7 @@ class MetaParser:
                 MetaParser.patternsmetadata[pattern] = True
             else:
                 MetaParser.patternsmetadata[pattern] = False
-        self._validate_syntax_meta()
+        self._validate_syntax_meta(meta_data.split())
         self.match = match
 
     def _default_val(self) -> dict[str, int]:
@@ -239,13 +238,13 @@ class MetaParser:
                 "max_drones": 1
             }
 
-    def _validate_syntax_meta(self) -> None:
+    def _validate_syntax_meta(self, data: List[str]) -> None:
         for index, is_not_valid in enumerate(MetaParser.patternsmetadata.
                                              values()):
             if is_not_valid:
                 raise MetaDataParserError("Invalid MetaData property syntax at"
-                                          f" position {index + 1}. Expected "
-                                          "format: 'key=value'.",
+                                          f" position {data[index]}. Expected "
+                                          "format: ''.",
                                           self.line_number,
                                           ErrorSeverity.Error,
                                           )

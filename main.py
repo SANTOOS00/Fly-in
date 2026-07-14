@@ -11,7 +11,7 @@ def parse() -> None:
 
 def run_graph(network: FlightNetwork) -> None:
     networkbuilder = NetworkTopologyBuilder()
-    networkbuilder.build(network)
+    networkbuilder.populate_network_links(network)
 
 
 if __name__ == "__main__":
