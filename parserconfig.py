@@ -161,7 +161,7 @@ class MetadataValidator:
 class MetaParser:
     patternsmetadata = {
         r'^\s*\w+=-?\w+': False,
-        r'^\s*\w+=-?\w+(?:\s+\w+=-?\w+)*\s*$': False,
+        r'^\s*\w+=\w+(\s+\w+=\w+)*\s*$': False,
     }
 
     def __init__(self) -> None:
@@ -175,13 +175,14 @@ class MetaParser:
         if len(meta_data) == 0:
             return (self._default_val())
         self._check_syntax_meta(meta_data)
+
         valid_meta = MetadataValidator(self.line_number,
                                        self,
                                        self._split_key_values())
         return (valid_meta.validate_metadata())
 
     @staticmethod
-    def check_duplicates(data: List[str], line_nu: int) -> None:
+    def check_duplicates(data: tuple[str], line_nu: int) -> None:
         seen = set()
         for itm in [k.split("=")[0].strip() for k in data]:
             if itm in seen:
@@ -195,13 +196,13 @@ class MetaParser:
                 seen.add(itm)
 
     def _split_key_values(self) -> Dict[str, str]:
-        data: List[str] = self.match.group().split(" ")
+        data: str = self.match.group().split()
         try:
             MetaParser.check_duplicates(data, self.line_number)
         except Exception as error:
             ParserConfig.append_warning(error)
         return (
-            {key.lower(): val
+            {key.lower().strip(): val
                 for keyval in data
                 for key, val in [keyval.split("=")]}
         )
@@ -514,8 +515,8 @@ class ParserConfig:
             except Exception as error:
                 self.errors.append(error)
                 continue
-        self.validate_hub_end_start
         self.print_report()
+        self.validate_hub_end_start
 
     @property
     def validate_hub_end_start(self) -> None:
@@ -578,6 +579,7 @@ class ParserConfig:
     @update_network.register(End_hub)
     @update_network.register(Start_hub)
     def _(self, component: Hub | Start_hub | End_hub) -> None:
+
         self.network.hubs.append(component)
 
     @update_network.register(Connection)
