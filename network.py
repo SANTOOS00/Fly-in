@@ -1,5 +1,6 @@
 from networknode import Drones, Start_hub, List, End_hub, Connection, Hub, Dict
 from collections import defaultdict
+from typing import Tuple
 
 class FlightNetwork:
     def __init__(self) -> None:
@@ -38,14 +39,33 @@ class PathFinder:
     def __init__(self) -> None:
         self.dict_paths = {}
         self.pths_save = []
-
+        self.stack_vertex: List[str] = []
     def find_all_paths(self, network: Dict[str, List[str]], start, end) -> None:
-        stack_edgs: List[str] = [start.name]
-        
+        self.stack_vertex: List[str] = [start.name]
+        data_path: List[Tuple] = []
+        visidet = set()
         while True:
-            vertex_new = stack_edgs.pop
+            vertex_new = self.stack_vertex.pop()
             if vertex_new == end.name and self.save_path():
                 break
+            if vertex_new in visidet:
+                continue
+            visidet.update([vertex_new])
+            for vertex in network[vertex_new]:
+                self.stack_vertex.append(vertex)
+                data_path.append((vertex, vertex_new))
+        self.print_data(data_path)
 
-    def save_path(self) -> None:
-        print("is ok save path")
+    def save_path(self) -> bool:
+        if len(self.stack_vertex) == 0:
+            return True
+        return True
+
+
+    def print_data(self, data):
+        if isinstance(data, list):
+            for d in data:
+                print(d)
+        if isinstance(data, dict):
+            for key in data.keys():
+                print(data[key])
