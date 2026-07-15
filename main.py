@@ -11,6 +11,7 @@ def parse() -> None:
 
 
 def run_graph(network: FlightNetwork) -> None:
+    print(network.hubs.keys())
     networkbuilder = NetworkTopologyBuilder()
     networkbuilder.populate_network_links(network)
     path_finder = PathFinder()
@@ -19,10 +20,10 @@ def run_graph(network: FlightNetwork) -> None:
                                network.get_end())
 
 if __name__ == "__main__":
-    # try:
-    run_graph(parse())
-    # except Exception as error:
-    #     print(error, file=sys.stderr)
-    # finally:
-    #     if SafeFileReader.fd is not None:
-    #         SafeFileReader.fd.close()
+    try:
+        run_graph(parse())
+    except Exception as error:
+        print(error, file=sys.stderr)
+    finally:
+        if SafeFileReader.fd is not None:
+            SafeFileReader.fd.close()

@@ -6,7 +6,7 @@ class FlightNetwork:
     def __init__(self) -> None:
         self.drones: Drones = None
         self.start_hube: Start_hub = None
-        self.hubs: List[Hub, Start_hub, End_hub] = []
+        self.hubs: Dict[str: "name zone", Hub] = defaultdict()
         self.end_hube: End_hub = None
         self.connections: List[Connection] = []
     

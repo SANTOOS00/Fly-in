@@ -8,14 +8,7 @@ class NetworkNode(Protocol):
 
 class Drones(NetworkNode):
     def __init__(self, number_drones: int) -> None:
-        self.drones: List[Dict[str, Any]] = [
-            {
-                "id": num + 1,
-                "name_zone": None,
-                "zone_visited_path": [],
-            }
-            for num in range(number_drones)
-            ]
+        self.drones = number_drones
      
 
 class End_hub(NetworkNode):
@@ -72,7 +65,7 @@ class Hub(NetworkNode):
         self.meta: Dict[str: Any] | None = meta
 
 
-class Connection(NetworkNode):
+class Connection:
     def __init__(self, connection: set, meta) -> None:
         self.connection = connection
         self.meta = meta

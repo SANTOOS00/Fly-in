@@ -519,18 +519,13 @@ class ParserConfig:
 
     @property
     def validate_hub_end_start(self) -> None:
-        is_valid_start = any(isinstance(hub, Start_hub)
-                             for hub in self.network.hubs)
-        if not is_valid_start:
+        if self.network.start_hube is None:
             raise ValueError(
                 "[Error]: Missing Start Hub! \n  You must define at least "
                 "one start hub using this format:\n"
                 "    >> start_hub: name_zone x y [key=val] <<"
             )
-
-        is_valid_end = any(isinstance(hub, End_hub)
-                           for hub in self.network.hubs)
-        if not is_valid_end:
+        if self.network.end_hube is None:
             raise ValueError(
                 "[Error]: Missing End Hub! \n  You must define at least "
                 "one end hub using this format:\n"
@@ -576,17 +571,18 @@ class ParserConfig:
     
     @update_network.register(Start_hub)
     def _(self, component: Start_hub) -> None:
-        self.network.start_hube = component        
-        self.network.hubs.append(component)
+        self.network.start_hube = component       
+        # print(component.name) 
+        self.network.hubs[component.name] = component
 
     @update_network.register(End_hub)
     def _(self, component: End_hub) -> None:
         self.network.end_hube = component
-        self.network.hubs.append(component)
+        self.network.hubs[component.name] = component
 
     @update_network.register(Hub)
     def _(self, component: Hub | Start_hub | End_hub) -> None:
-        self.network.hubs.append(component)
+        self.network.hubs[component.name] = component
 
     @update_network.register(Connection)
     def _(self, component: Connection):
@@ -595,7 +591,7 @@ class ParserConfig:
     @classmethod
     def get_all_zone_names(cls) -> List[str]:
         network = cls.instance.network
-        return ([hub.name for hub in network.hubs])
+        return list(network.hubs.keys())
 
     @classmethod
     def get_connection(cls) -> List[set[str, str]]:
