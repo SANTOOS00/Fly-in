@@ -1,23 +1,50 @@
-# from typing import Dict
+import heapq
+import sys
 
-# test : Dict[str, int] = {
-#     "test" : 1,
-#     "tst" : 1,
-#     "est" : 1,
-#     "st" : 1,
-#     "es " : 1
-# }
+def dijkstra(adj, src):
 
-# print(isinstance(type(test), Dict))
+    V = len(adj)
 
-# data = []
-# data_dict = {
-#     "test": data
-# }
-# for da in data_dict['test']:
-#     print(da)
-sss = 1
-ss = set()
-ss.update([1])
+    # Min-heap (priority queue) storing pairs of (distance, node)
+    pq = []
 
-print(ss)
+    dist = [sys.maxsize] * V
+
+    # Distance from source to itself is 0
+    dist[src] = 0
+    heapq.heappush(pq, (0, src))
+
+    # Process the queue until all reachable vertices are finalized
+    while pq:
+        print(pq)
+        d, u = heapq.heappop(pq)
+
+        # If this distance not the latest shortest one, skip it
+        if d > dist[u]:
+            continue
+
+        # Explore all neighbors of the current vertex
+        for v, w in adj[u]:
+
+            # If we found a shorter path to v through u, update it
+            if dist[u] + w < dist[v]:
+                dist[v] = dist[u] + w
+                heapq.heappush(pq, (dist[v], v))
+
+    # Return the final shortest distances from the source
+    return dist
+
+
+if __name__ == "__main__":
+    src = 0
+    
+    adj = [
+        [(1, 4), (2, 8)],
+        [(0, 4), (4, 6), (2, 3)],
+        [(0, 8), (3, 2), (1, 3)],
+        [(2, 2), (4, 10)],
+        [(1, 6), (3, 10)]
+    ]
+    
+    result = dijkstra(adj, src)
+    print(result)
