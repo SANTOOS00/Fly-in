@@ -27,28 +27,30 @@ class Drone():
 
 class NetworkTopologyBuilder:
     def __init__(self) -> None:
-        self.network_link: Dict[Hub, List[Hub, Connection]] = defaultdict(list)
+        self.graph: Dict[Hub, List[Hub, Connection]] = defaultdict(list)
     
-    def get_network_link(self) -> Dict[str, List[str]]:
-        return self.network_link
+    def get_graph(self) -> Dict[str, List[str]]:
+        return self.graph
 
     def populate_network_links(self, network: FlightNetwork) -> None:
         for edg in network.connections:
             link: List[str] = list(edg.connection)
-            self.network_link[network.get_hub(link[0])].append((network.get_hub(link[1]), edg))
-            self.network_link[network.get_hub(link[1])].append((network.get_hub(link[0]), edg))
+            self.graph[network.get_hub(link[0])].append((network.get_hub(link[1]), edg))
+            self.graph[network.get_hub(link[1])].append((network.get_hub(link[0]), edg))
 
 
 class PathFinder:
+    def __init__(self, network: FlightNetwork) -> None:
+        self.vertices: Dict[Hub, int] = {vertex: float('inf') for vertex in network.hubs.values()}
+        self.vertices[network.start_hube] = 0
 
-    def __init__(self) -> None:
-        self.dict_paths = {}
-        self.pths_save = []
-        self.stack_vertex: List[str] = []
-
-    def find_all_paths(self, network: Dict[str, List[str]], start, end) -> None:
-        # aplic dijkstra
+    def find_all_paths(self, graph: Dict[str, List[str]], start, end) -> None:
         pass
+
+
+    def Dijkstra(self, graph: Dict[str, List[str]], start, end) -> None:
+        for cost  in self.vertices.values():
+            print(cost)
 
     def save_path(self) -> bool:
         if len(self.stack_vertex) == 0:

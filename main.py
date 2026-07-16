@@ -13,8 +13,8 @@ def parse() -> None:
 def run_graph(network: FlightNetwork) -> None:
     networkbuilder = NetworkTopologyBuilder()
     networkbuilder.populate_network_links(network)
-    path_finder = PathFinder()
-    path_finder.find_all_paths(networkbuilder.get_network_link(),
+    path_finder = PathFinder(network)
+    path_finder.Dijkstra(networkbuilder.get_graph(),
                                network.get_start(),
                                network.get_end())
 
