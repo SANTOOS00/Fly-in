@@ -571,8 +571,7 @@ class ParserConfig:
     
     @update_network.register(Start_hub)
     def _(self, component: Start_hub) -> None:
-        self.network.start_hube = component       
-        # print(component.name) 
+        self.network.start_hube = component
         self.network.hubs[component.name] = component
 
     @update_network.register(End_hub)

@@ -15,6 +15,10 @@ class FlightNetwork:
 
     def get_end(self) -> None:
         return self.end_hube
+    
+    def get_hub(self, key_hub: str) -> Hub:
+        return self.hubs[key_hub]
+
 
 class Drone():
     def __init__(self, id: int) -> None:
@@ -23,44 +27,33 @@ class Drone():
 
 class NetworkTopologyBuilder:
     def __init__(self) -> None:
-        self.network_link: Dict[str, List[str]] = defaultdict(list)
-
-    def populate_network_links(self, network: FlightNetwork) -> None:
-        for zone_1 in network.connections:
-            edg = list(zone_1.connection)
-            self.network_link[edg[0]].append(edg[1])
-            self.network_link[edg[1]].append(edg[0])
+        self.network_link: Dict[Hub, List[Hub, Connection]] = defaultdict(list)
     
     def get_network_link(self) -> Dict[str, List[str]]:
         return self.network_link
 
+    def populate_network_links(self, network: FlightNetwork) -> None:
+        for edg in network.connections:
+            link: List[str] = list(edg.connection)
+            self.network_link[network.get_hub(link[0])].append((network.get_hub(link[1]), edg))
+            self.network_link[network.get_hub(link[1])].append((network.get_hub(link[0]), edg))
+
 
 class PathFinder:
+
     def __init__(self) -> None:
         self.dict_paths = {}
         self.pths_save = []
         self.stack_vertex: List[str] = []
+
     def find_all_paths(self, network: Dict[str, List[str]], start, end) -> None:
-        self.stack_vertex: List[str] = [start.name]
-        data_path: List[Tuple] = []
-        visidet = set()
-        while True:
-            vertex_new = self.stack_vertex.pop()
-            if vertex_new == end.name and self.save_path():
-                break
-            if vertex_new in visidet:
-                continue
-            visidet.update([vertex_new])
-            for vertex in network[vertex_new]:
-                self.stack_vertex.append(vertex)
-                data_path.append((vertex, vertex_new))
-        self.print_data(data_path)
+        # aplic dijkstra
+        pass
 
     def save_path(self) -> bool:
         if len(self.stack_vertex) == 0:
             return True
         return True
-
 
     def print_data(self, data):
         if isinstance(data, list):
@@ -69,3 +62,19 @@ class PathFinder:
         if isinstance(data, dict):
             for key in data.keys():
                 print(data[key])
+
+
+# self.stack_vertex: List[str] = [start.name]
+# data_path: List[Tuple] = []
+# visidet = set()
+# while True:
+#     vertex_new = self.stack_vertex.pop()
+#     if vertex_new == end.name and self.save_path():
+#         break
+#     if vertex_new in visidet:
+#         continue
+#     visidet.update([vertex_new])
+#     for vertex in network[vertex_new]:
+#         self.stack_vertex.append(vertex)
+#         data_path.append((vertex, vertex_new))
+# self.print_data(data_path)

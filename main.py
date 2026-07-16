@@ -11,7 +11,6 @@ def parse() -> None:
 
 
 def run_graph(network: FlightNetwork) -> None:
-    print(network.hubs.keys())
     networkbuilder = NetworkTopologyBuilder()
     networkbuilder.populate_network_links(network)
     path_finder = PathFinder()
