@@ -126,7 +126,7 @@ class MetadataValidator:
         status = status_zone.lower()
         for allowed in Type_zone:
             if status == allowed.value[0][1]:
-                return allowed
+                return allowed.value[0][0]
         raise UtilsError(
             f"Invalid status_zone '{status}'. Allowed values: "
             f"{', '.join(allowed)}",
@@ -584,8 +584,8 @@ class ParserConfig:
 
     @update_network.register(Hub)
     def _(self, component: Hub | Start_hub | End_hub) -> None:
-        # print(component.meta['zone'].value[0])
         self.network.hubs[component.name] = component
+
 
     @update_network.register(Connection)
     def _(self, component: Connection):

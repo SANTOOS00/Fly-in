@@ -2,15 +2,12 @@ import heapq
 
 def dijkstra(graph, start, end):
     distances = {node: float('inf') for node in graph}
-    print(distances)
     distances[start] = 0
     
     priority_queue = [(0, start)]
     predecessors = {node: None for node in graph}
     while priority_queue:
         current_distance, current_node = heapq.heappop(priority_queue)
-        #current_distance == 0 , current_node key zone
-        print(type(current_node))
         if current_node == end:
             break
             
@@ -24,6 +21,13 @@ def dijkstra(graph, start, end):
                 distances[neighbor] = distance
                 predecessors[neighbor] = current_node
                 heapq.heappush(priority_queue, (distance, neighbor))
+    path = []
+    current = end
+    while current is not None:
+        path.append(current)
+        current = predecessors[current]
+        
+    return distances[end], path
 
 graph = {
     1: [[2, 7], [3, 9], [6, 14]],
@@ -35,15 +39,10 @@ graph = {
 }
 
                 
-    # path = []
-    # current = end
-    # while current is not None:
-    #     path.insert(0, current)
-    #     current = predecessors[current]
-        
-    # return distances[end], path
 start_node = 1
 end_node = 5
 
 min_distance, shortest_path = dijkstra(graph, start_node, end_node)
 
+print(graph)
+print(min_distance, shortest_path)

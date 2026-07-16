@@ -1,6 +1,8 @@
 from networknode import Drones, Start_hub, List, End_hub, Connection, Hub, Dict
 from collections import defaultdict
 from typing import Tuple
+import heapq
+from itertools import count
 
 class FlightNetwork:
     def __init__(self) -> None:
@@ -18,7 +20,9 @@ class FlightNetwork:
     
     def get_hub(self, key_hub: str) -> Hub:
         return self.hubs[key_hub]
-
+    
+    def get_hubs(self) -> None:
+        return [hub  for hub in self.hubs]
 
 class Drone():
     def __init__(self, id: int) -> None:
@@ -39,6 +43,22 @@ class NetworkTopologyBuilder:
             self.graph[network.get_hub(link[1])].append((network.get_hub(link[0]), edg))
 
 
+class PriorityQueue:
+    def __init__(self):
+        self.heap = []
+        self.counter = count()
+
+    def push(self, priority, hub):
+        heapq.heappush(self.heap, (priority, next(self.counter), hub))
+
+    def pop(self):
+        cost, _, vertex = heapq.heappop(self.heap)
+        return cost, vertex
+
+    def is_empty(self):
+        return len(self.heap) != 0
+
+
 class PathFinder:
     def __init__(self, network: FlightNetwork) -> None:
         self.distances: Dict[Hub, int] = {vertex: float('inf') for vertex in network.hubs.values()}
@@ -49,21 +69,27 @@ class PathFinder:
 
 
     def Dijkstra(self, graph: Dict[Hub, List[tuple[Hub, Connection]]], start, end) -> None:
-        import heapq
-        pro_queue = [(0, start)]
-        while True:
-            cost, hub = heapq.heappop(pro_queue)
-
+        priority_queue = PriorityQueue()
+        priority_queue.push(0, start)
+        paths = {vertex: None for vertex in graph.keys()}
+        while priority_queue.is_empty():
+            cost, hub = priority_queue.pop()
             if hub == end:
                 break
-            
-            if cost > self.distances[hub]
-            for cost_test, edgs in graph[hub]:
-                weight = cost_test.meta['zone'].value
-                test = cost + weight
-                # print(edgs)
-                print(self.vertices[edgs])
-            break
+            if cost < self.distances[hub]:
+                continue
+            for vertex, edgs in graph[hub]:
+                distance = edgs.meta['max_link_capacity'] + cost
+                
+                if distance < self.distances[vertex]:
+                    self.distances[vertex] = distance
+                    priority_queue.push(distance, vertex)
+                    paths[vertex] = hub
+        path = []
+        current = end
+        while current is not None:
+            path.insert(0, current)
+            current = paths[current]
 
 
     def save_path(self) -> bool:
@@ -78,19 +104,3 @@ class PathFinder:
         if isinstance(data, dict):
             for key in data.keys():
                 print(data[key])
-
-
-# self.stack_vertex: List[str] = [start.name]
-# data_path: List[Tuple] = []
-# visidet = set()
-# while True:
-#     vertex_new = self.stack_vertex.pop()
-#     if vertex_new == end.name and self.save_path():
-#         break
-#     if vertex_new in visidet:
-#         continue
-#     visidet.update([vertex_new])
-#     for vertex in network[vertex_new]:
-#         self.stack_vertex.append(vertex)
-#         data_path.append((vertex, vertex_new))
-# self.print_data(data_path)
