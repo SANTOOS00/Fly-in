@@ -4,7 +4,7 @@ nb_drones: 4
 # max_drones=<number> (default: 1)
 
 
-start_hub: start 0 0 [ss=s ws=s]
+start_hub: start 0 0
 
 hub: passsh_s  3 3 [color=blue]
 hub: path_b 2 1 [color=blue]

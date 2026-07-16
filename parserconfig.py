@@ -10,6 +10,7 @@ from network import FlightNetwork
 from custom_error import ErrorLocation, PathError, ErrorSeverity
 from custom_error import ConnectionError, UtilsError, BaseError
 from custom_error import ZoneWithCoordsParserError, MetaDataParserError
+from enums import Type_zone
 import re
 
 
@@ -106,10 +107,12 @@ class MetadataValidator:
 
     def validate_metadata(self) -> Dict[str, Any]:
         self.allowed_status_meta()
-        self._set_color
-        self._set_type_zone
-        self._set_max_drones
-        self._set_max_capacity
+        if isinstance(self.in_type, ConnectionParser):
+            self._set_max_capacity
+        else:
+            self._set_color
+            self._set_type_zone
+            self._set_max_drones
         return (self.data)
 
     def get_hex(self, color: str) -> str:
@@ -120,16 +123,16 @@ class MetadataValidator:
             return "#FFFFFF"
 
     def allowed_status_zone(self, status_zone: str) -> str:
-        allowed = ["normal", "blocked", "restricted", "priority"]
         status = status_zone.lower()
-        if status not in allowed:
-            raise UtilsError(
-                f"Invalid status_zone '{status}'. Allowed values: "
-                f"{', '.join(allowed)}",
-                self.line_number,
-                ErrorSeverity.Error,
-            )
-        return status
+        for allowed in Type_zone:
+            if status == allowed.value[0][1]:
+                return allowed
+        raise UtilsError(
+            f"Invalid status_zone '{status}'. Allowed values: "
+            f"{', '.join(allowed)}",
+            self.line_number,
+            ErrorSeverity.Error,
+        )
 
     def allowed_status_meta(self) -> None:
         allowed = ["zone", "color", "max_drones"]
@@ -581,6 +584,7 @@ class ParserConfig:
 
     @update_network.register(Hub)
     def _(self, component: Hub | Start_hub | End_hub) -> None:
+        # print(component.meta['zone'].value[0])
         self.network.hubs[component.name] = component
 
     @update_network.register(Connection)

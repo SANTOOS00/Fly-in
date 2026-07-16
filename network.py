@@ -27,7 +27,7 @@ class Drone():
 
 class NetworkTopologyBuilder:
     def __init__(self) -> None:
-        self.graph: Dict[Hub, List[Hub, Connection]] = defaultdict(list)
+        self.graph: Dict[Hub, List[tuple[Hub, Connection]]] = defaultdict(list)
     
     def get_graph(self) -> Dict[str, List[str]]:
         return self.graph
@@ -41,16 +41,30 @@ class NetworkTopologyBuilder:
 
 class PathFinder:
     def __init__(self, network: FlightNetwork) -> None:
-        self.vertices: Dict[Hub, int] = {vertex: float('inf') for vertex in network.hubs.values()}
-        self.vertices[network.start_hube] = 0
+        self.distances: Dict[Hub, int] = {vertex: float('inf') for vertex in network.hubs.values()}
+        self.distances[network.start_hube] = 0
 
-    def find_all_paths(self, graph: Dict[str, List[str]], start, end) -> None:
+    def find_all_paths(self, graph: Dict[Hub, List[tuple[Hub, Connection]]], start, end) -> None:
         pass
 
 
-    def Dijkstra(self, graph: Dict[str, List[str]], start, end) -> None:
-        for cost  in self.vertices.values():
-            print(cost)
+    def Dijkstra(self, graph: Dict[Hub, List[tuple[Hub, Connection]]], start, end) -> None:
+        import heapq
+        pro_queue = [(0, start)]
+        while True:
+            cost, hub = heapq.heappop(pro_queue)
+
+            if hub == end:
+                break
+            
+            if cost > self.distances[hub]
+            for cost_test, edgs in graph[hub]:
+                weight = cost_test.meta['zone'].value
+                test = cost + weight
+                # print(edgs)
+                print(self.vertices[edgs])
+            break
+
 
     def save_path(self) -> bool:
         if len(self.stack_vertex) == 0:
