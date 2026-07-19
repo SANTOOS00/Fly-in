@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from enum import Enum
 from custom_error import FlyinError
 
+
 @dataclass(frozen=True)
 class Hub:
     name: str
@@ -9,6 +10,7 @@ class Hub:
     zone: "Hub.Zone" = None
     max_drones: int = 1
     color: str = '#FFFFFF'
+
 
     def __hash__(self) -> int:
         return hash(self.name)
@@ -41,23 +43,6 @@ class Hub:
             except Exception:
                 return '#FFFFFF'
 
-    class Type(Enum):
-        NORMAL_HUB = "Normal_hub"
-        START_HUB = "Start_hub"
-        END_HUB = "End_hub"
-
-        @classmethod
-        def get_type_hube(cls, type_str: str) -> "Hub.Type":
-            match type_str.upper():
-                case "START_HUB":
-                    return cls.START_HUB
-                case "END_HUB":
-                    return cls.END_HUB
-                case "HUB":
-                    return cls.NORMAL_HUB
-                case _:
-                    raise FlyinError("Invalid hub type found during parsing.", type_error="invalid_hub_type")
-
     class Zone(Enum):
         PRIORITY = 1
         NORMAL = 1
@@ -65,7 +50,9 @@ class Hub:
         BLOCKED = float('inf')
 
         @classmethod
+        @FlyinError.check_error("invalid zone type")
         def get_type_zone(cls, type_zone: str) -> "Hub.Zone":
+            from parser import Parseline
             match type_zone.upper():
                 case "NORMAL":
                     return cls.NORMAL
@@ -76,10 +63,10 @@ class Hub:
                 case "RESTRICTED":
                     return cls.RESTRICTED
                 case _:
-                    raise FlyinError("Invalid zone type found during parsing.", type_error="invalid_zone_type")
+                    raise FlyinError("Invalid zone type found during parsing.",
+                                     line_number=f'{Parseline.line_number}')
+    zone = Zone.NORMAL
 
-Hub.type = Hub.Type.NORMAL_HUB
-Hub.zone = Hub.Zone.NORMAL
 
 COLOR_HEX = {
     Hub.Color.BLACK: "#000000",
@@ -101,10 +88,3 @@ COLOR_HEX = {
     Hub.Color.CRIMSON: "#DC143C",
     Hub.Color.RAINBOW: "#FF69B4",
 }
-
-
-
-@dataclass
-class Edge:
-    source: Hub
-    destintion: Hub

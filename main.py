@@ -1,73 +1,12 @@
-from typing import Dict, List, TextIO
 from custom_error import FlyinError
-from networknode import Hub, Edge
-import sys
-import os
-from pathlib import Path
-from typing import Generator
+from parser import Parseline
 
-
-class Network:
-    def __init__(self) -> None:
-        self.start_hub: Hub | None = None
-        self.end_hub: Hub | None = None
-        self.hubs: Dict[str, Hub] = {}
-        self.edge: List[Edge] = []
-
-    @FlyinError.check_error(type_error="Duplicate Zone")
-    def add_hub(self, hub: Hub) -> None:
-        if self.hubs.get(hub.name):
-            raise FlyinError(f"The zone name {hub.name} must not be repeated in the "
-                                "config file; you must change the name only,",
-                                line_number=str(Parseline.line_number))
-        self.hubs[hub.name] = hub
-
-    def set_start(self, start_hub: Hub) -> None:
-        self.hubs.add(start_hub)
-        self.start_hub = start_hub
-    
-    def set_end(self, end_hub: Hub) -> None:
-        self.hubs.add(end_hub)
-        self.end_hub = end_hub
-    
-    def add_egde(self, edge: Edge) -> None:
-        self.edge.append(edge)
-
-    @FlyinError.check_error(type_error="Zone not in valid hubs list")
-    def get_hub(self, name_zone: str) -> Hub:
-        if not self.hubs.get(name_zone):
-            raise FlyinError(f"Zone name '{name_zone}' is not defined "
-                             "in the configuration file.",
-                             line_number=str(Parseline.line_number))
-        return self.hubs[name_zone]
-
-class SafeFileReader:
-    def __init__(self, path_file: str) -> None:
-        self.path_file = Path(path_file)
-    
-    @FlyinError.check_error(type_error="path is error")
-    def valid_path(self) -> None:
-        if not self.path_file.exists():
-            raise FlyinError(f"File not found: {self.path_file}")
-        if not os.access(self.path_file, os.R_OK):
-            raise FlyinError(
-                f"No read permission: {self.path_file}")
-
-
-class Parseline:
-    line_number: int = 1
-
-    @staticmethod
-    def parse_line(path: str) -> Hub | Edge:
-        safe_file = SafeFileReader(path)
-        with open(safe_file.path_file, 'r') as fb:
-            for _ in fb:
-                print(fb.readline())    
 
 class Fly_in:
     @staticmethod
     def run() -> None:
-        Parseline.parse_line(sys.argv[1])
+        parser = Parseline()
+        parser.parse_line()
 
 if __name__ == "__main__":
     try:

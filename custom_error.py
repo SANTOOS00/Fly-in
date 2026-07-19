@@ -1,3 +1,34 @@
+from typing import Dict, Callable, Any
+
+class   FlyinError(Exception):
+    def __init__(self, message: str, **context) -> None:
+        super().__init__(message)
+        self.context: Dict[str, str] = context
+    
+    def __add__(self, other: Dict[str, str]) -> 'FlyinError':
+        self.context.update(other)
+        return self 
+    
+    def report(self) -> str:
+        print(self.context)     
+        print(self)
+
+    def check_error(type_error: str) -> Callable:
+        def decorator(func: Callable) -> Callable:
+            def wrapper(*args, **kwargs) -> Any:
+                try:
+                    func(*args, **kwargs)
+                except FlyinError as error:
+                    raise FlyinError(str(error),
+                                    type_error=type_error,
+                                    ) + error.context
+            return wrapper
+        return decorator
+
+
+
+
+
 # from enum import Enum
 
 
@@ -114,31 +145,5 @@
 #     def __str__(self) -> str:
 #         return (f"\n[{self.severity.value}] Line {self.line_number}\n"
 #                 f"  ➜ Input : {self.message}\n")
-from typing import Dict, Callable, Any
-
-class   FlyinError(Exception):
-    def __init__(self, message: str, **context) -> None:
-        super().__init__(message)
-        self.context: Dict[str, str] = context
-    
-    def __add__(self, other: Dict[str, str]) -> 'FlyinError':
-        self.context.update(other)
-        return self
-    
-    def report(self) -> str:
-        print(self.context)     
-        print(self)
-
-    def check_error(type_error: str) -> Callable:
-        def decorator(func: Callable) -> Callable:
-            def wrapper(*args, **kwargs) -> Any:
-                try:
-                    func(*args, **kwargs)
-                except FlyinError as error:
-                    raise FlyinError(str(error),
-                                    type_error=type_error,
-                                    ) + error.context
-            return wrapper
-        return decorator
 
 

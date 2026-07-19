@@ -1,13 +1,4 @@
-class A:
-    def __init__(self):
-        self.name = "santoos"
+from ..parser import Parseline
 
-    def __str__(self):
-        return "hamid"
+dd = Parseline('hub: waypoint1 1 0 [color=blue]')
 
-
-
-
-
-aa = A()
-print(aa)
