@@ -1,96 +1,56 @@
-# from functools import singledispatch
-# from typing import Any
+from typing import Any, Callable, Dict
+
+class ErrorFlyIn(Exception):
+    def __init__(self, message: str, **context: str) -> None:
+        super().__init__(message)
+        self.context: Dict[str, str] = context
+
+    def __add__(self, other: Dict[str, str]) -> "ErrorFlyIn":
+        print("ssssss")
+        print(self.context)
+        self.context.update(other)
+        return self
+
+    def str_with_context(self) -> str:
+        print(self.context)
+        print(self)
+
+    @staticmethod
+    def spread(title: str, ww: int) -> Callable:
+        def decorator(func: Callable) -> Callable:
+            def wrapper(*args: Any, **kwargs: Any) -> Any:
+                try:
+                    return func(*args, **kwargs)
+                except ErrorFlyIn as e:
+                    print(str(e))
+                    raise ErrorFlyIn(str(e),ww=ww,  title=title) + e.context
+                except Exception as e:
+                    raise ErrorFlyIn(str(e), title=title)
+            return wrapper
+        return decorator
 
 
 
-# # class A:
+@ErrorFlyIn.spread(title="3amal / ", ww=12)
+def divide(a: int, b: int):
+    return a / b
 
-# @singledispatch
-# def spell(ss, data: Any) -> str:
-#     return f'default: {data}{ss}'
-
-
-# class V:
-#     @spell.register(int)
-#     def _(self, ss, data) -> str:
-#         return f'damage spell: {data}{ss}'
-
-
-# class S:
-#     @spell.register(str)
-#     def _(self, ss, data: str) -> str:
-#         return f"enchantment: {data}{ss}"
+@ErrorFlyIn.spread(title="hamid 5wrni", ww=122)
+def calculate_unit_price(total_price: int, quantity: int):
+    if quantity == 0:
+        raise ErrorFlyIn("test cal 1", file="app.py", line="5")
+@ErrorFlyIn.spread(title="queue == 0", ww=13)
+def calculate_unit(total_price: int, quantity: int):
+    if quantity == 0:
+        raise ErrorFlyIn("test cal 2", file="app.py", line="45")
+    
+    return divide(total_price, quantity)
 
 
-# class B:
-#     @spell.register(list)
-#     def _(self, ss, data: list) -> str:
-#         return f"multi-cast: {data}{ss}"
+try:
+    calculate_unit_price(100, 0)
+    calculate_unit(100, 0)
 
-
-# print(spell("22", 22))
-# from enum import Enum
-
-# class Type_Error(Enum):
-#     Warning = "Warning"
-#     Error = "Error"
-
-
-# class ParsingError(Exception):
-#     def __init__(self, message: str, number_line: int, type_error: Type_Error) -> None:
-#         self.message = message
-#         self.number_line = number_line
-#         self.type_error = type_error
-        
-
-#     def _get_error(self) -> str:
-#         return f"[{self.type_error.value}] line {self.number_line}: {self.message}"
-
-
-# if __name__ == "__main__":
-#     try:
-#         raise ParsingError("test error", 2, Type_Error.Warning)
-#     except Exception as error:
-#         print(error._get_error())
-
-# from pathlib import Path
-
-# file_path = Path("../main.py")
-
-# if file_path.exists():
-#     print("File exists")
-# else:
-#     print("Not found")
-
-
-
-# from pathlib import Path
-# import os
-
-# path = Path("../ain.py")
-
-# if path.exists:
-#     print("is ok")
-
-# if os.access(path, os.R_OK):
-#     print("you can read")
-
-# test2 = "# test tprint(text.split(sep=, maxsplit=2))"
-# test1 = "test tprint(text.split#(sep="
-
-# print(test1.split("#", maxsplit=1)[0])
-# print(test2.split("#", maxsplit=1))
-
-
-ss = [{13, 24}, {24, 32}, {22, 25}]
-sss = {24, 3}
-
-
-print(sss not in ss)
-
-# def test():
-#     return False
-
-# if __name__ == "__main__":
-#     if test():
-#         print("is ok")
+except ErrorFlyIn as e:
+    print("--- تم التقاط خطأ (Error Caught) ---")
+    print(e.str_with_context())
