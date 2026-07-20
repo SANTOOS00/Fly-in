@@ -1,7 +1,4 @@
-# from collections import defaultdict
-# import heapq
-# from itertools import count
-# from edge import Edge
+
 
 # class FlightNetwork:
 #     def __init__(self) -> None:
@@ -39,20 +36,6 @@
 #             self.graph[network.get_hub(link[1])].append((network.get_hub(link[0]), edg))
 
 
-# class PriorityQueue:
-#     def __init__(self):
-#         self.heap = []
-#         self.counter = count()
-
-#     def push(self, priority, hub):
-#         heapq.heappush(self.heap, (priority, next(self.counter), hub))
-
-#     def pop(self):
-#         cost, _, vertex = heapq.heappop(self.heap)
-#         return cost, vertex
-
-#     def is_empty(self):
-#         return len(self.heap) != 0
 
 
 # class PathFinder:

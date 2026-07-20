@@ -1,6 +1,5 @@
 from dataclasses import dataclass
 from enum import Enum
-from custom_error import FlyinError
 
 
 @dataclass(frozen=True)
@@ -50,9 +49,8 @@ class Hub:
         BLOCKED = float('inf')
 
         @classmethod
-        @FlyinError.check_error("invalid zone type")
-        def get_type_zone(cls, type_zone: str) -> "Hub.Zone":
-            from parser import Parseline
+        def get_type_zone(cls, type_zone: str, number) -> "Hub.Zone":
+            print(number)
             match type_zone.upper():
                 case "NORMAL":
                     return cls.NORMAL
@@ -63,8 +61,7 @@ class Hub:
                 case "RESTRICTED":
                     return cls.RESTRICTED
                 case _:
-                    raise FlyinError("Invalid zone type found during parsing.",
-                                     line_number=f'{Parseline.line_number}')
+                    pass
     zone = Zone.NORMAL
 
 

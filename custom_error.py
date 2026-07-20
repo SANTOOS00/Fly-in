@@ -1,9 +1,21 @@
 from typing import Dict, Callable, Any
 
 class   FlyinError(Exception):
+    line_number: int = 1
+
     def __init__(self, message: str, **context) -> None:
         super().__init__(message)
         self.context: Dict[str, str] = context
+
+
+    @classmethod
+    def add_line_number(cls: 'FlyinError') -> None:
+        cls.line_number += 1
+    
+    @classmethod
+    def get_number_line(cls: 'FlyinError') -> str:
+        return str(cls.line_number)
+
     
     def __add__(self, other: Dict[str, str]) -> 'FlyinError':
         self.context.update(other)

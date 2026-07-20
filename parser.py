@@ -1,31 +1,33 @@
-from custom_error import FlyinError
+
 from pathlib import Path
-from edge import Edge
-from hube import Hub
-from parser_data import BaseParser, HubParser, EdgeParser
-from graph import Network
+from parser_data import BaseParser, HubParser, EdgeParser, FlyinError
+from graph import Graph
 import os
 import sys
 
-
 class SafeFileReader:
-    def __init__(self, path_file: str) -> None:
+    def __init__(self, path_file: str):
         self.path_file = Path(path_file)
-    
-    @FlyinError.check_error(type_error="path is error")
-    def valid_path(self) -> None:
+
+    @FlyinError.check_error("valid argument")
+    def valid_arg(self):
+        if len(sys.argv) != 2:
+            raise FlyinError(
+                "Usage: python main.py <file.txt>"
+            )
+
+    @FlyinError.check_error("path error")
+    def valid_path(self):
         self.valid_arg()
+
         if not self.path_file.exists():
             raise FlyinError(f"File not found: {self.path_file}")
+
         if not os.access(self.path_file, os.R_OK):
             raise FlyinError(
-                f"No read permission: {self.path_file}")
-    
-    @FlyinError.check_error('valid argement')
-    def valid_path(self) -> None:
-        if len(sys.argv) != 2:
-            raise FlyinError("run in program name_program example"
-                             "<main.py> file config <file.txt>")
+                f"No read permission: {self.path_file}"
+            )
+
 
 class Parseline:
     _line_number: int = 1
@@ -37,17 +39,15 @@ class Parseline:
         self.base_parse: BaseParser
 
 
-    def parse_file(self):
+    def parse_file(self) -> None:
         safe_file = SafeFileReader(sys.argv[1])
         safe_file.valid_path()
-
         with open(safe_file.path_file, "r") as fb:
             for raw_line in fb:
                 self._process_line(raw_line)
-        # print(Parseline._line_number)
     
     def _process_line(self, raw_line: str):
-        Parseline._line_number += 1
+        FlyinError.add_line_number()
         self.raw_line = raw_line.split("#", maxsplit=1)[0].strip()
         if not self.raw_line:
             return
@@ -60,63 +60,34 @@ class Parseline:
                 self._set_number_drones()
             case "START_HUB":
                 self._set_start_hube()
-                self._set_hube()
             case "HUB":
                 self._set_hube()
             case "END_HUB":
-                self._set_hube()
                 self._set_end_hube()
             case "CONNECTION":
                 self._set_edge()
 
-    def parse_line(self) -> Hub | Edge:
-        safe_file = SafeFileReader(sys.argv[1])
-        safe_file.valid_path()
-        with open(safe_file.path_file, 'r') as fb:
-            while True:
-                raw_line = fb.readline()
-                Parseline._line_number += 1
-                if not raw_line:
-                    break
-                self.raw_line = raw_line.split("#", maxsplit=1)[0].strip()
-                if self.raw_line == "":
-                    continue
-                self._set_type_line()
-                match self.type_line.upper():
-                    case 'NB_DRONES':
-                        self._set_number_drones()
-                    case 'START_HUB':
-                        self._set_start_hube()
-                        self._set_hube()
-                    case 'HUB':
-                        self._set_hube()
-                    case 'END_HUB':
-                        self._set_hube()
-                        self._set_end_hube()
-                    case 'CONNECTION':
-                        self._set_edge()
-        # print(Parseline._line_number)
-
     def _set_start_hube(self) -> None:
-        print('satrt hube')
+        HubParser(self.clean_line.strip().lower()).parser()
 
     def _set_hube(self) -> None:
-        print('hube ')
+        HubParser(self.clean_line.strip().lower()).parser()
+        # print(hub)
 
     def _set_end_hube(self) -> None:
-        print('end hube')
+        HubParser(self.clean_line.strip().lower()).parser()
 
     def _set_edge(self) -> None:
-        print('edge')
+        pass
 
     @FlyinError.check_error("number drons")
     def _set_number_drones(self) -> None:
-        network = Network()
+        graph = Graph()
         try:
-            network.set_number_drones(int(self.clean_line))
+            graph.set_number_drones(int(self.clean_line))
         except ValueError:
             raise FlyinError("val li kaukon f drones hwa wahd number sahih tabi3i",
-                             str(Parseline._line_number))
+                             line_number=str(FlyinError.get_number_line))
 
     @FlyinError.check_error(type_error="type line")
     def _set_type_line(self) -> None:
@@ -138,7 +109,7 @@ class Parseline:
             self.base_parser = parsers[key_raw.lower()]
         else:
             raise FlyinError('type error',
-                             line_number=(Parseline._line_number))
+                             line_number=str(FlyinError.get_number_line()))
 
 
 

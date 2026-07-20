@@ -4,10 +4,10 @@ from edge import Edge
 from custom_error import FlyinError
 
 
-class Network:
+class Graph:
     instance: None = None
 
-    def __new__(cls) -> 'Network':
+    def __new__(cls) -> 'Graph':
         if cls.instance is None:
             cls.instance = super().__new__(cls)
         return cls.instance
@@ -21,12 +21,10 @@ class Network:
 
     @FlyinError.check_error(type_error="Duplicate Zone")
     def add_hub(self, hub: Hub) -> None:
-        from parser import Parseline
-
         if self.hubs.get(hub.name):
             raise FlyinError(f"The zone name {hub.name} must not be repeated in the "
                                 "config file; you must change the name only,",
-                                line_number=str(Parseline.line_number))
+                                line_number=str(FlyinError.get_number_line()))
         self.hubs[hub.name] = hub
 
     def set_start_hub(self, start_hub: Hub) -> None:
@@ -47,7 +45,7 @@ class Network:
         if not self.hubs.get(name_zone):
             raise FlyinError(f"Zone name '{name_zone}' is not defined "
                              "in the configuration file.",
-                             line_number=str(Parseline.line_number))
+                             line_number=str(FlyinError.get_number_line()))
         return self.hubs[name_zone]
     
     def set_number_drones(self, number_drones: int) -> None:
