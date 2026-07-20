@@ -5,16 +5,15 @@ from enum import Enum
 @dataclass(frozen=True)
 class Hub:
     name: str
-    type: "Hub.Type" = None
+    x: int
+    y: int
     zone: "Hub.Zone" = None
     max_drones: int = 1
     color: str = '#FFFFFF'
-    x: int
-    y: int
 
 
-    def __hash__(self) -> int:
-        return hash(self.name)
+    # def __hash__(self) -> int:
+    #     return hash(self.name)
 
     class Color(Enum):
         BLACK = "black"
@@ -64,7 +63,7 @@ class Hub:
                     return cls.RESTRICTED
                 case _:
                     pass
-    zone = Zone.NORMAL
+    zone = Zone.NORMAL.value
 
 
 COLOR_HEX = {
