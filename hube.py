@@ -9,6 +9,8 @@ class Hub:
     zone: "Hub.Zone" = None
     max_drones: int = 1
     color: str = '#FFFFFF'
+    x: int
+    y: int
 
 
     def __hash__(self) -> int:

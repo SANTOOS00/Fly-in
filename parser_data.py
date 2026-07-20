@@ -1,6 +1,7 @@
 from custom_error import FlyinError
 from typing import Tuple
 from edge import Edge
+from hube import Hub
 import re
 
 
@@ -25,30 +26,16 @@ class HubParser(BaseParser):
         match = re.match(r'^(\w+)\s+(-?\d+)\s+(-?\d+)(.*)',
                         self.line_str)
         name, x, y, *meta = match.groups()
-        # self.has_invalid_zone_names(name)
-        # return {
-        #     "zone_name": name,
-        #     "x_coordinate": int(x),
-        #     "y_coordinate": int(y),
-        #     "metadata": meta[0]
-        # }
+        return Hub(
+            name=name,
+            x=int(x),
+            y=int(y),
+        )
 
     def _validate_syntax(self) -> None:
         self._validate_zone_name()
         self._validate_x_coordinate()
         self._validate_y_coordinate()
-
-    # def has_invalid_zone_names(self, zone_name) -> None:
-    #     pass
-    #     # zones: List[str] = ParserConfig.get_all_zone_names()
-    #     # if zone_name in zones:
-    #     #     raise UtilsError(
-    #     #         f"Duplicate zone name '{zone_name}' detected. Each "
-    #     #         "zone name must be unique.",
-    #     #         self.line_number,
-    #     #         ErrorSeverity.Error
-    #     #     )
-
 
 
     FlyinError.check_error(type_error='Zone name')
