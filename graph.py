@@ -2,17 +2,18 @@ from typing import List, Dict
 from hube import Hub
 from edge import Edge
 from custom_error import FlyinError
-from parser import Parseline
+
 
 class Network:
-    _instnce: None = None
+    instance: None = None
 
     def __new__(cls) -> 'Network':
-        if cls._instnce is None:
-            cls._instnce = super().__new__(cls)
-        return cls._instnce
+        if cls.instance is None:
+            cls.instance = super().__new__(cls)
+        return cls.instance
 
     def __init__(self) -> None:
+        self.number_drones: int = None
         self.start_hub: Hub | None = None
         self.end_hub: Hub | None = None
         self.hubs: Dict[str, Hub] = {}
@@ -20,6 +21,8 @@ class Network:
 
     @FlyinError.check_error(type_error="Duplicate Zone")
     def add_hub(self, hub: Hub) -> None:
+        from parser import Parseline
+
         if self.hubs.get(hub.name):
             raise FlyinError(f"The zone name {hub.name} must not be repeated in the "
                                 "config file; you must change the name only,",
@@ -39,8 +42,14 @@ class Network:
 
     @FlyinError.check_error(type_error="Zone not in valid hubs")
     def get_hub(self, name_zone: str) -> Hub:
+        from parser import Parseline
+
         if not self.hubs.get(name_zone):
             raise FlyinError(f"Zone name '{name_zone}' is not defined "
                              "in the configuration file.",
                              line_number=str(Parseline.line_number))
         return self.hubs[name_zone]
+    
+    def set_number_drones(self, number_drones: int) -> None:
+        self.number_drones = number_drones
+

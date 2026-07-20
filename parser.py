@@ -2,16 +2,10 @@ from custom_error import FlyinError
 from pathlib import Path
 from edge import Edge
 from hube import Hub
-from drones import Drone
+from parser_data import BaseParser, HubParser, EdgeParser
+from graph import Network
 import os
 import sys
-
- 
-class BaseParser:
-    def __init__(self, line_str: str, line_number: int) -> None:
-        self.line_number: int = line_number
-        self.line_str: str = line_str
-
 
 
 class SafeFileReader:
@@ -40,7 +34,40 @@ class Parseline:
         self.raw_line: str
         self.type_line: str
         self.clean_line: str
-        self.base_parse: BasePa
+        self.base_parse: BaseParser
+
+
+    def parse_file(self):
+        safe_file = SafeFileReader(sys.argv[1])
+        safe_file.valid_path()
+
+        with open(safe_file.path_file, "r") as fb:
+            for raw_line in fb:
+                self._process_line(raw_line)
+        # print(Parseline._line_number)
+    
+    def _process_line(self, raw_line: str):
+        Parseline._line_number += 1
+        self.raw_line = raw_line.split("#", maxsplit=1)[0].strip()
+        if not self.raw_line:
+            return
+        self._set_type_line()
+        self._dispatch_line()
+  
+    def _dispatch_line(self):
+        match self.type_line.upper():
+            case "NB_DRONES":
+                self._set_number_drones()
+            case "START_HUB":
+                self._set_start_hube()
+                self._set_hube()
+            case "HUB":
+                self._set_hube()
+            case "END_HUB":
+                self._set_hube()
+                self._set_end_hube()
+            case "CONNECTION":
+                self._set_edge()
 
     def parse_line(self) -> Hub | Edge:
         safe_file = SafeFileReader(sys.argv[1])
@@ -55,7 +82,42 @@ class Parseline:
                 if self.raw_line == "":
                     continue
                 self._set_type_line()
-    
+                match self.type_line.upper():
+                    case 'NB_DRONES':
+                        self._set_number_drones()
+                    case 'START_HUB':
+                        self._set_start_hube()
+                        self._set_hube()
+                    case 'HUB':
+                        self._set_hube()
+                    case 'END_HUB':
+                        self._set_hube()
+                        self._set_end_hube()
+                    case 'CONNECTION':
+                        self._set_edge()
+        # print(Parseline._line_number)
+
+    def _set_start_hube(self) -> None:
+        print('satrt hube')
+
+    def _set_hube(self) -> None:
+        print('hube ')
+
+    def _set_end_hube(self) -> None:
+        print('end hube')
+
+    def _set_edge(self) -> None:
+        print('edge')
+
+    @FlyinError.check_error("number drons")
+    def _set_number_drones(self) -> None:
+        network = Network()
+        try:
+            network.set_number_drones(int(self.clean_line))
+        except ValueError:
+            raise FlyinError("val li kaukon f drones hwa wahd number sahih tabi3i",
+                             str(Parseline._line_number))
+
     @FlyinError.check_error(type_error="type line")
     def _set_type_line(self) -> None:
         if self.raw_line.count(":") < 0:
@@ -64,35 +126,34 @@ class Parseline:
                 "{nb_drones, start_hub, etc.}. Example: [type: ,,, ]",
                 str(Parseline.number_line))
         key_raw, self.clean_line = self.raw_line.split(":", 1)
-
-        self.type_line = self.get_type(key_raw)
         parsers = {
-            "nb_drones": DroneParser,
-            "start_hub": StartHubParser,
+            "nb_drones": 'DroneParser',
+            "start_hub": HubParser,
             "hub": HubParser,
-            "end_hub": EndHubParser,
-            "connection": ConnectionParser
+            "end_hub": HubParser,
+            "connection": EdgeParser
         }
         if parsers.get(key_raw.lower()):
-            self.base_parser = parsers[self.base_parser]
-            return True
-        raise Exception()
+            self.type_line = key_raw.lower()
+            self.base_parser = parsers[key_raw.lower()]
+        else:
+            raise FlyinError('type error',
+                             line_number=(Parseline._line_number))
 
 
 
-    def parse_in_type_line(self) -> None:
-        fileread = SafeFileReader(Path(sys.argv[1]))
-        while (True):
-            try:
-                component = fileread.get_validated_line()
-                if component == "EOF":
-                    break
-                self.update_network(component)
-            except Exception as error:
-                self.errors.append(error)
-                continue
-        self.print_report()
-        self.validate_hub_end_start
+    # def parse_in_type_line(self) -> None:
+    #     fileread = SafeFileReader(Path(sys.argv[1]))
+    #     while (True):
+    #         try:
+    #             component = fileread.get_validated_line()
+    #             if component == "EOF":
+    #                 break
+    #             self.update_network(component)
+    #         except Exception as error:
+    #             self.errors.append(error)
+    #             continue
+    #     self.print_report()
     
     #         while True:
 #             raw_line = SafeFileReader.fd.readline()
@@ -415,172 +476,87 @@ class Parseline:
 #                              self.line_number, ErrorSeverity.Error)
 
 
-# class ZoneWithCoordsParser(BaseParser):
-#     patterns = {
-#             r'^([^\s-]+)(\s)': False,
-#             r'^([^\s-]+)\s+(-?\d+)': False,
-#             r'^([^\s-]+)\s+(-?\d+)\s+(-?\d+)(.*)': False,
-#         }
+# class ConnectionParser(MetaParser):
+#     _patterns = {
+#         r'^([^\s-]+)-': False,
+#         r'^([^\s-]+)-([^\s-]+)': False,
+#         r'^([^\s-]+)-([^\s-]+)(.*)': False
+#     }
 
-#     def parser(self) -> Dict[str, Any]:
-#         self._check_syntax(self.line_str.strip())
-#         match = re.match(r'^(\w+)\s+(-?\d+)\s+(-?\d+)(.*)',
-#                          self.line_str.strip())
-#         name, x, y, *meta = match.groups()
-#         self.has_invalid_zone_names(name)
-#         return {
-#             "zone_name": name,
-#             "x_coordinate": int(x),
-#             "y_coordinate": int(y),
-#             "metadata": meta[0]
-#         }
+#     def __init__(self, line_str: str, line_number: int) -> None:
+#         self.line_str = line_str
+#         self.line_number = line_number
+#         self.match: re.Match
 
-#     def has_invalid_zone_names(self, zone_name) -> None:
-#         zones: List[str] = ParserConfig.get_all_zone_names()
-#         if zone_name in zones:
+#     def _check_syntax(self):
+#         for pattern in ConnectionParser._patterns.keys():
+#             self.match = re.match(pattern, self.line_str.strip())
+#             if self.match is None:
+#                 ConnectionParser._patterns[pattern] = True
+#             else:
+#                 ConnectionParser._patterns[pattern] = False
+#         self._validate_syntax()
+
+#     def _validate_syntax(self) -> None:
+#         for is_not_valid in ConnectionParser._patterns.values():
+#             if is_not_valid:
+#                 raise ConnectionError(
+#                     "Invalid connection format. Expected "
+#                     "format: 'zone1-zone2' (no spaces). \n"
+#                     "\n Zone names may contain any characters except spaces "
+#                     "and hyphens ('-').\n"
+#                     f" > but got:       {self.line_str}.",
+#                     self.line_number,
+#                     ErrorSeverity.Error)
+
+#     def parser(self) -> Connection:
+#         self._check_syntax()
+#         zone_1, zone_2, *meta = self.match.groups()
+#         self.validate_connection(zone_1, zone_2)
+#         connection: set = {zone_1, zone_2}
+#         return (
+#             Connection(
+#                 connection, self.parse_metadata(meta[0])
+#             )
+#         )
+
+#     def validate_connection(self, zone_1, zone_2: Connection):
+#         if self.is_duplicate_connection({zone_2, zone_1}):
 #             raise UtilsError(
-#                 f"Duplicate zone name '{zone_name}' detected. Each "
-#                 "zone name must be unique.",
+#                 f"Duplicate connection detected: {zone_1}-{zone_2}",
+#                 self.line_number,
+#                 ErrorSeverity.Error
+#             )
+#         self.validate_connection_zones(zone_1, zone_2)
+
+#     def is_duplicate_connection(self, component: Connection) -> bool:
+#         connes = ParserConfig.get_connection()
+#         if component in connes:
+#             return True
+#         return False
+
+#     def validate_connection_zones(self, source_zone: str,
+#                                   destination_zone: str) -> None:
+#         """
+#         Validate that both zones exist before creating a connection.
+#         Raises UtilsError if any zone is invalid.
+#         """
+#         zones = ParserConfig.get_all_zone_names()
+#         if source_zone not in zones:
+#             raise UtilsError(
+#                 f"Invalid source zone: '{source_zone}' does not exist.",
 #                 self.line_number,
 #                 ErrorSeverity.Error
 #             )
 
-#     def _check_syntax(self, line: str) -> None:
-#         line = self.line_str.strip()
-#         for pattern in ZoneWithCoordsParser.patterns.keys():
-#             match = re.match(pattern, line)
-#             if match is None:
-#                 ZoneWithCoordsParser.patterns[pattern] = True
-#             else:
-#                 ZoneWithCoordsParser.patterns[pattern] = False
-#         self._validate_syntax()
+#         if destination_zone not in zones:
+#             raise UtilsError(
+#                 f"Invalid destination zone: '{destination_zone}' "
+#                 "does not exist.",
+#                 self.line_number,
+#                 ErrorSeverity.Error
+#             )
 
-#     def _validate_syntax(self) -> None:
-#         errors = list(ErrorLocation)
-#         for index, is_not_valid in enumerate(ZoneWithCoordsParser.patterns.
-#                                              values()):
-#             if is_not_valid:
-#                 raise ZoneWithCoordsParserError("",
-#                                                 self.line_number,
-#                                                 ErrorSeverity.Error,
-#                                                 errors[index])
-
-
-class ConnectionParser(MetaParser):
-    _patterns = {
-        r'^([^\s-]+)-': False,
-        r'^([^\s-]+)-([^\s-]+)': False,
-        r'^([^\s-]+)-([^\s-]+)(.*)': False
-    }
-
-    def __init__(self, line_str: str, line_number: int) -> None:
-        self.line_str = line_str
-        self.line_number = line_number
-        self.match: re.Match
-
-    def _check_syntax(self):
-        for pattern in ConnectionParser._patterns.keys():
-            self.match = re.match(pattern, self.line_str.strip())
-            if self.match is None:
-                ConnectionParser._patterns[pattern] = True
-            else:
-                ConnectionParser._patterns[pattern] = False
-        self._validate_syntax()
-
-    def _validate_syntax(self) -> None:
-        for is_not_valid in ConnectionParser._patterns.values():
-            if is_not_valid:
-                raise ConnectionError(
-                    "Invalid connection format. Expected "
-                    "format: 'zone1-zone2' (no spaces). \n"
-                    "\n Zone names may contain any characters except spaces "
-                    "and hyphens ('-').\n"
-                    f" > but got:       {self.line_str}.",
-                    self.line_number,
-                    ErrorSeverity.Error)
-
-    def parser(self) -> Connection:
-        self._check_syntax()
-        zone_1, zone_2, *meta = self.match.groups()
-        self.validate_connection(zone_1, zone_2)
-        connection: set = {zone_1, zone_2}
-        return (
-            Connection(
-                connection, self.parse_metadata(meta[0])
-            )
-        )
-
-    def validate_connection(self, zone_1, zone_2: Connection):
-        if self.is_duplicate_connection({zone_2, zone_1}):
-            raise UtilsError(
-                f"Duplicate connection detected: {zone_1}-{zone_2}",
-                self.line_number,
-                ErrorSeverity.Error
-            )
-        self.validate_connection_zones(zone_1, zone_2)
-
-    def is_duplicate_connection(self, component: Connection) -> bool:
-        connes = ParserConfig.get_connection()
-        if component in connes:
-            return True
-        return False
-
-    def validate_connection_zones(self, source_zone: str,
-                                  destination_zone: str) -> None:
-        """
-        Validate that both zones exist before creating a connection.
-        Raises UtilsError if any zone is invalid.
-        """
-        zones = ParserConfig.get_all_zone_names()
-        if source_zone not in zones:
-            raise UtilsError(
-                f"Invalid source zone: '{source_zone}' does not exist.",
-                self.line_number,
-                ErrorSeverity.Error
-            )
-
-        if destination_zone not in zones:
-            raise UtilsError(
-                f"Invalid destination zone: '{destination_zone}' "
-                "does not exist.",
-                self.line_number,
-                ErrorSeverity.Error
-            )
-
-
-class StartHubParser(ZoneWithCoordsParser, MetaParser):
-    def parser(self) -> Start_hub:
-        data: Dict[str, Any] = super().parser()
-        return Start_hub(
-            data["zone_name"],
-            data["x_coordinate"],
-            data["y_coordinate"],
-            self.parse_metadata(data["metadata"]),
-            self.line_number
-        )
-
-
-# class EndHubParser(ZoneWithCoordsParser, MetaParser):
-#     def parser(self) -> End_hub:
-#         data: Dict[str, Any] = super().parser()
-#         return End_hub(
-#             data["zone_name"],
-#             data["x_coordinate"],
-#             data["y_coordinate"],
-#             self.parse_metadata(data["metadata"]),
-#             self.line_number
-#         )
-
-
-# class HubParser(ZoneWithCoordsParser, MetaParser):
-#     def parser(self) -> Hub:
-#         data: Dict[str, Any] = super().parser()
-#         return Hub(
-#             data["zone_name"],
-#             data["x_coordinate"],
-#             data["y_coordinate"],
-#             self.parse_metadata(data["metadata"]),
-#         )
 
 
 # class SafeFileReader:

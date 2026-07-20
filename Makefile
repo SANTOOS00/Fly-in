@@ -1,7 +1,7 @@
 SCRIPT = main.py
 
 
-MAP ?= maps/challenger/01_the_impossible_dream.txt
+MAP ?= maps/easy/01_linear_path.txt
 
 # .PHONY: all run clean lint install debug
 

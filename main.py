@@ -6,7 +6,7 @@ class Fly_in:
     @staticmethod
     def run() -> None:
         parser = Parseline()
-        parser.parse_line()
+        parser.parse_file()
 
 if __name__ == "__main__":
     try:
