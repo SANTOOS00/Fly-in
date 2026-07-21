@@ -56,34 +56,34 @@ class Parseline:
     def _dispatch_line(self):
         match self.type_line.upper():
             case "NB_DRONES":
-                self._set_number_drones()
+                self._create_number_drones()
             case "START_HUB":
-                self._set_start_hube()
+                self._create_start_hube()
             case "HUB":
-                self._set_hube()
+                self._create_hube()
             case "END_HUB":
-                self._set_end_hube()
+                self._create_end_hube()
             case "CONNECTION":
-                self._set_edge()
+                self._create_edge()
 
-    def _set_start_hube(self) -> None:
+    def _create_start_hube(self) -> None:
         hub: Hub = HubParser(self.clean_line.strip().lower()).parser()
         Graph().set_start_hub(hub)
 
-    def _set_hube(self) -> None:
+    def _create_hube(self) -> None:
         hub: Hub = HubParser(self.clean_line.strip().lower()).parser()
         Graph().add_hub(hub)
 
-    def _set_end_hube(self) -> None:
+    def _create_end_hube(self) -> None:
         hub: Hub = HubParser(self.clean_line.strip().lower()).parser()
         Graph().set_end_hub(hub)
 
-    def _set_edge(self) -> None:
+    def _create_edge(self) -> None:
         edge: Edge = EdgeParser(self.clean_line.strip().lower()).parser()
         Graph().add_egde(edge)
 
     @FlyinError.check_error("number drons")
-    def _set_number_drones(self) -> None:
+    def _create_number_drones(self) -> None:
         graph = Graph()
         try:
             graph.set_number_drones(int(self.clean_line))
