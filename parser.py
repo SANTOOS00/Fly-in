@@ -2,6 +2,8 @@
 from pathlib import Path
 from parser_data import BaseParser, HubParser, EdgeParser, FlyinError
 from graph import Graph
+from hube import Hub
+from edge import Edge
 import os
 import sys
 
@@ -30,14 +32,11 @@ class SafeFileReader:
 
 
 class Parseline:
-    _line_number: int = 1
-
+    
     def __init__(self) -> None:
         self.raw_line: str
         self.type_line: str
         self.clean_line: str
-        self.base_parse: BaseParser
-
 
     def parse_file(self) -> None:
         safe_file = SafeFileReader(sys.argv[1])
@@ -68,17 +67,20 @@ class Parseline:
                 self._set_edge()
 
     def _set_start_hube(self) -> None:
-        HubParser(self.clean_line.strip().lower()).parser()
+        hub: Hub = HubParser(self.clean_line.strip().lower()).parser()
+        Graph().set_start_hub(hub)
 
     def _set_hube(self) -> None:
-        HubParser(self.clean_line.strip().lower()).parser()
-        # print(hub)
+        hub: Hub = HubParser(self.clean_line.strip().lower()).parser()
+        Graph().add_hub(hub)
 
     def _set_end_hube(self) -> None:
-        HubParser(self.clean_line.strip().lower()).parser()
+        hub: Hub = HubParser(self.clean_line.strip().lower()).parser()
+        Graph().set_end_hub(hub)
 
     def _set_edge(self) -> None:
-        EdgeParser(self.clean_line.strip().lower()).parser()
+        edge: Edge = EdgeParser(self.clean_line.strip().lower()).parser()
+        Graph().add_egde(edge)
 
     @FlyinError.check_error("number drons")
     def _set_number_drones(self) -> None:
@@ -106,7 +108,6 @@ class Parseline:
         }
         if parsers.get(key_raw.lower()):
             self.type_line = key_raw.lower()
-            self.base_parser = parsers[key_raw.lower()]
         else:
             raise FlyinError('type error',
                              line_number=str(FlyinError.get_number_line()))
@@ -216,7 +217,11 @@ class Parseline:
 
 
 # class ConnectionParser(MetaParser):
-#     
+#     _patterns = {
+#         r'^([^\s-]+)-': False,
+#         r'^([^\s-]+)-([^\s-]+)': False,
+#         r'^([^\s-]+)-([^\s-]+)(.*)': False
+#     }
 
 #     def __init__(self, line_str: str, line_number: int) -> None:
 #         self.line_str = line_str

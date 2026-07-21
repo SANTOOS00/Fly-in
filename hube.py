@@ -1,19 +1,15 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from enum import Enum
 
 
 @dataclass(frozen=True)
 class Hub:
     name: str
-    x: int
-    y: int
-    zone: "Hub.Zone" = None
-    max_drones: int = 1
-    color: str = '#FFFFFF'
-
-
-    # def __hash__(self) -> int:
-    #     return hash(self.name)
+    x: int = field(hash=False, compare=False)
+    y: int = field(hash=False, compare=False)
+    zone: "Hub.Zone" = field(hash=False, compare=False, default=None)
+    max_drones: int = field(hash=False, compare=False, default=1)
+    color: str =  field(hash=False, compare=False, default='#FFFFFF')
 
     class Color(Enum):
         BLACK = "black"

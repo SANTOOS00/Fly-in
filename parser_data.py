@@ -18,9 +18,15 @@ class EdgeParser(BaseParser):
         match = re.match(r'^([^\s-]+)-([^\s-]+)(.*)', self.line_str)
         source, destination, *meta = match.groups()
         edge = Edge(
-            source=self.get_source_hub(source),
-            destintion=self.get_destination_hub(destination)
+            source=self._get_source_hub(source),
+            destintion=self._get_destination_hub(destination)
         )
+
+    def _get_source_hub(self, name_zone: str) -> Hub:
+        print(name_zone)
+
+    def _get_destination_hub(self, name_zone: str) -> Hub:
+        print(name_zone)
         
 
     def _validate_edge_syntax(self) -> None:
@@ -47,7 +53,7 @@ class EdgeParser(BaseParser):
 
 
 class HubParser(BaseParser):
-    def parser(self) -> None:
+    def parser(self) -> Hub:
         self._validate_syntax()
         match = re.match(r'^(\w+)\s+(-?\d+)\s+(-?\d+)(.*)',
                         self.line_str)
@@ -58,6 +64,7 @@ class HubParser(BaseParser):
             y=int(y),
         )
         self.init_meta_data(hub, meta)
+        return hub
 
     
     def init_meta_data(self, hub: Hub, meta: List[str]) -> None:
