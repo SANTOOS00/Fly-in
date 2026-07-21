@@ -8,7 +8,7 @@ import re
 
 class BaseParser:
     def __init__(self, line_str: str) -> None:
-        self.line_str: str = line_str.strip()
+        self.line_str: str = line_str
 
     def parser(self) -> None:
         pass
@@ -19,16 +19,11 @@ class EdgeParser(BaseParser):
         match = re.match(r'^([^\s-]+)-([^\s-]+)(.*)', self.line_str)
         source, destination, *meta = match.groups()
         edge = Edge(
-            source=self._get_source_hub(source),
-            destintion=self._get_destination_hub(destination)
+            source=source,
+            destintion=destination
         )
         return edge
 
-    def _get_source_hub(self, name_zone: str) -> Hub:
-        return Graph().get_hub(name_zone)
-
-    def _get_destination_hub(self, name_zone: str) -> Hub:
-        return Graph().get_hub(name_zone)        
 
     def _validate_edge_syntax(self) -> None:
         self._validate_source()
@@ -38,13 +33,13 @@ class EdgeParser(BaseParser):
     def _validate_source(self) -> None:
         if not re.match(r'^([^\s-]+)-', self.line_str):
             raise FlyinError('',
-                             FlyinError.get_number_line)
+                             line_number=FlyinError.get_number_line)
 
     @FlyinError.check_error(type_error='destination')
     def _validate_destination(self) -> None:
         if not re.match(r'^([^\s-]+)-([^\s-]+)', self.line_str):
             raise FlyinError('test valid ',
-                             FlyinError.get_number_line)
+                             line_number=FlyinError.get_number_line)
 
 
 

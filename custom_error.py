@@ -23,7 +23,7 @@ class   FlyinError(Exception):
     
     def report(self) -> str:
         print(self.context)     
-        print(self)
+        print(f'is message ==>>{self}')
 
     def check_error(type_error: str) -> Callable:
         def decorator(func: Callable) -> Callable:
