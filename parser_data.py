@@ -2,7 +2,7 @@ from custom_error import FlyinError
 from typing import Tuple, List
 from edge import Edge
 from hube import Hub
-from graph import Graph
+from map import Map
 import re
 
 
@@ -29,18 +29,15 @@ class EdgeParser(BaseParser):
         self._validate_source()
         self._validate_destination()    
 
-    @FlyinError.check_error(type_error='source')
     def _validate_source(self) -> None:
         if not re.match(r'^([^\s-]+)-', self.line_str):
             raise FlyinError('',
                              line_number=FlyinError.get_number_line)
 
-    @FlyinError.check_error(type_error='destination')
     def _validate_destination(self) -> None:
         if not re.match(r'^([^\s-]+)-([^\s-]+)', self.line_str):
             raise FlyinError('test valid ',
                              line_number=FlyinError.get_number_line)
-
 
 
     def ZoneAdjacencyParser() -> Tuple[str, str]:
@@ -71,20 +68,17 @@ class HubParser(BaseParser):
         self._validate_x_coordinate()
         self._validate_y_coordinate()
 
-    FlyinError.check_error(type_error='Zone name')
     def _validate_zone_name(self):
         if not re.match(r'^([^\s-]+)(\s)', self.line_str):
             raise FlyinError('Zone name is not valid',
                              number_line=FlyinError.get_number_line())
 
-    FlyinError.check_error(type_error='X')
     def _validate_x_coordinate(self):
         if not re.match(r'^([^\s-]+)\s+(-?\d+)', self.line_str):
             raise FlyinError('X coordinate is not valid',
                              number_line=FlyinError.get_number_line())
 
 
-    FlyinError.check_error(type_error='Y')
     def _validate_y_coordinate(self):
         if not re.match(r'^([^\s-]+)\s+(-?\d+)\s+(-?\d+)(.*)', self.line_str):
             raise FlyinError('Y coordinate is not valid',

@@ -3,10 +3,12 @@ from typing import Dict, Callable, Any
 class   FlyinError(Exception):
     _line_number: int = 0
 
-    def __init__(self, message: str, **context) -> None:
-        super().__init__(message)
+    def __init__(self, *message: str, **context) -> None:
+        super().__init__(self.format_message(context, message))
         self.context: Dict[str, str] = context
 
+    def format_message(self, context, message) -> str:
+        return f"{message} {context}"
 
     @classmethod
     def add_line_number(cls: 'FlyinError') -> None:
@@ -16,43 +18,6 @@ class   FlyinError(Exception):
     def get_number_line(cls: 'FlyinError') -> str:
         return str(cls._line_number)
 
-    
-    def __add__(self, other: Dict[str, str]) -> 'FlyinError':
-        self.context.update(other)
-        return self 
-    
-    def report(self) -> str:
-        print(self.context)     
-        print(f'is message ==>>{self}')
-
-    def check_error(type_error: str) -> Callable:
-        def decorator(func: Callable) -> Callable:
-            def wrapper(*args, **kwargs) -> Any:
-                try:
-                    func(*args, **kwargs)
-                except FlyinError as error:
-                    raise FlyinError(str(error),
-                                    type_error=type_error,
-                                    ) + error.context
-            return wrapper
-        return decorator
-
-
-
-
-
-# from enum import Enum
-
-
-# class ErrorSeverity(Enum):
-#     Warning = "Warning"
-#     Error = "Error"
-
-
-# class ErrorLocation(Enum):
-#     ZONE = "Zone name is not valid"
-#     X_AXIS = "X coordinate is not valid"
-#     Y_AXIS = "Y coordinate is not valid"
 
 
 # class BaseError(Exception):

@@ -1,99 +1,72 @@
-from typing import List, Dict, Optional
- 
+from 
 from hube import Hub
 from edge import Edge
-from custom_error import FlyinError
+from map import Map
+from typing import Dict, List
+from collections import defaultdict
 
+class GraphBuilder:
+    def __init__(self) -> None:
+        self.graph: Dict[Hub, List[Edge]] = defaultdict(list)
+
+    def init_graph(self) -> None:
+        for edge in Map().edges:
+            self.graph[edge.destintion].append(edge)
+            self.graph[edge.source].append(edge)
+        return self.graph
+
+class Pri
 
 class Graph:
-    _instance: Optional['Graph'] = None
-    _initialized: bool = False
-
-    def __new__(cls) -> 'Graph':
-        if cls._instance is None:
-            cls._instance = super().__new__(cls)
-        return cls._instance
-
     def __init__(self) -> None:
-        if Graph._initialized is True:
-            return
-        Graph._initialized = True
-        self.number_drones: int = None
-        self.start_hub: Hub | None = None
-        self.end_hub: Hub | None = None
-        self.hubs: Dict[str, Hub] = {}
-        self.edges: List[Edge] = []
-
-    @FlyinError.check_error(type_error="Duplicate Zone")
-    def add_hub(self, hub: Hub) -> None:
-        if self.hubs.get(hub.name):
-            raise FlyinError('test',
-                             line_number=str(FlyinError.get_number_line()))
-        self.hubs[hub.name] = hub
-
-    @FlyinError.check_error(type_error='tet')
-    def set_start_hub(self, start_hub: Hub) -> None:
-        if self.start_hub is not None:
-            raise FlyinError('test',
-                             line_number=str(FlyinError.get_number_line()))
-        self.start_hub = start_hub
-        self.add_hub(start_hub)
+        self.graph = GraphBuilder().init_graph()
+        self.paths = 
     
-    @FlyinError.check_error(type_error='tesst')
-    def set_end_hub(self, end_hub: Hub) -> None:
-        if self.end_hub is not None:
-            raise FlyinError('test',
-                             line_number=str(FlyinError.get_number_line()))
-        self.end_hub = end_hub
-        self.add_hub(end_hub)
-    
-    @FlyinError.check_error(type_error='testsss')
-    def add_egde(self, edge: Edge) -> None:
-        self._init_edge_for_hubs(edge)
-        if {edge.source, edge.destintion} in [{edg.source, edg.destintion}
-                                              for edg in self.edges]:
-            raise FlyinError("testsssssssssssss",
-                             line_number=FlyinError.get_number_line())
-        self.edges.append(edge)    
+    def run(self) -> None:
+        print(self.graph)
 
-    def _init_edge_for_hubs(self, edge: Edge) -> None:
-        self._set_hub_source(edge)
-        self._set_hub_destintion(edge)
+# class PathFinder:
+#     def __init__(self, network: FlightNetwork) -> None:
+#         self.distances: Dict[Hub, int] = {vertex: float('inf') for vertex in network.hubs.values()}
+#         self.distances[network.start_hube] = 0
 
-    def _set_hub_source(self, edge: Edge) -> None:
-        if self.hubs.get(edge.source):
-            edge.source = self.hubs[edge.source]
-        else:
-            raise FlyinError("",
-                             line_number=FlyinError.get_number_line())
-
-    def _set_hub_destintion(self, edge: Edge) -> None:
-        if self.hubs.get(edge.destintion):
-            edge.destintion = self.hubs[edge.destintion]
-        else:
-            raise FlyinError("",
-                             line_number=FlyinError.get_number_line())
-
-    def _get_source_hub(self, name_zone: str) -> Hub:
-        return self.get_hub(name_zone)
+#     def find_all_paths(self, graph: Dict[Hub, List[tuple[Hub, Connection]]], start, end) -> None:
+#         pass
 
 
-    def _get_destination_hub(self, name_zone: str) -> Hub:
-        return self.get_hub(name_zone)        
+#     def Dijkstra(self, graph: Dict[Hub, List[tuple[Hub, Connection]]], start, end) -> None:
+#         priority_queue = PriorityQueue()
+#         priority_queue.push(0, start)
+#         paths = {vertex: None for vertex in graph.keys()}
+#         while priority_queue.is_empty():
+#             cost, hub = priority_queue.pop()
+#             if hub == end:
+#                 break
+#             if cost < self.distances[hub]:
+#                 continue
+#             for vertex, edgs in graph[hub]:
+#                 distance = edgs.meta['max_link_capacity'] + cost
+                
+#                 if distance < self.distances[vertex]:
+#                     self.distances[vertex] = distance
+#                     priority_queue.push(distance, vertex)
+#                     paths[vertex] = hub
+#         path = []
+#         current = end
+#         while current is not None:
+#             path.insert(0, current)
+#             current = paths[current]
 
-    @FlyinError.check_error(type_error="Zone not in valid hubs")
-    def get_hub(self, name_zone: str) -> Hub:
-        if self.hubs.get(name_zone) is None:
-            raise FlyinError(f"Zone name '{name_zone}' is not defined "
-                             "in the configuration file.",
-                             line_number=str(FlyinError.get_number_line()))
-        print(self.hubs)
-        return self.hubs[name_zone]
 
-    @FlyinError.check_error(type_error='test')
-    def set_number_drones(self, number_drones: int) -> None:
-        if self.number_drones is not None:
-            raise FlyinError('test',
-                             line_number=FlyinError.get_number_line())
-        self.number_drones = number_drones
+#     def save_path(self) -> bool:
+#         if len(self.stack_vertex) == 0:
+#             return True
+#         return True
 
+#     def print_data(self, data):
+#         if isinstance(data, list):
+#             for d in data:
+#                 print(d)
+#         if isinstance(data, dict):
+#             for key in data.keys():
+#                 print(data[key])
