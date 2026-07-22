@@ -28,7 +28,7 @@ class Graph:
         pass
 
     def find_all_paths(self) -> None:
-        print(self.graph)
+        # print(self.graph) 
         ss = self.dijkstra.run(self.graph,
                                Map().get_start(),
                                Map().get_end())

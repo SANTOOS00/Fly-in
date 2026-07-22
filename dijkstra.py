@@ -14,32 +14,29 @@ class Dijkstra:
             start,
             end
             ) -> List[Hub]:
-        # print(graph)
-        # heap: List[int, Hub] = []
-        # heapq.heappush(heap, (0, Map().get_start()))
+        heap: List[int, Hub] = []
+        heapq.heappush(heap, (0, Map().get_start()))
 
-        # self._init_data(graph)
-        # while True:
-        #     cost, hub_new = heapq.heappop(heap)
-        #     if Map().get_end() == hub_new:
-        #         print("is ok")
-        #         break
-        #     for ajarhub, edge in graph[hub_new]:
-        #         desti: int = cost + ajarhub.zone
-        #         if desti < self.distances[ajarhub]:
-        #             heapq.heappush(heap, (desti, ajarhub))
-        #             self.distances[ajarhub] = desti
-        #             self.paths[ajarhub] = hub_new
-        # return self.get_path()
-        return ''
+        self._init_data(graph)
+        while True:
+            cost, hub_new = heapq.heappop(heap)
+            if Map().get_end() == hub_new:
+                break
+            for ajarhub, _ in graph[hub_new]:
+                desti: int = cost + ajarhub.zone
+                if desti < self.distances[ajarhub]:
+                    heapq.heappush(heap, (  desti, ajarhub))
+                    self.distances[ajarhub] = desti
+                    self.paths[ajarhub] = hub_new
+        return self.get_path()
+
     def get_path(self) -> List[Hub]:
         path: List = []
         sourch = Map().get_end()
-        # print(sourch)
-        print(self.paths[Map().get_end()])
-        while sourch is not None:
-            path.insert(0, self.paths[sourch])
+        while self.paths.get(sourch):
+            path.insert(0, sourch)
             sourch = self.paths[sourch]
+        path.insert(0, sourch)
         return path
 
 
