@@ -56,6 +56,7 @@ class Parseline:
             case "NB_DRONES":
                 self._create_number_drones()
             case "START_HUB":
+
                 self._create_start_hube()
             case "HUB":
                 self._create_hube()

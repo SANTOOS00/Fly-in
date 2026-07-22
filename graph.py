@@ -1,30 +1,34 @@
-from 
 from hube import Hub
 from edge import Edge
 from map import Map
-from typing import Dict, List
+from typing import Dict, List, Tuple
 from collections import defaultdict
+from dijkstra import Dijkstra
+
 
 class GraphBuilder:
     def __init__(self) -> None:
-        self.graph: Dict[Hub, List[Edge]] = defaultdict(list)
+        self.graph: Dict[Hub, List[Tuple[Hub, Edge]]] = defaultdict(list)
 
-    def init_graph(self) -> None:
+    def init_graph(self) -> Dict[Hub, List[Tuple[Hub, Edge]]]:
         for edge in Map().edges:
-            self.graph[edge.destintion].append(edge)
-            self.graph[edge.source].append(edge)
+            self.graph[edge.destintion].append((edge.source, edge))
+            self.graph[edge.source].append((edge.destintion, edge))
         return self.graph
 
-class Pri
 
 class Graph:
     def __init__(self) -> None:
-        self.graph = GraphBuilder().init_graph()
-        self.paths = 
-    
-    def run(self) -> None:
-        print(self.graph)
+        self.graph: Dict[Hub, List[Tuple[Hub, Edge]]]    = GraphBuilder().init_graph()
+        self.paths = []
+        self.dijkstra = Dijkstra()
 
+    def run(self) -> None:
+        pass
+
+    def find_all_paths(self) -> None:
+        ss = self.dijkstra.run(self.graph)
+    
 # class PathFinder:
 #     def __init__(self, network: FlightNetwork) -> None:
 #         self.distances: Dict[Hub, int] = {vertex: float('inf') for vertex in network.hubs.values()}

@@ -7,7 +7,9 @@ class Fly_in:
     def run() -> None:
         parser = Parseline()
         parser.parse_file()
-        Graph().run()
+        graph = Graph()
+        graph.find_all_paths()
+
 if __name__ == "__main__":
     try:
         launcher = Fly_in()

@@ -11,6 +11,9 @@ class Hub:
     max_drones: int = field(hash=False, compare=False, default=1)
     color: str =  field(hash=False, compare=False, default='#FFFFFF')
 
+    def __lt__(self, oth: 'Hub') -> bool:
+        return self.zone < oth.zone
+
     class Color(Enum):
         BLACK = "black"
         RED = "red"

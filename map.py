@@ -20,10 +20,16 @@ class Map:
         self.number_drones: int = None
         self.start_hub: Hub | None = None
         self.end_hub: Hub | None = None
-        self.hubs: Dict[str, Hub] = {}
+        self.hubs: Dict[Hub, Hub] = {}
         self.edges: List[Edge] = []
 
-    def add_hub(self, hub: Hub) -> None:
+    def get_start(self) -> Hub:
+        return self.start_hub
+
+    def get_end(self) -> None:
+        return self.end_hub
+
+    def add_hub(self, hub: Hub) -> Hub:
         if self.hubs.get(hub.name):
             raise FlyinError('test',
                              type_error="Duplicate Zone",
