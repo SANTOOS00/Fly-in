@@ -1,7 +1,7 @@
 SCRIPT = main.py
 
 
-MAP ?= maps/easy/01_linear_path.txt
+MAP ?= maps/easy/03_basic_capacity.txt
 
 # .PHONY: all run clean lint install debug
 

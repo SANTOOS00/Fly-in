@@ -11,7 +11,8 @@ class GraphBuilder:
         self.graph: Dict[Hub, List[Tuple[Hub, Edge]]] = defaultdict(list)
 
     def init_graph(self) -> Dict[Hub, List[Tuple[Hub, Edge]]]:
-        for edge in Map().edges:
+        edges = Map().edges
+        for edge in edges:
             self.graph[edge.destintion].append((edge.source, edge))
             self.graph[edge.source].append((edge.destintion, edge))
         return self.graph
@@ -27,7 +28,10 @@ class Graph:
         pass
 
     def find_all_paths(self) -> None:
-        ss = self.dijkstra.run(self.graph)
+        print(self.graph)
+        ss = self.dijkstra.run(self.graph,
+                               Map().get_start(),
+                               Map().get_end())
     
 # class PathFinder:
 #     def __init__(self, network: FlightNetwork) -> None:
