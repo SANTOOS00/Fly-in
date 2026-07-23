@@ -5,28 +5,27 @@ from edge import Edge
 
 class Dijkstra:
     def __init__(self) -> None:
-        self.distances: Dict[Hub, int]
         self.paths: Dict[Hub, Hub] = {}
-
+        self.heap = []
     def run(self,
             graph: Dict[Hub, List[Tuple[Hub, Edge]]],
-            start_hub,
-            end_hub
-            ) -> List[Hub]:
-        heap: List[int, Hub] = []
+            start_hub: Hub,
+            end_hub: Hub
+            ) -> tuple[List[Hub], float]:
+        heap: List[Tuple[int, Hub]] = []
         heap.append((0, start_hub))
         self._set_distances_inf(graph, start_hub)
-        while True:
+        while heap:
             cost, hub_new = queue.heappop(heap)
             if end_hub == hub_new:
                 break
-            for ajarhub, _ in graph[hub_new]:
-                desti: int = cost + ajarhub.zone
-                if desti < self.distances[ajarhub]:
-                    queue.heappush(heap, (desti, ajarhub))
-                    self.distances[ajarhub] = desti
-                    self.paths[ajarhub] = hub_new
-        return self.get_path(end_hub)
+            for neighbor_hub, _ in graph[hub_new]:
+                new_cost: int = cost + neighbor_hub.get_type_zone()
+                if new_cost < self.distances[neighbor_hub]:
+                    queue.heappush(heap, (new_cost, neighbor_hub))
+                    self.distances[neighbor_hub] = new_cost
+                    self.paths[neighbor_hub] = hub_new
+        return (self.get_path(end_hub), self.distances[end_hub])
 
     def get_path(self, end_hub: Hub) -> List[Hub]:
         path: List = []
@@ -41,5 +40,5 @@ class Dijkstra:
         return len(self.heap)
 
     def _set_distances_inf(self, graph: Dict[Hub, List[Tuple[Hub, Edge]]], start: Hub) -> None:
-        self.distances = {hub: float('inf') for hub in graph.keys()}
+        self.distances: Dict[Hub, float] = {hub: float('inf') for hub in graph.keys()}
         self.distances[start] = 0

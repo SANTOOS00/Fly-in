@@ -1,18 +1,20 @@
 from dataclasses import dataclass, field
 from enum import Enum
-
-
+from typing import Union
 @dataclass(frozen=True)
 class Hub:
     name: str
     x: int = field(hash=False, compare=False)
     y: int = field(hash=False, compare=False)
-    zone: "Hub.Zone" = field(hash=False, compare=False, default=None)
+    zone: "Hub.Zone" = field(hash=False, compare=False)
     max_drones: int = field(hash=False, compare=False, default=1)
     color: str =  field(hash=False, compare=False, default='#FFFFFF')
 
     def __lt__(self, oth: 'Hub') -> bool:
-        return self.zone < oth.zone
+        return self.zone.value < oth.zone.value
+
+    def get_type_zone(self) -> int:
+        return int(self.zone.value)
 
     class Color(Enum):
         BLACK = "black"
@@ -43,14 +45,13 @@ class Hub:
                 return '#FFFFFF'
 
     class Zone(Enum):
-        PRIORITY = 1
-        NORMAL = 1
         RESTRICTED = 2
+        PRIORITY = 1
         BLOCKED = float('inf')
+        NORMAL = 1
 
         @classmethod
-        def get_type_zone(cls, type_zone: str, number) -> "Hub.Zone":
-            print(number)
+        def get_type_zone(cls, type_zone: str) -> Union['Hub.Zone', None]:
             match type_zone.upper():
                 case "NORMAL":
                     return cls.NORMAL
@@ -61,8 +62,8 @@ class Hub:
                 case "RESTRICTED":
                     return cls.RESTRICTED
                 case _:
-                    pass
-    zone = Zone.NORMAL.value
+                    return None
+    zone: Zone = Zone.NORMAL
 
 
 COLOR_HEX = {

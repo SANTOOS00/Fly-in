@@ -1,5 +1,6 @@
 from custom_error import FlyinError
 from typing import Tuple, List
+from typing_extensions import override
 from edge import Edge
 from hube import Hub
 from map import Map
@@ -10,17 +11,19 @@ class BaseParser:
     def __init__(self, line_str: str) -> None:
         self.line_str: str = line_str
 
+    @override
     def parser(self) -> None:
         pass
 
 class EdgeParser(BaseParser):
+    @override
     def parser(self) -> Edge:
         self._validate_edge_syntax()
         match = re.match(r'^([^\s-]+)-([^\s-]+)(.*)', self.line_str)
         source, destination, *meta = match.groups()
         edge = Edge(
-            source=source,
-            destintion=destination
+            source=Map().get_hub(source),
+            destintion=Map().get_hub(destination)
         )
         return edge
 
@@ -46,6 +49,7 @@ class EdgeParser(BaseParser):
 
 
 class HubParser(BaseParser):
+    @override
     def parser(self) -> Hub:
         self._validate_syntax()
         match = re.match(r'^(\w+)\s+(-?\d+)\s+(-?\d+)(.*)',

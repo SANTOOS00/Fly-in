@@ -11,11 +11,11 @@ class   FlyinError(Exception):
         return f"{message} {context}"
 
     @classmethod
-    def add_line_number(cls: 'FlyinError') -> None:
+    def add_line_number(cls) -> None:
         cls._line_number += 1
     
     @classmethod
-    def get_number_line(cls: 'FlyinError') -> str:
+    def get_number_line(cls) -> str:
         return str(cls._line_number)
 
 
