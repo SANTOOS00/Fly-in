@@ -4,7 +4,7 @@ from map import Map
 from typing import Dict, List, Tuple
 from collections import defaultdict
 from dijkstra import Dijkstra
-
+import heapq as queue
 
 class GraphBuilder:
     def __init__(self) -> None:
@@ -23,16 +23,26 @@ class Graph:
         self.graph: Dict[Hub, List[Tuple[Hub, Edge]]]    = GraphBuilder().init_graph()
         self.paths = []
         self.dijkstra = Dijkstra()
+        self.star_hub = Map().get_start()        
+        self.end_hub = Map().get_end()
 
     def run(self) -> None:
         pass
 
     def find_all_paths(self) -> None:
-        # print(self.graph) 
-        ss = self.dijkstra.run(self.graph,
-                               Map().get_start(),
-                               Map().get_end())
-    
+        path, cost = self.dijkstra.run(self.graph,
+                               self.star_hub,
+                               self.end_hub)
+        
+        for k in range(1, 5):
+            graph_cope = self.graph.copy()
+            for hub in 
+
+
+
+
+
+
 # class PathFinder:
 #     def __init__(self, network: FlightNetwork) -> None:
 #         self.distances: Dict[Hub, int] = {vertex: float('inf') for vertex in network.hubs.values()}
