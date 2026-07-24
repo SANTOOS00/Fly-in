@@ -11,21 +11,21 @@ class Dijkstra:
             graph: Dict[Hub, List[Tuple[Hub, Edge]]],
             start_hub: Hub,
             end_hub: Hub
-            ) -> tuple[List[Hub], float]:
+            ) -> tuple[List[Hub], float] | tuple[None, float]:
         heap: List[Tuple[int, Hub]] = []
         heap.append((0, start_hub))
         self._set_distances_inf(graph, start_hub)
         while heap:
             cost, hub_new = queue.heappop(heap)
             if end_hub == hub_new:
-                break
+                return (self.get_path(end_hub), cost)
             for neighbor_hub, _ in graph[hub_new]:
                 new_cost: int = cost + neighbor_hub.get_type_zone()
                 if new_cost < self.distances[neighbor_hub]:
                     queue.heappush(heap, (new_cost, neighbor_hub))
                     self.distances[neighbor_hub] = new_cost
                     self.paths[neighbor_hub] = hub_new
-        return (self.get_path(end_hub), self.distances[end_hub])
+        return (None, float('inf'))
 
     def get_path(self, end_hub: Hub) -> List[Hub]:
         path: List = []
