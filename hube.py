@@ -8,7 +8,8 @@ class Hub:
     y: int = field(hash=False, compare=False)
     zone: "Hub.Zone" = field(hash=False, compare=False)
     max_drones: int = field(hash=False, compare=False, default=1)
-    color: str =  field(hash=False, compare=False, default='#FFFFFF')
+    color: str = field(hash=False, compare=False, default='#FFFFFF')
+    size_zone: int  = field(hash=False, compare=False, default=0)
 
     def __lt__(self, oth: 'Hub') -> bool:
         return self.zone.value < oth.zone.value
