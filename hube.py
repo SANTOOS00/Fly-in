@@ -2,18 +2,21 @@ from dataclasses import dataclass, field
 from enum import Enum
 from typing import Union
 
-@dataclass(frozen=True)
 class Hub:
-    name: str
-    x: int = field(hash=False, compare=False)
-    y: int = field(hash=False, compare=False)
-    zone: "Hub.Zone" = field(hash=False)
-    max_drones: int = field(hash=False, compare=False, default=1)
-    color: str = field(hash=False, compare=False, default='#FFFFFF')
-    size_zone: int  = field(hash=False, compare=False, default=0)
+    def __init__(self, name:str, x: int, y: int) -> None:
+        self.name = name
+        x = x
+        y = y
+        self.zone: "Hub.Zone" = Hub.Zone.NORMAL
+        self.max_drones: int = 1
+        self.color: str = '#FFFFFF'
+        self.size_zone: int  = 0
 
     def __lt__(self, oth: 'Hub') -> bool:
         return self.zone.value < oth.zone.value
+
+    def __hash__(self) -> int:
+        return hash(self.name)
 
     def get_type_zone(self) -> float:
         return float(self.zone.value)
@@ -66,7 +69,6 @@ class Hub:
                     return cls.RESTRICTED
                 case _:
                     return None
-
 
 COLOR_HEX = {
     Hub.Color.BLACK: "#000000",
