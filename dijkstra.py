@@ -1,14 +1,14 @@
 import heapq as queue
-from hube import Hub
 from typing import List, Dict, Tuple
-from edge import Edge
+from hube import Hub
+from adj_intrfc import ADJ_LIST
 
 class Dijkstra:
     def __init__(self) -> None:
         self.paths: Dict[Hub, Hub] = {}
         self.heap = []
     def run(self,
-            graph: Dict[Hub, List[Tuple[Hub, Edge]]],
+            graph: ADJ_LIST,
             start_hub: Hub,
             end_hub: Hub
             ) -> tuple[List[Hub], float]:
@@ -19,9 +19,9 @@ class Dijkstra:
             cost, hub_new = queue.heappop(heap)
             if end_hub == hub_new:
                 return self.get_path(end_hub)
-            for neighbor_hub, _ in graph[hub_new]:
+            for neighbor_hub, edge in graph[hub_new]:
                 new_cost: int = cost + self.get_hub_score(neighbor_hub)
-                if new_cost < self.distances[neighbor_hub]:
+                if new_cost < self.distances[neighbor_hub] and edge.has_available_capacity():
                     queue.heappush(heap, (new_cost, neighbor_hub))
                     self.distances[neighbor_hub] = new_cost
                     self.paths[neighbor_hub] = hub_new
@@ -41,6 +41,6 @@ class Dijkstra:
         path.insert(0, sourch)
         return path
 
-    def _set_vertex_inf(self, graph: Dict[Hub, List[Tuple[Hub, Edge]]], start: Hub) -> None:
+    def _set_vertex_inf(self, graph: ADJ_LIST, start: Hub) -> None:
         self.distances: Dict[Hub, float] = {hub: float('inf') for hub in graph.keys()}
         self.distances[start] = 0

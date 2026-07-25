@@ -28,7 +28,8 @@ class Simulation:
                                      Map().get_end())
             if not path:
                 continue
-            
+            drone.drone_inta9alt_ila_hub(path[1], self.graph)
+
     def check_finished(self) -> bool:
         if self.graph.end_hub.size_zone == len(self.drones):
             return False

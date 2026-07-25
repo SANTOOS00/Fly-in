@@ -1,18 +1,15 @@
-from hube import Hub
-from edge import Edge
-from map import Map
-from typing import Dict, List, Tuple, NewType
+from typing import List
 from collections import defaultdict
-
-
-ADJ_LIST = NewType('ADJ_LIST', Dict[Hub, List[tuple[Hub, Edge]]])
-
+from hube import Hub
+from adj_intrfc import ADJ_LIST
+from edge import Edge
 
 class GraphBuilder:
     def __init__(self) -> None:
         self.graph: ADJ_LIST = defaultdict(list)
 
     def init_graph(self) -> ADJ_LIST:
+        from map import Map
         edges = Map().edges
         for edge in edges:
             self.graph[edge.destintion].append((edge.source, edge))
@@ -21,22 +18,29 @@ class GraphBuilder:
 
 class Graph:
     def __init__(self) -> None:
+        from map import Map
         self.graph: ADJ_LIST = GraphBuilder().init_graph()
-        self.star_hub = Map().get_start()        
+        self.star_hub = Map().get_start() 
         self.end_hub = Map().get_end()
 
     def run(self) -> None:
         pass
 
     @staticmethod
-    def remove_edge_visidet(edges: List[Hub], adj_list: ADJ_LIST) -> None:
-        # print(edges)
+    def remove_edge_visidet(edges: List['Hub'], adj_list: ADJ_LIST) -> None:
         pass
-
 
     def get_copy_adj_list(self) -> ADJ_LIST:
         return self.graph.copy()
 
+    def is_end_hub(self, hub: Hub) -> bool:
+        return self.end_hub == hub
+
+    def get_edge(self, from_hub: Hub, to_hub: Hub) ->  Edge | None:
+        for hub, edge in self.graph[from_hub]:
+            if hub.name == to_hub.name:
+                return edge
+        return None
 
 
 

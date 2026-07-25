@@ -1,9 +1,6 @@
-
-from hube import Hub
 from typing import List
-from edge import Edge
 from graph import Graph
-
+from hube import Hub
 
 class Drone:
     def __init__(self, id: int, hub_new: Hub) -> None:
@@ -12,8 +9,9 @@ class Drone:
         self.path_visidet: List[Hub] = [hub_new]
 
     def drone_inta9alt_ila_hub(self,
-                               hub: Hub,
-                               edge: Edge,
+                               hub_next: Hub,
                                graph: Graph) -> None:
-        self.hub_new.size_zone -= 1
+        edge = graph.get_edge(self.hub_new, hub_next)
         
+        if graph.is_end_hub(hub_next):
+            pass

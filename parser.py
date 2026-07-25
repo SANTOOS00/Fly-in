@@ -1,6 +1,6 @@
 
 from pathlib import Path
-from parser_data import BaseParser, HubParser, EdgeParser, FlyinError
+from parser_data import HubParser, EdgeParser, FlyinError
 from map import Map
 from hube import Hub
 from edge import Edge
