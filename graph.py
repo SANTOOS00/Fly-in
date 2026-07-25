@@ -1,33 +1,41 @@
 from hube import Hub
 from edge import Edge
 from map import Map
-from typing import Dict, List, Tuple, cast
+from typing import Dict, List, Tuple, NewType
 from collections import defaultdict
-from dijkstra import Dijkstra
-import heapq as queue
+
+
+ADJ_LIST = NewType('ADJ_LIST', Dict[Hub, List[tuple[Hub, Edge]]])
+
 
 class GraphBuilder:
     def __init__(self) -> None:
-        self.graph: Dict[Hub, List[tuple[Hub, Edge]]] = defaultdict(list)
+        self.graph: ADJ_LIST = defaultdict(list)
 
-    def init_graph(self) -> Dict[Hub, List[Tuple[Hub, Edge]]]:
+    def init_graph(self) -> ADJ_LIST:
         edges = Map().edges
         for edge in edges:
-            self.graph[edge.destintion].append((cast(Hub, edge.source), edge))
-            self.graph[edge.source].append((cast(Hub, edge.destintion), edge))
+            self.graph[edge.destintion].append((edge.source, edge))
+            self.graph[edge.source].append((edge.destintion, edge))
         return self.graph
 
 class Graph:
     def __init__(self) -> None:
-        self.graph: Dict[Hub, List[tuple[Hub, Edge]]] = GraphBuilder().init_graph()
+        self.graph: ADJ_LIST = GraphBuilder().init_graph()
         self.star_hub = Map().get_start()        
         self.end_hub = Map().get_end()
 
     def run(self) -> None:
         pass
 
-    def romve_edge(self, edges: List[Hub]) -> None:
+    @staticmethod
+    def remove_edge_visidet(edges: List[Hub], adj_list: ADJ_LIST) -> None:
+        # print(edges)
         pass
+
+
+    def get_copy_adj_list(self) -> ADJ_LIST:
+        return self.graph.copy()
 
 
 
