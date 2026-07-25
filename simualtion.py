@@ -22,7 +22,9 @@ class Simulation:
         adj_list: ADJ_LIST
         for drone in self.drones:
             adj_list = self.graph.get_copy_adj_list()
-            self.graph.remove_edge_visidet(drone.path_visidet, adj_list)          
+            self.graph.remove_edge_visited(drone.path_visited, adj_list)
+            if drone.test_name():
+                drone.drone_inta9alt_ila_hub(path[1], self.graph)         
             path = self.dijkstra.run(adj_list,
                                      drone.hub_new,
                                      Map().get_end())
