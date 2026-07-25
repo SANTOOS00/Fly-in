@@ -18,8 +18,11 @@ class Hub:
     def __hash__(self) -> int:
         return hash(self.name)
 
-    def get_type_zone(self) -> float:
+    def get_zone_value(self) -> float:
         return float(self.zone.value)
+
+    def is_full(self) -> bool:
+        return self.size_zone == self.max_drones
 
     class Color(Enum):
         BLACK = "black"

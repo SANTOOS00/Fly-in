@@ -65,9 +65,6 @@ class HubParser(BaseParser):
 
     
     def init_meta_data(self, hub: Hub, meta: List[str]) -> None:
-        if hub.name == 'gate3':
-            hub.zone = Hub.Zone.get_type_zone('BLOCKED')
-
         pass
 
     def _validate_syntax(self) -> None:
