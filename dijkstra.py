@@ -48,6 +48,7 @@ class Dijkstra:
 
         while sourch in self.paths:
             if sourch in visited:
+                
                 print(f"[Error Cycle] Loop detected at hub: {sourch}")
                 break
                 

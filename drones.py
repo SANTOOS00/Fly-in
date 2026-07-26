@@ -33,7 +33,7 @@ class Drone:
                 self._reset_edge_turns()
 
             elif hub_next.get_zone_value() > 1:
-                print("ss")
+        
                 self.current_hub.decrease_zone_size()
                 self.current_edge = edge
                 self.set_hub_next(hub_next)

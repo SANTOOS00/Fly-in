@@ -17,18 +17,12 @@ class Simulation:
     def run(self) -> None:
         torn = 0
         while self.check_finished():
-            # print(torn)
             self.track_drone_zones()
-            self.track_drone_zones()
-            self.track_drone_zones()
-            # torn += 1
-            # break
-        print(torn)
     def track_drone_zones(self) -> None:
         adj_list: Adj_List
         for drone in self.drones:
-            print(drone.current_hub.name, drone.id)
             if drone.drone_in_edge():
+                print("is ok")
                 drone.drone_inta9alt_ila_hub(None, self.graph)
                 continue
 
