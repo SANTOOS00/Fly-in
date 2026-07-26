@@ -2,8 +2,7 @@
 from pathlib import Path
 from parser_data import HubParser, EdgeParser, FlyinError
 from map import Map
-from hube import Hub
-from edge import Edge
+from modules import Hub, Edge
 import os
 import sys
 

@@ -1,6 +1,5 @@
 from typing import List, Dict, Optional
-from hube import Hub
-from edge import Edge
+from modules import Hub, Edge
 from custom_error import FlyinError
 
 

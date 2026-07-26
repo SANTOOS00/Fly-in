@@ -1,14 +1,13 @@
 from typing import List
 from collections import defaultdict
-from hube import Hub
-from adj_intrfc import ADJ_LIST
-from edge import Edge
+from modules import Hub, Edge, Adj_List
+
 
 class GraphBuilder:
     def __init__(self) -> None:
-        self.graph: ADJ_LIST = defaultdict(list)
+        self.graph: Adj_List = defaultdict(list)
 
-    def init_graph(self) -> ADJ_LIST:
+    def init_graph(self) -> Adj_List:
         from map import Map
         edges = Map().edges
         for edge in edges:
@@ -19,7 +18,7 @@ class GraphBuilder:
 class Graph:
     def __init__(self) -> None:
         from map import Map
-        self.graph: ADJ_LIST = GraphBuilder().init_graph()
+        self.graph: Adj_List = GraphBuilder().init_graph()
         self.star_hub = Map().get_start() 
         self.end_hub = Map().get_end()
 
@@ -27,10 +26,11 @@ class Graph:
         pass
 
     @staticmethod
-    def remove_edge_visidet(edges: List['Hub'], adj_list: ADJ_LIST) -> None:
+    def remove_edge_visited(edges: List['Hub'], adj_list: Adj_List) -> None:
+        # for hh in edges:
+        #     print(hh.name)
         pass
-
-    def get_copy_adj_list(self) -> ADJ_LIST:
+    def get_copy_adj_list(self) -> Adj_List:
         return self.graph.copy()
 
     def is_end_hub(self, hub: Hub) -> bool:

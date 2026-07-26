@@ -1,6 +1,8 @@
-from dataclasses import dataclass, field
+from typing import List
+from typing import NewType, Dict
 from enum import Enum
 from typing import Union
+ 
 
 class Hub:
     def __init__(self, name:str, x: int, y: int) -> None:
@@ -23,6 +25,13 @@ class Hub:
 
     def is_full(self) -> bool:
         return self.size_zone == self.max_drones
+
+    def increase_zone_size(self) -> None:
+        self.size_zone += 1
+
+    def decrease_zone_size(self) -> None:
+        self.size_zone -= 1
+
 
     class Color(Enum):
         BLACK = "black"
@@ -93,3 +102,20 @@ COLOR_HEX = {
     Hub.Color.CRIMSON: "#DC143C",
     Hub.Color.RAINBOW: "#FF69B4",
 }
+
+
+class Edge:
+    def __init__(self, source: Hub, destintion: Hub) -> None:
+        self.source = source
+        self.destintion = destintion
+        self.max_link_capacity: int = 1
+        self.size_edge = 0
+
+    def has_available_capacity(self) -> bool:
+        return self.max_link_capacity > self.size_edge
+
+    def add_drone(self, drone_id: int) -> None:
+        self.drones_on_edge.append(drone_id)
+
+
+Adj_List = NewType('Adj_List', Dict[Hub, List[tuple[Hub, Edge]]])

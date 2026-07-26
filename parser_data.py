@@ -1,8 +1,7 @@
 from custom_error import FlyinError
 from typing import Tuple, List
 from typing_extensions import override
-from edge import Edge
-from hube import Hub
+from modules import Hub, Edge
 from map import Map
 import re
 

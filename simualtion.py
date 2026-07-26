@@ -1,8 +1,8 @@
 from drones import Drone
 from typing import List
 from map import Map
-from hube import Hub
-from graph import Graph, ADJ_LIST
+from modules import Adj_List
+from graph import Graph
 from dijkstra import Dijkstra
 
 class Simulation:
@@ -15,27 +15,44 @@ class Simulation:
         self.dijkstra = Dijkstra()
 
     def run(self) -> None:
+        torn = 0
         while self.check_finished():
+            # print(torn)
             self.track_drone_zones()
-            break
+            self.track_drone_zones()
+            self.track_drone_zones()
+            # torn += 1
+            # break
+        print(torn)
     def track_drone_zones(self) -> None:
-        adj_list: ADJ_LIST
+        adj_list: Adj_List
         for drone in self.drones:
+            print(drone.current_hub.name, drone.id)
+            if drone.drone_in_edge():
+                drone.drone_inta9alt_ila_hub(None, self.graph)
+                continue
+
             adj_list = self.graph.get_copy_adj_list()
             self.graph.remove_edge_visited(drone.path_visited, adj_list)
-            if drone.test_name():
-                drone.drone_inta9alt_ila_hub(path[1], self.graph)         
             path = self.dijkstra.run(adj_list,
-                                     drone.hub_new,
+                                     drone.get_hub_new(),
                                      Map().get_end())
+
             if not path:
                 continue
+            # print(type(path[1]))
             drone.drone_inta9alt_ila_hub(path[1], self.graph)
+            # print("ll")
+            if self.graph.is_end_hub(path[1]):
+                self.remove_drone(drone)
 
     def check_finished(self) -> bool:
-        if self.graph.end_hub.size_zone == len(self.drones):
+        if len(self.drones) == 0:
             return False
         return True
+
+    def remove_drone(self, drone: Drone) -> None:
+        self.drones.remove(drone)
 
 
 
