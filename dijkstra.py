@@ -12,9 +12,6 @@ class Dijkstra:
             start_hub: Hub,
             end_hub: Hub
             ) -> List[Hub]:
-        if not end_hub:
-            return None
-
         heap: List[Tuple[int, Hub]] = [(0.0, start_hub)]
         self._set_vertex_inf(graph, start_hub)
         while heap:

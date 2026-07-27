@@ -30,6 +30,16 @@ class Graph:
         # for hh in edges:
         #     print(hh.name)
         pass
+
+    
+    def remve_edge_is_adj_list(adj_list: Adj_List, edge_remove: Edge) -> None:
+        for hub, edge in adj_list[edge_remove.destintion]:
+            if hub == edge.source:
+                adj_list.pop((hub, edge))
+        for hub, edge in adj_list[edge_remove.source]:
+                if hub == edge.destintion:
+                    adj_list.pop((hub, edge))
+                
     def get_copy_adj_list(self) -> Adj_List:
         return self.graph.copy()
 
