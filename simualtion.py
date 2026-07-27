@@ -31,43 +31,32 @@ class Simulation:
 
             adj_list = self.graph.get_copy_adj_list()
             self.graph.remove_edge_visited(drone.path_visited, adj_list)
-            path = self.check_hub_bossiple()
-            if 
-            print('=====================')
-            print(drone.id)
-            print('======================')
-            if not path:
+            hub_next = self.check_hub_bossiple()
+            if not hub_next:
                 continue
-            print('---------------------')
-            print(drone.id)
-            for hub in path:
-                print(hub.name)
-            print('---------------------')
-
-            drone.drone_inta9alt_ila_hub(path[1], self.graph)
-            if self.graph.is_end_hub(path[1]):
+            drone.drone_inta9alt_ila_hub(hub_next, self.graph)
+            if self.graph.is_end_hub(hub_next):
                 self.remove_drone(drone)
 
     def check_hub_bossiple(self, drone: Drone) -> Hub | None:
         adj_list: Adj_List
-
+        hub_next: Hub | None = None
         while True:
-
             path = self.dijkstra.run(adj_list,
                                  drone.get_hub_new(),
                                  self.end_hub)
             if not path:
                 return None
-            if not self.check_is_move_valid(path[0], path[1]):
+            if self.check_is_move_valid(path[0], path[1]):
                 return None
             
-            return path[1]
+        return hub_next
 
     def check_is_move_valid(self, from_hub: Hub, to_hub: Hub) -> bool:
-        if to_hub.is_full():
-            return False
         edge = self.graph.get_edge(from_hub, to_hub)
-        if edge.has_available_capacity():
+        if not edge.has_available_capacity():
+            return True
+        if not to_hub.is_full():
             return True
         return False
         

@@ -14,7 +14,6 @@ class Drone:
     def drone_inta9alt_ila_hub(self,
                                hub_next: Hub | None,
                                graph: Graph) -> None:
-        # print(hub_next.name)
         if not hub_next:
             
             if self.hub_next.get_zone_value() == self.torne_moradart_edge:

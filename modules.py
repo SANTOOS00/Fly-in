@@ -24,7 +24,7 @@ class Hub:
         return float(self.zone.value)
 
     def is_full(self) -> bool:
-        return self.size_zone == self.max_drones
+        return self.size_zone > self.max_drones
 
     def increase_zone_size(self) -> None:
         self.size_zone += 1
