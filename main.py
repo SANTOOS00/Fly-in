@@ -1,7 +1,6 @@
 from parser import Parseline, FlyinError
 import sys
 from simualtion import Simulation
-from map import Map
 
 class Fly_in:
     @staticmethod

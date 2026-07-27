@@ -8,4 +8,5 @@
 
     connection: 1-2 [max_link_capacity=4]
     connection: 2-3 [max_link_capacity=4]
+    connection: 2-3 [max_link_capacity=4]
     connection: 3-4 [max_link_capacity=4]

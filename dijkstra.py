@@ -1,46 +1,82 @@
 import heapq as queue
 from typing import List, Dict, Tuple
-from hube import Hub
-from adj_intrfc import ADJ_LIST
+from modules import Hub, Adj_List
+from map import Map
 
 class Dijkstra:
     def __init__(self) -> None:
         self.paths: Dict[Hub, Hub] = {}
         self.heap = []
     def run(self,
-            graph: ADJ_LIST,
+            graph: Adj_List,
             start_hub: Hub,
             end_hub: Hub
-            ) -> tuple[List[Hub], float]:
-        heap: List[Tuple[int, Hub]] = []
-        heap.append((0, start_hub))
+            ) -> List[Hub]:
+        if not end_hub:
+            return None
+
+        heap: List[Tuple[int, Hub]] = [(0.0, start_hub)]
         self._set_vertex_inf(graph, start_hub)
         while heap:
             cost, hub_new = queue.heappop(heap)
+
             if end_hub == hub_new:
-                return self.get_path(end_hub)
+                return self.get_path(start_hub)
             for neighbor_hub, edge in graph[hub_new]:
-                new_cost: int = cost + self.get_hub_score(neighbor_hub)
-                if new_cost < self.distances[neighbor_hub] and edge.has_available_capacity():
+                new_cost: int = cost + neighbor_hub.get_zone_value()
+                if new_cost < self.distances[neighbor_hub]:
                     queue.heappush(heap, (new_cost, neighbor_hub))
                     self.distances[neighbor_hub] = new_cost
                     self.paths[neighbor_hub] = hub_new
         return None
-
-    def get_hub_score(self, hub: Hub) -> float:
-        if hub.is_full():
-            return float('inf')
-        return hub.get_zone_value()
         
-    def get_path(self, end_hub: Hub) -> List[Hub]:
-        path: List = []
-        sourch = end_hub
-        while self.paths.get(sourch):
-            path.insert(0, sourch)
+    def get_path(self, start_hub: Hub, ) -> List[Hub]:
+        path: List[Hub] = []
+        sourch = Map().get_end()
+        while sourch != start_hub:
+            path.append(sourch)
             sourch = self.paths[sourch]
-        path.insert(0, sourch)
+        path.append(sourch)
+        path.reverse()
         return path
 
-    def _set_vertex_inf(self, graph: ADJ_LIST, start: Hub) -> None:
+    def _set_vertex_inf(self, graph: Adj_List, start: Hub) -> None:
         self.distances: Dict[Hub, float] = {hub: float('inf') for hub in graph.keys()}
         self.distances[start] = 0
+
+
+# from parser import Parseline
+# from graph import GraphBuilder
+# from map import Map
+
+# if __name__ == "__main__":
+#     parser = Parseline()
+#     parser.parse_file()
+#     graph_builder = GraphBuilder()
+#     adj_list = graph_builder.init_adj_list()
+#     # for hub in adj_list.keys():
+#     #     print(hub.name)
+#     # print(len(adj_list))
+#     start = Map().get_start()
+#     end = Map().get_end()
+#     path: List[Hub] = Dijkstra().run(adj_list, start, end)
+#     print('============================')
+        
+#     print('============================')
+#     path: List[Hub] = Dijkstra().run(adj_list, path[1], end)
+#     for hub in path:
+#         print(hub.name)
+
+#     print('============================')
+#     path: List[Hub] = Dijkstra().run(adj_list, path[1], end)
+#     for hub in path:
+#         print(hub.name)
+#     print('============================')
+
+#     # if path:
+#     #     print('is oki')
+#     #     for hub in path:
+#     #         print(hub.name)
+#     # else:
+#     #     print(None) 
+

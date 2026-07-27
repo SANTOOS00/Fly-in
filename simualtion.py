@@ -1,8 +1,9 @@
 from drones import Drone
 from typing import List
 from map import Map
-from hube import Hub
-from graph import Graph, ADJ_LIST
+from modules import Hub
+from modules import Adj_List
+from graph import Graph
 from dijkstra import Dijkstra
 
 class Simulation:
@@ -13,29 +14,60 @@ class Simulation:
         ]
         self.graph = Graph()
         self.dijkstra = Dijkstra()
+        self.end_hub: Hub = Map().get_end()
 
     def run(self) -> None:
+        torn = 0
         while self.check_finished():
+            torn += 1
             self.track_drone_zones()
-            break
+        print(torn)
     def track_drone_zones(self) -> None:
-        adj_list: ADJ_LIST
+        adj_list: Adj_List
         for drone in self.drones:
+            if drone.drone_in_edge():
+                drone.drone_inta9alt_ila_hub(None, self.graph)
+                continue
+
             adj_list = self.graph.get_copy_adj_list()
             self.graph.remove_edge_visited(drone.path_visited, adj_list)
-            if drone.test_name():
-                drone.drone_inta9alt_ila_hub(path[1], self.graph)         
-            path = self.dijkstra.run(adj_list,
-                                     drone.hub_new,
-                                     Map().get_end())
-            if not path:
+            hub_next = self.check_hub_bossiple()
+            if not hub_next:
                 continue
-            drone.drone_inta9alt_ila_hub(path[1], self.graph)
+            drone.drone_inta9alt_ila_hub(hub_next, self.graph)
+            if self.graph.is_end_hub(hub_next):
+                self.remove_drone(drone)
 
+    def check_hub_bossiple(self, drone: Drone) -> Hub | None:
+        adj_list: Adj_List
+        hub_next: Hub | None = None
+        while True:
+            path = self.dijkstra.run(adj_list,
+                                 drone.get_hub_new(),
+                                 self.end_hub)
+            if not path:
+                return None
+            if self.check_is_move_valid(path[0], path[1]):
+                return None
+            
+        return hub_next
+
+    def check_is_move_valid(self, from_hub: Hub, to_hub: Hub) -> bool:
+        edge = self.graph.get_edge(from_hub, to_hub)
+        if not edge.has_available_capacity():
+            return True
+        if not to_hub.is_full():
+            return True
+        return False
+        
+        
     def check_finished(self) -> bool:
-        if self.graph.end_hub.size_zone == len(self.drones):
+        if len(self.drones) == 0:
             return False
         return True
+
+    def remove_drone(self, drone: Drone) -> None:
+        self.drones.remove(drone)
 
 
 
