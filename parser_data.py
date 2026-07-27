@@ -4,17 +4,9 @@ from typing_extensions import override
 from modules import Hub, Edge
 from map import Map
 import re
-
-
-class BaseParser:
-    def __init__(self, line_str: str) -> None:
-        self.line_str: str = line_str
-
-    @override
-    def parser(self) -> None:
-        pass
-
-class EdgeParser(BaseParser):
+from parse_meta_data import MetaParser
+from base_parse import BaseParser
+class EdgeParser(BaseParser, MetaParser):
     @override
     def parser(self) -> Edge:
         self._validate_edge_syntax()
@@ -42,12 +34,8 @@ class EdgeParser(BaseParser):
                              line_number=FlyinError.get_number_line)
 
 
-    def ZoneAdjacencyParser() -> Tuple[str, str]:
-        pass
 
-
-
-class HubParser(BaseParser):
+class HubParser(BaseParser, MetaParser):
     @override
     def parser(self) -> Hub:
         self._validate_syntax()
@@ -59,12 +47,19 @@ class HubParser(BaseParser):
             x=int(x),
             y=int(y),
         )
-        self.init_meta_data(hub, meta)
+        self.init_meta_data(hub, meta[0])
+
         return hub
 
+    def init_meta_data(self, hub: Hub, meta_str: str) -> None:
+        if len(meta_str) == 0:
+            return None
+        meta_dict = self.parse_metadata(meta_str)
+        if meta_dict.get('color'):
+            hub.color = Hub.Color.get_hex(meta_dict['color'])
+        if meta_dict.get('zone'):
+            hub.zone = Hub.Zone.get_type_zone(meta_dict['zone'])
     
-    def init_meta_data(self, hub: Hub, meta: List[str]) -> None:
-        pass
 
     def _validate_syntax(self) -> None:
         self._validate_zone_name()

@@ -7,7 +7,7 @@ class GraphBuilder:
     def __init__(self) -> None:
         self.graph: Adj_List = defaultdict(list)
 
-    def init_graph(self) -> Adj_List:
+    def init_adj_list(self) -> Adj_List:
         from map import Map
         edges = Map().edges
         for edge in edges:
@@ -18,7 +18,7 @@ class GraphBuilder:
 class Graph:
     def __init__(self) -> None:
         from map import Map
-        self.graph: Adj_List = GraphBuilder().init_graph()
+        self.graph: Adj_List = GraphBuilder().init_adj_list()
         self.star_hub = Map().get_start() 
         self.end_hub = Map().get_end()
 

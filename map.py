@@ -47,6 +47,7 @@ class Map:
             raise FlyinError('test',
                              line_number=str(FlyinError.get_number_line()))
         self.end_hub = end_hub
+        self.end_hub.max_drones = float('inf')
         self.add_hub(end_hub)
 
     def add_egde(self, edge: Edge) -> None:

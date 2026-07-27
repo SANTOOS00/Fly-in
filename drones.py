@@ -14,7 +14,9 @@ class Drone:
     def drone_inta9alt_ila_hub(self,
                                hub_next: Hub | None,
                                graph: Graph) -> None:
-        if self.drone_in_edge():
+        # print(hub_next.name)
+        if not hub_next:
+            
             if self.hub_next.get_zone_value() == self.torne_moradart_edge:
                 self.hub_next.increase_zone_size()
                 self.entre_hub(self.hub_next)
@@ -23,9 +25,10 @@ class Drone:
             else:
                 self._add_edge_turn()
     
-        elif self.drone_in_hub():
+        elif hub_next:
             edge = graph.get_edge(self.current_hub, hub_next)
             if hub_next.get_zone_value() == 1:
+                
                 self.current_hub.decrease_zone_size()
                 self.path_visited.append(self.current_hub)
                 self.entre_hub(hub_next)
@@ -47,6 +50,7 @@ class Drone:
         return self.current_hub
 
     def entre_hub(self, hub_next: Hub) -> None:
+        # print(hub_next)
         self.current_hub = hub_next
 
 
