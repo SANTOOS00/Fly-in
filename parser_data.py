@@ -6,6 +6,7 @@ from map import Map
 import re
 from parse_meta_data import MetaParser
 from base_parse import BaseParser
+
 class EdgeParser(BaseParser, MetaParser):
     @override
     def parser(self) -> Edge:

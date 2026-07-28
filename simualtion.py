@@ -20,8 +20,9 @@ class Valid_Json:
         return result
 
     def write_in_data(self, adj_list: Adj_List, name_file: str) -> None:
-        with open(f"{name_file}.txt", "w") as fb:
+        with open(f"{name_file}.txt", "a") as fb:
             json.dump(self.adj_list_to_dict(adj_list), fb, indent=4)
+            fb.write('\n')
 class Simulation:
     def __init__(self) -> None:
         hub_current = Map().get_start()
@@ -44,10 +45,11 @@ class Simulation:
         print(torn)
 
     def track_drone_zones(self) -> None:
-        adj_list: Adj_List
+        ss = Valid_Json()
+        ss.write_in_data(self.graph.network, 'sss')
         for drone in self.drones:
             if drone.is_drone_on_edge():
-                drone.move(None, self.graph)
+                drone.move(None, self.graph)    
                 continue
             hub_next = self.get_next_valid_hub(drone)
             if not hub_next:

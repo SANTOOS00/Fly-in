@@ -1,24 +1,24 @@
 from typing import List
 from collections import defaultdict
 from modules import Hub, Edge, Adj_List
-
+import copy
 
 class GraphBuilder:
     def __init__(self) -> None:
-        self.graph: Adj_List = defaultdict(list)
+        self.network: Adj_List = defaultdict(list)
 
     def init_adj_list(self) -> Adj_List:
         from map import Map
         edges = Map().edges
         for edge in edges:
-            self.graph[edge.destintion].append((edge.source, edge))
-            self.graph[edge.source].append((edge.destintion, edge))
-        return self.graph
+            self.network[edge.destintion].append((edge.source, edge))
+            self.network[edge.source].append((edge.destintion, edge))
+        return self.network
 
 class Graph:
     def __init__(self) -> None:
         from map import Map
-        self.graph: Adj_List = GraphBuilder().init_adj_list()
+        self.network: Adj_List = GraphBuilder().init_adj_list()
         self.star_hub = Map().get_start() 
         self.end_hub = Map().get_end()
 
@@ -32,13 +32,13 @@ class Graph:
                     adj_list[hub_to].remove((hub, edge))
         
     def get_copy_adj_list(self) -> Adj_List:
-        return self.graph.copy()
+        return GraphBuilder().init_adj_list()
 
     def is_end_hub(self, hub: Hub) -> bool:
         return self.end_hub == hub
 
     def get_edge(self, from_hub: Hub, to_hub: Hub) ->  Edge | None:
-        for hub, edge in self.graph[from_hub]:
+        for hub, edge in self.network[from_hub]:
             if hub.name == to_hub.name:
                 return edge
         return None
