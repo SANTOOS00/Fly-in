@@ -21,23 +21,13 @@ class Graph:
         self.graph: Adj_List = GraphBuilder().init_adj_list()
         self.star_hub = Map().get_start() 
         self.end_hub = Map().get_end()
-
-    def run(self) -> None:
-        pass
-
-    @staticmethod
-    def remove_edge_visited(edges: List['Hub'], adj_list: Adj_List) -> None:
-        # for hh in edges:
-        #     print(hh.name)
-        pass
-
     
-    def remve_edge_is_adj_list(adj_list: Adj_List, edge_remove: Edge) -> None:
-        for hub, edge in adj_list[edge_remove.destintion]:
-            if hub == edge.source:
+    def remve_edge_is_adj_list(adj_list: Adj_List, hub_from: Hub, hub_to: Hub) -> None:
+        for hub, edge in adj_list[hub_from]:
+            if hub == hub_to:
                 adj_list.pop((hub, edge))
-        for hub, edge in adj_list[edge_remove.source]:
-                if hub == edge.destintion:
+        for hub, edge in adj_list[hub_to]:
+                if hub == hub_from:
                     adj_list.pop((hub, edge))
                 
     def get_copy_adj_list(self) -> Adj_List:
