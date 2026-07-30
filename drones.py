@@ -3,16 +3,19 @@ from graph import Graph
 from modules import Hub, Edge
 
 class Drone:
-    def __init__(self, id: int, hub_current: Hub) -> None:
+    def __init__(self, id: int, hub_current: Hub | None) -> None:
         self.id = id
         self.current_hub: Hub | None = hub_current
         self.hub_next: Hub | None = None
         self.current_edge: Edge | None = None
-        self.path_visited: List[Hub] = [hub_current]
-        self.edge_turns: int = 0
+        self.path_visited: List[Hub] = []
+        self.edge_turns: float = 0
+
+    def comp_number_trone(self) -> bool:
+        return self.hub_next.get_zone_value() == self.edge_turns
 
     def update_edge_progress(self) -> None:
-        if self.hub_next.get_zone_value() == self.edge_turns:
+        if self.comp_number_trone():
             self.hub_next.increase_zone_size()
             self.entre_hub(self.hub_next)
             self.current_edge = None
@@ -20,6 +23,10 @@ class Drone:
         else:
             self.add_edge_turn()
 
+    def get_path_visited(self) -> List[Hub]:
+        for hub in self.path_visited:
+            print(hub.name)
+        return self.path_visited
 
     def entre_drone_hub(self, hub_next: Hub) -> None:
             self.current_hub.decrease_zone_size()
@@ -31,6 +38,7 @@ class Drone:
     def entre_drone_edge(self, hub_next: Hub, edge : Edge) -> None:
             self.current_hub.decrease_zone_size()
             self.current_edge = edge
+            self.path_visited.append(self.current_hub)
             self.hub_next = hub_next
             self.current_hub = None
             self.add_edge_turn()
@@ -43,7 +51,6 @@ class Drone:
 
     def move(self, hub_next: Hub | None,
                                graph: Graph) -> None:
-        
         if hub_next is None:
             self.update_edge_progress()
         else:
@@ -56,7 +63,7 @@ class Drone:
     def get_current_hub (self) -> None:
         return self.current_hub
 
-    def entre_hub(self, hub_next: Hub) -> None:
+    def entre_hub(self, hub_next: Hub | None) -> None:
         self.current_hub = hub_next
 
     def add_edge_turn(self) -> None:

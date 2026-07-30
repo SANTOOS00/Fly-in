@@ -1,24 +1,24 @@
 SCRIPT = main.py
-
+PYRIGHT = ./node_modules/.bin/pyright
 
 MAP ?= maps/challenger/01_the_impossible_dream.txt
-
-# .PHONY: all run clean lint install debug
 
 all: run
 
 run:
 	@python3 $(SCRIPT) $(MAP)
 
-# debug:
-# 	@python3 -m pdb $(SCRIPT) $(MAP)
-
 install:
-	@pip3 install -r requirements.txt
+	npm install --save-dev pyright
 
 clean:
 	@rm -rf __pycache__ .mypy_cache .pytest_cache
 	@echo "Cleaned cache files!"
+	@rm -rf node_modules package-lock.json
+
 lint:
 	@flake8 .
 	@mypy . --warn-return-any --warn-unused-ignores --ignore-missing-imports --disallow-untyped-defs --check-untyped-defs
+
+check_error:
+	$(PYRIGHT) $(NAME)

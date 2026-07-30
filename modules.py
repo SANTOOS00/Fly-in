@@ -79,8 +79,6 @@ class Hub:
                     return cls.PRIORITY
                 case "RESTRICTED":
                     return cls.RESTRICTED
-                case _:
-                    return None
 
 COLOR_HEX = {
     Hub.Color.BLACK: "#000000",

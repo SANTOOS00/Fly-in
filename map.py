@@ -25,7 +25,7 @@ class Map:
     def get_start(self) -> Hub | None:
         return self.start_hub
 
-    def get_end(self) -> None | Hub:
+    def get_end(self) -> Hub:
         return self.end_hub
 
     def add_hub(self, hub: Hub) -> None:

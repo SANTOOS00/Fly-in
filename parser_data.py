@@ -28,7 +28,7 @@ class EdgeParser(BaseParser, MetaParser):
         if not re.match(r'^([^\s-]+)-', self.line_str):
             raise FlyinError('',
                              line_number=FlyinError.get_number_line)
-
+    
     def _validate_destination(self) -> None:
         if not re.match(r'^([^\s-]+)-([^\s-]+)', self.line_str):
             raise FlyinError('test valid ',

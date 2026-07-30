@@ -15,6 +15,7 @@ class GraphBuilder:
             self.network[edge.source].append((edge.destintion, edge))
         return self.network
 
+
 class Graph:
     def __init__(self) -> None:
         from map import Map
@@ -32,7 +33,17 @@ class Graph:
                     adj_list[hub_to].remove((hub, edge))
         
     def get_copy_adj_list(self) -> Adj_List:
-        return GraphBuilder().init_adj_list()
+        copy_adj: Adj_List = Adj_List({
+            hub: neighbors.copy()
+            for hub, neighbors in self.network.items()
+            })
+        return copy_adj
+
+    @staticmethod
+    def remove_path_visidet_drone(adj_list: Adj_List, path: List[Hub]) -> None:
+        for i, hub in enumerate(path):
+            if len(path) > i + 1:
+                Graph.remve_edge_is_adj_list(adj_list, hub, path[i + 1])
 
     def is_end_hub(self, hub: Hub) -> bool:
         return self.end_hub == hub
