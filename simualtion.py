@@ -55,8 +55,9 @@ class Simulation:
         ss = Valid_Json()
         ss.write_in_data(self.graph.network, 'sss')
         for drone in self.drones:
+            
             if drone.is_drone_on_edge():
-                drone.move(hub_next, self.graph, )   
+                drone.move(None, self.graph)
                 continue
             hub_next = self.get_next_valid_hub(drone)
             if not hub_next:
@@ -68,11 +69,10 @@ class Simulation:
     def get_next_valid_hub(self, drone: Drone) -> Hub | None:
         adj_list: Adj_List = self.graph.get_copy_adj_list()
         hub_next: Hub | None = None
-        print(drone.id)
         self.graph.remove_path_visidet_drone(adj_list,
                                              drone.get_path_visited())
         i = 0
-        while i != 3:
+        while True:
             i += 1
             path = self.dijkstra.run(adj_list,
                                     drone.get_current_hub(),
@@ -82,17 +82,16 @@ class Simulation:
             if self.check_is_valid_edge(path[0], path[1]) or self.check_is_valid_hub_next(path[1]):
                 self.graph.remve_edge_is_adj_list(adj_list, path[0], path[1])
             else:
+                
                 hub_next = path[1]
                 break
-        # print(hub_next.name, drone.id)
         return hub_next
     def check_is_valid_edge(self, from_hub: Hub, to_hub: Hub) -> bool:
+
         edge = self.graph.get_edge(from_hub, to_hub)
         if not edge.has_available_capacity():
             return True
         return False
-
-
 
     @staticmethod
     def check_is_valid_hub_next(to_hub: Hub) -> bool:

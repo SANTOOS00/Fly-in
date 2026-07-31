@@ -40,7 +40,7 @@ class HubParser(BaseParser, MetaParser):
     @override
     def parser(self) -> Hub:
         self._validate_syntax()
-        match = re.match(r'^(\w+)\s+(-?\d+)\s+(-?\d+)(.*)',
+        match = re.match(r'^([^\s-]+)\s+(-?\d+)\s+(-?\d+)(.*)',
                         self.line_str)
         name, x, y, *meta = match.groups()
         hub = Hub(

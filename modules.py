@@ -15,7 +15,11 @@ class Hub:
         self.size_zone: int  = 0
 
     def __lt__(self, oth: 'Hub') -> bool:
-        return self.zone.value < oth.zone.value
+        if self.zone == self.Zone.PRIORITY:
+            return True
+        if oth.zone == oth.Zone.PRIORITY:
+            return False
+        return self.zone.value > oth.zone.value
 
     def __hash__(self) -> int:
         return hash(self.name)
@@ -66,7 +70,6 @@ class Hub:
         PRIORITY = 1
         BLOCKED = float('inf')
         NORMAL = 1
-        DEFAULT = 1
 
         @classmethod
         def get_type_zone(cls, type_zone: str) -> Union['Hub.Zone', None]:
@@ -79,6 +82,7 @@ class Hub:
                     return cls.PRIORITY
                 case "RESTRICTED":
                     return cls.RESTRICTED
+
 
 COLOR_HEX = {
     Hub.Color.BLACK: "#000000",
@@ -112,8 +116,6 @@ class Edge:
     def has_available_capacity(self) -> bool:
         return self.max_link_capacity > self.size_edge
 
-    def add_drone(self, drone_id: int) -> None:
-        self.drones_on_edge.append(drone_id)
 
 
 Adj_List = NewType('Adj_List', Dict[Hub, List[tuple[Hub, Edge]]])
