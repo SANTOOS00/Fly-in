@@ -14,7 +14,6 @@ class Dijkstra:
             start_hub: Hub,
             end_hub: Hub
             ) -> List[Hub] | None:
-        print(start_hub.name)
         heap: List[Tuple[float, Hub]] = [(0.0, start_hub)]
         self._set_vertex_inf(start_hub)
         while heap:

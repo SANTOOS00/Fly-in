@@ -41,7 +41,6 @@ class Drone:
         self.current_edge = edge
         self.path_visited.append(self.current_hub)
         self.hub_next = hub_next
-        self.current_hub = None
         self.add_edge_turn()
 
     def update_hub_progress(self, hub_next: Hub, edge: Edge) -> None:

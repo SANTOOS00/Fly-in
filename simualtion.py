@@ -43,12 +43,15 @@ class Simulation:
         self.dijkstra = Dijkstra()
         self.end_hub: Hub = Map().get_end()
         self.adj_list: Adj_List | None = None
+        self.test: str = ''
 
     def run(self) -> None:
         torn = 0
         while self.check_finished():
             torn += 1
             self.track_drone_zones()
+            print(self.test)
+            self.test = ''
         print(torn)
 
     def track_drone_zones(self) -> None:
@@ -63,8 +66,16 @@ class Simulation:
             if not hub_next:
                 continue
             drone.move(hub_next, self.graph)
+            self.print_drone_in_pos(drone)
             if self.graph.is_end_hub(hub_next):
                 self.remove_drone(drone)
+
+
+    def print_drone_in_pos(self, drone: Drone) -> None:
+        if drone.is_drone_on_edge():
+            self.test += f' D{drone.id}-{drone.current_hub.name}-{drone.hub_next.name}'
+        else:
+            self.test += f' D{drone.id}-{drone.current_hub.name}'
 
     def get_next_valid_hub(self, drone: Drone) -> Hub | None:
         adj_list: Adj_List = self.graph.get_copy_adj_list()
