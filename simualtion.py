@@ -49,24 +49,34 @@ class Simulation:
         torn = 0
         while self.check_finished():
             torn += 1
-            self.track_drone_zones()
-            print(self.test)
+            self.track_drone_zones(torn)
+            self._reduction_drones()
+            print(torn, self.test)
             self.test = ''
         print(torn)
 
-    def track_drone_zones(self) -> None:
-        ss = Valid_Json()
-        ss.write_in_data(self.graph.network, 'sss')
+
+    def _reduction_drones(self) -> None:
+        self.drones = list(filter(lambda dron: dron is not None, self.drones))
+
+    def track_drone_zones(self,torn) -> None:
+        # ss = Valid_Json()
+        # ss.write_in_data(self.graph.network, 'sss')
         for drone in self.drones:
-            
+
             if drone.is_drone_on_edge():
                 drone.move(None, self.graph)
+                self.print_drone_in_pos(drone)
                 continue
+
             hub_next = self.get_next_valid_hub(drone)
             if not hub_next:
+                self.print_drone_in_pos(drone)
                 continue
+
             drone.move(hub_next, self.graph)
             self.print_drone_in_pos(drone)
+
             if self.graph.is_end_hub(hub_next):
                 self.remove_drone(drone)
 
@@ -116,6 +126,8 @@ class Simulation:
         return True
 
     def remove_drone(self, drone: Drone) -> None:
-        self.drones.remove(drone)
+        index_drone = self.drones.index(drone)
+        self.drones[index_drone] = None
+        
 
 

@@ -17,7 +17,7 @@ class EdgeParser(BaseParser, MetaParser):
             source=Map().get_hub(source),
             destintion=Map().get_hub(destination)
         )
-        # self.init_meta_data(edge, meta[0])
+        self.init_meta_data(edge, meta[0])
         return edge
 
 
@@ -38,10 +38,16 @@ class EdgeParser(BaseParser, MetaParser):
     def init_meta_data(self, edge: Edge, meta_str: str) -> None:
         if len(meta_str) == 0:
             return None
-        meta_dict = self.parse_metadata(meta_str)
-        # print(meta_dict )
-        # hub.color = Hub.Color.get_hex(meta_dict['max_link_capacity'])    
+        meta: dict = self.parse_metadata(meta_str)
+        edge.max_link_capacity = int(meta['max_link_capacity'])
 
+    def _valid_max_capacity(self, max_capacity: str) -> int:
+        try:
+            val_capacity = int(max_capacity)
+        except ValueError:
+            raise FlyinError('',
+                       number_line=FlyinError.get_number_line())
+        return val_capacity
 
 class HubParser(BaseParser, MetaParser):
     @override
@@ -55,7 +61,7 @@ class HubParser(BaseParser, MetaParser):
             x=int(x),
             y=int(y),
         )
-        # self.init_meta_data(hub, meta[0])
+        self.init_meta_data(hub, meta[0])
         return hub
 
     def init_meta_data(self, hub: Hub, meta_str: str) -> None:
@@ -65,7 +71,10 @@ class HubParser(BaseParser, MetaParser):
         if meta_dict.get('color'):
             hub.color = Hub.Color.get_hex(meta_dict['color'])
         if meta_dict.get('zone'):
-            hub.zone = Hub.Zone.get_type_zone(meta_dict['zone'])
+            print(meta_dict['zone'])
+            hub.zone = hub.Zone.get_type_zone(meta_dict['zone'])
+        if meta_dict.get('max_drones'):
+            hub.max_drones = int(meta_dict['max_drones'])
 
     def _validate_syntax(self) -> None:
         self._validate_zone_name()

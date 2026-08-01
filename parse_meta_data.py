@@ -70,8 +70,9 @@ class MetadataValidator:
 
     def allowed_status_meta(self) -> None:
         allowed = ["zone", "color", "max_drones"]
-        if isinstance(self.in_type, Edge):
-            if self.data.get("max_link_capacity"):
+        from parser import EdgeParser
+        if isinstance(self.in_type, EdgeParser):
+            if self.data.get("max_link_capacity") is False:
                 raise FlyinError(
                     "Invalid connection metadata\n \n ⚠ Fix: "
                     f"key '{self.data}'"
@@ -79,6 +80,7 @@ class MetadataValidator:
                     self.line_number,
                     FlyinError.get_number_line())
         else:
+            # print(self.in_type)
             for key in self.data.keys():
                 if key not in allowed:
                     raise FlyinError(

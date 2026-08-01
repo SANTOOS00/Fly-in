@@ -14,14 +14,13 @@ class Drone:
     def comp_number_trone(self) -> bool:
         return (
             self.hub_next is not None
-            and self.hub_next.get_zone_value() == self.edge_turns
+            and self.hub_next.get_zone_value() >= self.edge_turns
         )
 
     def update_edge_progress(self) -> None:
         if self.comp_number_trone():
             self.hub_next.increase_zone_size()
             self.entre_hub(self.hub_next)
-            self.current_edge = None
             self.reset_edge_turns()
         else:
             self.add_edge_turn()
@@ -29,19 +28,17 @@ class Drone:
     def get_path_visited(self) -> List[Hub]:
         return self.path_visited
 
-    def entre_drone_hub(self, hub_next: Hub) -> None:
-        self.current_hub.decrease_zone_size()
-        self.path_visited.append(self.current_hub)
-        self.entre_hub(hub_next)
-        hub_next.increase_zone_size()
-        self.reset_edge_turns()
-
     def entre_drone_edge(self, hub_next: Hub, edge : Edge) -> None:
         self.current_hub.decrease_zone_size()
         self.current_edge = edge
         self.path_visited.append(self.current_hub)
         self.hub_next = hub_next
         self.add_edge_turn()
+
+    def entre_drone_hub(self, hub_next: Hub) -> None:
+        self.entre_hub(hub_next)
+        self.path_visited.append(self.current_hub)
+        self.reset_edge_turns()
 
     def update_hub_progress(self, hub_next: Hub, edge: Edge) -> None:
         if hub_next.get_zone_value() == 1:
@@ -64,7 +61,11 @@ class Drone:
         return self.current_hub
 
     def entre_hub(self, hub_next: Hub | None) -> None:
+        self.current_hub.decrease_zone_size()
         self.current_hub = hub_next
+        self.current_hub.increase_zone_size()
+        
+        
 
     def add_edge_turn(self) -> None:
         self.edge_turns += 1
