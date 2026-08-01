@@ -19,8 +19,8 @@ class Drone:
 
     def update_edge_progress(self) -> None:
         if self.comp_number_trone():
-            self.hub_next.increase_zone_size()
             self.entre_hub(self.hub_next)
+            self.current_edge = None
             self.reset_edge_turns()
         else:
             self.add_edge_turn()

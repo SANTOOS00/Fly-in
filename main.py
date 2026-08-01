@@ -8,17 +8,17 @@ class Fly_in:
         parser = Parseline()
         parser.parse_file()
         # ss = 
-        # simu = Simulation()
-        # simu.run()
+        simu = Simulation()
+        simu.run()
 
 if __name__ == "__main__":
     try:
         from map import Map
         launcher = Fly_in()
         launcher.run()
-        ss = Map()
-        for hub in ss.hubs.values():
-            print(hub.name, hub.color, hub.max_drones)
+        # ss = Map()
+        # for hub in ss.hubs.values():
+        #     print(hub.name, hub.color, hub.max_drones)
     except FlyinError as error:
         print(error, file=sys.stderr)
 
@@ -28,4 +28,3 @@ if __name__ == "__main__":
 
 
 
-    

@@ -51,7 +51,7 @@ class Simulation:
             torn += 1
             self.track_drone_zones(torn)
             self._reduction_drones()
-            print(torn, self.test)
+            print(self.test)
             self.test = ''
         print(torn)
 
@@ -92,10 +92,8 @@ class Simulation:
         hub_next: Hub | None = None
         self.graph.remove_path_visidet_drone(adj_list,
                                              drone.get_path_visited())
-        i = 0
         while True:
-            i += 1
-            path = self.dijkstra.run(adj_list,
+            path, cost = self.dijkstra.run(adj_list,
                                     drone.get_current_hub(),
                                     self.end_hub)
             if not path:
@@ -103,16 +101,15 @@ class Simulation:
             if self.check_is_valid_edge(path[0], path[1]) or self.check_is_valid_hub_next(path[1]):
                 self.graph.remve_edge_is_adj_list(adj_list, path[0], path[1])
             else:
-                
                 hub_next = path[1]
                 break
         return hub_next
     def check_is_valid_edge(self, from_hub: Hub, to_hub: Hub) -> bool:
 
         edge = self.graph.get_edge(from_hub, to_hub)
-        if not edge.has_available_capacity():
-            return True
-        return False
+        if edge.has_available_capacity():
+            return False
+        return True
 
     @staticmethod
     def check_is_valid_hub_next(to_hub: Hub) -> bool:
