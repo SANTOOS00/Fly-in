@@ -51,15 +51,18 @@ class Simulation:
             torn += 1
             self.track_drone_zones(torn)
             self._reduction_drones()
+            self.graph.reset_all_edge_usage_counts()
             print(self.test)
             self.test = ''
         print(torn)
 
+    def defult_val_edges_work(self) -> None:
+        pass
 
     def _reduction_drones(self) -> None:
         self.drones = list(filter(lambda dron: dron is not None, self.drones))
 
-    def track_drone_zones(self,torn) -> None:
+    def track_drone_zones(self, torn) -> None:
         # ss = Valid_Json()
         # ss.write_in_data(self.graph.network, 'sss')
         for drone in self.drones:
@@ -91,31 +94,30 @@ class Simulation:
         adj_list: Adj_List = self.graph.get_copy_adj_list()
         hub_next: Hub | None = None
         self.graph.remove_path_visidet_drone(adj_list,
-                                             drone.get_path_visited())
+                                            drone.get_path_visited())
         while True:
             path, cost = self.dijkstra.run(adj_list,
                                     drone.get_current_hub(),
                                     self.end_hub)
             if not path:
                 return None
-            if self.check_is_valid_edge(path[0], path[1]) or self.check_is_valid_hub_next(path[1]):
-                self.graph.remve_edge_is_adj_list(adj_list, path[0], path[1])
-            else:
+            if self.check_is_valid_edge(path[0], path[1]) and self.check_is_valid_hub_next(path[1]):
                 hub_next = path[1]
                 break
+            else:
+                self.graph.remve_edge_is_adj_list(adj_list, path[0], path[1])
         return hub_next
     def check_is_valid_edge(self, from_hub: Hub, to_hub: Hub) -> bool:
-
         edge = self.graph.get_edge(from_hub, to_hub)
         if edge.has_available_capacity():
-            return False
-        return True
+            return True
+        return False
 
     @staticmethod
     def check_is_valid_hub_next(to_hub: Hub) -> bool:
         if to_hub.is_full():
-            return True
-        return False
+            return False
+        return True
         
     def check_finished(self) -> bool:
         if len(self.drones) == 0:
@@ -123,8 +125,7 @@ class Simulation:
         return True
 
     def remove_drone(self, drone: Drone) -> None:
-        index_drone = self.drones.index(drone)
-        self.drones[index_drone] = None
+        self.drones[self.drones.index(drone)] = None
         
 
 

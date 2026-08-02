@@ -51,7 +51,7 @@ class Map:
         self.add_hub(end_hub)
 
     def add_egde(self, edge: Edge) -> None:
-        if {edge.source, edge.destintion} in [{edg.source, edg.destintion}
+        if {edge.source, edge.destination} in [{edg.source, edg.destination}
                                               for edg in self.edges]:
             raise FlyinError("testsssssssssssss", dd='add_edge',
                              line_number=FlyinError.get_number_line())

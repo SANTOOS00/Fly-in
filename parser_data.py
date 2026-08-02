@@ -15,7 +15,7 @@ class EdgeParser(BaseParser, MetaParser):
         source, destination, *meta = match.groups()
         edge = Edge(
             source=Map().get_hub(source),
-            destintion=Map().get_hub(destination)
+            destination=Map().get_hub(destination)
         )
         self.init_meta_data(edge, meta[0])
         return edge

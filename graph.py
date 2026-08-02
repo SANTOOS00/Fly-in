@@ -1,6 +1,7 @@
 from typing import Any, List
 from collections import defaultdict
 from modules import Hub, Edge, Adj_List
+from map import Map
 
 class GraphBuilder:
     def __init__(self) -> None:
@@ -10,17 +11,22 @@ class GraphBuilder:
         from map import Map
         edges = Map().edges
         for edge in edges:
-            self.network[edge.destintion].append((edge.source, edge))
-            self.network[edge.source].append((edge.destintion, edge))
+            self.network[edge.destination].append((edge.source, edge))
+            self.network[edge.source].append((edge.destination, edge))
         return self.network
 
 
 class Graph:
     def __init__(self) -> None:
-        from map import Map
         self.network: Adj_List = GraphBuilder().init_adj_list()
         self.star_hub = Map().get_start() 
         self.end_hub = Map().get_end()
+
+    @staticmethod
+    def reset_all_edge_usage_counts() -> None:
+        edges = Map().edges
+        for edge in edges:
+            edge.reset_usage_count()
 
     @staticmethod
     def remve_edge_is_adj_list(adj_list: Adj_List, hub_from: Hub, hub_to: Hub) -> None:

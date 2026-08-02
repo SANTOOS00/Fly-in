@@ -20,6 +20,7 @@ class Drone:
     def update_edge_progress(self) -> None:
         if self.comp_number_trone():
             self.entre_hub(self.hub_next)
+            self.current_edge.decrease_edge_capacity()
             self.current_edge = None
             self.reset_edge_turns()
         else:
@@ -31,6 +32,7 @@ class Drone:
     def entre_drone_edge(self, hub_next: Hub, edge : Edge) -> None:
         self.current_hub.decrease_zone_size()
         self.current_edge = edge
+        edge.increase_edge_capacity()
         self.path_visited.append(self.current_hub)
         self.hub_next = hub_next
         self.add_edge_turn()
@@ -41,10 +43,12 @@ class Drone:
         self.reset_edge_turns()
 
     def update_hub_progress(self, hub_next: Hub, edge: Edge) -> None:
-        if hub_next.get_zone_value() == 1:
+        if hub_next.zone.value == 1:
             self.entre_drone_hub(hub_next)
+            edge.increment_usage_count()
         else:
             self.entre_drone_edge(hub_next, edge)
+            edge.increment_usage_count()
 
     def move(self, hub_next: Hub | None,
                                graph: Graph) -> None:
@@ -64,8 +68,6 @@ class Drone:
         self.current_hub.decrease_zone_size()
         self.current_hub = hub_next
         self.current_hub.increase_zone_size()
-        
-        
 
     def add_edge_turn(self) -> None:
         self.edge_turns += 1

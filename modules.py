@@ -107,14 +107,30 @@ COLOR_HEX = {
 
 
 class Edge:
-    def __init__(self, source: Hub, destintion: Hub) -> None:
+    def __init__(self, source: Hub, destination: Hub) -> None:
         self.source = source
-        self.destintion = destintion
+        self.destination = destination
         self.max_link_capacity: int = 1
         self.size_edge = 0
+        self.usage_count = 0
+
+    def reset_usage_count(self) -> None:
+        self.usage_count = 0
+
+    def increment_usage_count(self) -> None:
+        self.usage_count += 1
 
     def has_available_capacity(self) -> bool:
-        return self.max_link_capacity > self.size_edge
+        return (
+            self.max_link_capacity > self.size_edge and self.usage_count < self.max_link_capacity
+                )
+
+    def decrease_edge_capacity(self) -> None:
+        self.size_edge -= 1
+
+    def increase_edge_capacity(self) -> None:
+        self.size_edge += 1
+
 
 
 
