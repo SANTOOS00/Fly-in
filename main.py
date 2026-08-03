@@ -7,7 +7,6 @@ class Fly_in:
     def run() -> None:
         parser = Parseline()
         parser.parse_file()
-        # ss = 
         simu = Simulation()
         simu.run()
 

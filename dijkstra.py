@@ -44,38 +44,38 @@ class Dijkstra:
         self.distances[start.name] = 0
 
 
-# from parser import Parseline
-# from graph import GraphBuilder
-# from map import Map
+from parser import Parseline
+from graph import GraphBuilder
+from map import Map
 
-# if __name__ == "__main__":
-#     parser = Parseline()
-#     parser.parse_file()
-#     graph_builder = GraphBuilder()
-#     adj_list = graph_builder.init_adj_list()
-#     # for hub in adj_list.keys():
-#     #     print(hub.name)
-#     # print(len(adj_list))
-#     start = Map().get_start()
-#     end = Map().get_end()
-#     path: List[Hub] = Dijkstra().run(adj_list, start, end)
-#     print('============================')
+if __name__ == "__main__":
+    parser = Parseline()
+    parser.parse_file()
+    graph_builder = GraphBuilder()
+    adj_list = graph_builder.init_adj_list()
+    # for hub in adj_list.keys():
+    #     print(hub.name)
+    # print(len(adj_list))
+    start = Map().get_start()
+    end = Map().get_end()
+    path: List[Hub] = Dijkstra().run(adj_list, start, end)
+    print('============================')
         
-#     print('============================')
-#     path: List[Hub] = Dijkstra().run(adj_list, path[1], end)
-#     for hub in path:
-#         print(hub.name)
+    print('============================')
+    path: List[Hub] = Dijkstra().run(adj_list, path[1], end)
+    for hub in path:
+        print(hub.name)
 
-#     print('============================')
-#     path: List[Hub] = Dijkstra().run(adj_list, path[1], end)
-#     for hub in path:
-#         print(hub.name)
-#     print('============================')
+    print('============================')
+    path: List[Hub] = Dijkstra().run(adj_list, path[1], end)
+    for hub in path:
+        print(hub.name)
+    print('============================')
 
-#     # if path:
-#     #     print('is oki')
-#     #     for hub in path:
-#     #         print(hub.name)
-#     # else:
-#     #     print(None) 
+    # if path:
+    #     print('is oki')
+    #     for hub in path:
+    #         print(hub.name)
+    # else:
+    #     print(None) 
 

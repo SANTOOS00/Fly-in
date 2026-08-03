@@ -71,7 +71,6 @@ class HubParser(BaseParser, MetaParser):
         if meta_dict.get('color'):
             hub.color = Hub.Color.get_hex(meta_dict['color'])
         if meta_dict.get('zone'):
-            print(meta_dict['zone'])
             hub.zone = hub.Zone.get_type_zone(meta_dict['zone'])
         if meta_dict.get('max_drones'):
             hub.max_drones = int(meta_dict['max_drones'])
