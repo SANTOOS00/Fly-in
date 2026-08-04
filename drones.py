@@ -35,18 +35,15 @@ class Drone:
             self.hub_visited.append(hub_next)
             edge = graph.get_edge(self.current_hub, hub_next)
             self.update_hub_progress(hub_next, edge)
-        # else:
-        #     self.update_edge_progress()
+        else:
+            self.update_edge_progress()
 
     def update_hub_progress(self, hub_next: Hub, edge: Edge) -> None:
         edge.increment_usage_count()
         if hub_next.zone.value == 1:
             self.entre_drone_hub(hub_next)
-        
         else:
-            print("s")
             self.entre_drone_edge(hub_next, edge)
-        #     edge.increment_usage_count()
 
     def entre_drone_edge(self, hub_next: Hub, edge : Edge) -> None:
         self.current_hub.increase_zone_size(self.id)
@@ -54,16 +51,16 @@ class Drone:
         edge.increase_edge_capacity(self.id)
         self.hub_next = hub_next
         hub_next.decrease_zone_size(self.id)
-        # self.add_edge_turn()
+        self.add_edge_turn()
     
-    # def update_edge_progress(self) -> None:
-    #     if self.hub_next.get_zone_value() >= self.edge_turns:
-    #         self.entre_hub(self.hub_next)
-    #         self.current_edge.decrease_edge_capacity()
-    #         self.current_edge = None
-    #         self.reset_edge_turns()
-    #     else:
-    #         self.add_edge_turn()
+    def update_edge_progress(self) -> None:
+        if self.hub_next.get_zone_value() <= self.edge_turns:
+            self.current_hub = self.hub_next
+            self.current_edge.increase_edge_capacity(self.id)
+            self.current_edge = None
+            self.reset_edge_turns()
+        else:
+            self.add_edge_turn()
 
 
     def entre_drone_hub(self, hub_next: Hub) -> None:
@@ -79,8 +76,8 @@ class Drone:
         self.current_hub = hub_next
         hub_next.increase_zone_size(self.id)
 
-    # def add_edge_turn(self) -> None:
-    #     self.edge_turns += 1
+    def add_edge_turn(self) -> None:
+        self.edge_turns += 1
 
     def reset_edge_turns(self) -> None:
         self.edge_turns = 0

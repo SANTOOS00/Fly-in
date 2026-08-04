@@ -56,20 +56,16 @@ class Simulation:
         torn = 0
         while self.check_finished():
             torn += 1
-            self.track_drone_zones(torn)
+            self.track_drone_zones()
             self._reduction_drones()
-            break
-            # print(self.test)
-            # self.test = ''
-        # print(torn)
+            # break
+            print(self.string_output)
 
 
     def _reduction_drones(self) -> None:
         self.drones = list(filter(lambda dron: dron is not None, self.drones))
 
-    def track_drone_zones(self,torn) -> None:
-        # ss = Valid_Json()
-        # ss.write_in_data(self.graph.network, 'sss')
+    def track_drone_zones(self) -> None:
         for drone in self.drones:
             if not drone.is_drone_on_edge():
                 hub_next = self.get_next_valid_hub(drone)
@@ -80,18 +76,12 @@ class Simulation:
                 drone.move(hub_next, self.graph)
                 self.print_drone_in_action(drone)
 
-                # if self.graph.is_end_hub(hub_next):
-                #     self.remove_drone(drone)
+                if self.graph.is_end_hub(hub_next):
+                    self.remove_drone(drone)
+            else:
+                drone.move(None, self.graph)
+                self.print_drone_in_action(drone)
 
-
-
-            # if drone.is_drone_on_edge():
-            #     drone.move(None, self.graph)
-            #     self.print_drone_in_action(drone)
-            #     continue
-
-            # if not hub_next:
-            #     continue
 
 
     def print_drone_in_action(self, drone: Drone) -> None:
@@ -107,8 +97,6 @@ class Simulation:
         hub_next: Hub | None = None
         self.graph.remove_path_visidet_drone(adj_list,
                                              drone.get_path_visited())
-        # ss = Valid_Json()
-        # ss.write_in_data(adj_list, 'test_list_adj')
         while True:
             path, cost = self.dijkstra.run(adj_list,
                                     drone.get_current_hub(),
