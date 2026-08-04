@@ -1,0 +1,353 @@
+{
+    "dist_gate1": [
+        {
+            "to": "dist_gate1",
+            "from": "maze_correct"
+        }
+    ],
+    "start": [
+        {
+            "to": "start",
+            "from": "dist_gate2"
+        },
+        {
+            "to": "start",
+            "from": "dist_gate3"
+        }
+    ],
+    "dist_gate2": [
+        {
+            "to": "dist_gate2",
+            "from": "start"
+        },
+        {
+            "to": "dist_gate2",
+            "from": "maze_trap1"
+        }
+    ],
+    "dist_gate3": [
+        {
+            "to": "dist_gate3",
+            "from": "start"
+        },
+        {
+            "to": "dist_gate3",
+            "from": "maze_loop1"
+        }
+    ],
+    "maze_correct": [
+        {
+            "to": "maze_correct",
+            "from": "dist_gate1"
+        },
+        {
+            "to": "maze_correct",
+            "from": "maze_loop2"
+        },
+        {
+            "to": "maze_correct",
+            "from": "bottleneck1"
+        }
+    ],
+    "maze_trap1": [
+        {
+            "to": "maze_trap1",
+            "from": "dist_gate2"
+        },
+        {
+            "to": "maze_trap1",
+            "from": "maze_trap2"
+        }
+    ],
+    "maze_loop1": [
+        {
+            "to": "maze_loop1",
+            "from": "dist_gate3"
+        },
+        {
+            "to": "maze_loop1",
+            "from": "maze_loop2"
+        },
+        {
+            "to": "maze_loop1",
+            "from": "maze_loop4"
+        }
+    ],
+    "maze_trap2": [
+        {
+            "to": "maze_trap2",
+            "from": "maze_trap1"
+        }
+    ],
+    "maze_loop2": [
+        {
+            "to": "maze_loop2",
+            "from": "maze_loop1"
+        },
+        {
+            "to": "maze_loop2",
+            "from": "maze_loop3"
+        },
+        {
+            "to": "maze_loop2",
+            "from": "maze_correct"
+        }
+    ],
+    "maze_loop3": [
+        {
+            "to": "maze_loop3",
+            "from": "maze_loop2"
+        },
+        {
+            "to": "maze_loop3",
+            "from": "maze_loop4"
+        }
+    ],
+    "maze_loop4": [
+        {
+            "to": "maze_loop4",
+            "from": "maze_loop3"
+        },
+        {
+            "to": "maze_loop4",
+            "from": "maze_loop1"
+        }
+    ],
+    "bottleneck1": [
+        {
+            "to": "bottleneck1",
+            "from": "maze_correct"
+        },
+        {
+            "to": "bottleneck1",
+            "from": "bottleneck2"
+        },
+        {
+            "to": "bottleneck1",
+            "from": "overflow1"
+        }
+    ],
+    "bottleneck2": [
+        {
+            "to": "bottleneck2",
+            "from": "bottleneck1"
+        },
+        {
+            "to": "bottleneck2",
+            "from": "overflow2"
+        },
+        {
+            "to": "bottleneck2",
+            "from": "priority_hub"
+        }
+    ],
+    "overflow1": [
+        {
+            "to": "overflow1",
+            "from": "bottleneck1"
+        },
+        {
+            "to": "overflow1",
+            "from": "overflow2"
+        }
+    ],
+    "overflow2": [
+        {
+            "to": "overflow2",
+            "from": "overflow1"
+        },
+        {
+            "to": "overflow2",
+            "from": "bottleneck2"
+        },
+        {
+            "to": "overflow2",
+            "from": "conv_normal1"
+        }
+    ],
+    "priority_hub": [
+        {
+            "to": "priority_hub",
+            "from": "bottleneck2"
+        },
+        {
+            "to": "priority_hub",
+            "from": "priority_trap1"
+        },
+        {
+            "to": "priority_hub",
+            "from": "priority_correct"
+        },
+        {
+            "to": "priority_hub",
+            "from": "conv_priority1"
+        }
+    ],
+    "priority_trap1": [
+        {
+            "to": "priority_trap1",
+            "from": "priority_hub"
+        },
+        {
+            "to": "priority_trap1",
+            "from": "priority_trap2"
+        }
+    ],
+    "priority_correct": [
+        {
+            "to": "priority_correct",
+            "from": "priority_hub"
+        },
+        {
+            "to": "priority_correct",
+            "from": "conv_restricted1"
+        },
+        {
+            "to": "priority_correct",
+            "from": "conv_normal1"
+        },
+        {
+            "to": "priority_correct",
+            "from": "conv_priority1"
+        }
+    ],
+    "priority_trap2": [
+        {
+            "to": "priority_trap2",
+            "from": "priority_trap1"
+        },
+        {
+            "to": "priority_trap2",
+            "from": "priority_dead_end"
+        }
+    ],
+    "priority_dead_end": [
+        {
+            "to": "priority_dead_end",
+            "from": "priority_trap2"
+        }
+    ],
+    "conv_restricted1": [
+        {
+            "to": "conv_restricted1",
+            "from": "priority_correct"
+        },
+        {
+            "to": "conv_restricted1",
+            "from": "conv_restricted2"
+        }
+    ],
+    "conv_normal1": [
+        {
+            "to": "conv_normal1",
+            "from": "priority_correct"
+        },
+        {
+            "to": "conv_normal1",
+            "from": "conv_normal2"
+        },
+        {
+            "to": "conv_normal1",
+            "from": "overflow2"
+        }
+    ],
+    "conv_priority1": [
+        {
+            "to": "conv_priority1",
+            "from": "priority_correct"
+        },
+        {
+            "to": "conv_priority1",
+            "from": "conv_priority2"
+        },
+        {
+            "to": "conv_priority1",
+            "from": "priority_hub"
+        }
+    ],
+    "conv_restricted2": [
+        {
+            "to": "conv_restricted2",
+            "from": "conv_restricted1"
+        },
+        {
+            "to": "conv_restricted2",
+            "from": "final_merge"
+        }
+    ],
+    "conv_normal2": [
+        {
+            "to": "conv_normal2",
+            "from": "conv_normal1"
+        },
+        {
+            "to": "conv_normal2",
+            "from": "final_merge"
+        }
+    ],
+    "conv_priority2": [
+        {
+            "to": "conv_priority2",
+            "from": "conv_priority1"
+        },
+        {
+            "to": "conv_priority2",
+            "from": "final_merge"
+        }
+    ],
+    "final_merge": [
+        {
+            "to": "final_merge",
+            "from": "conv_restricted2"
+        },
+        {
+            "to": "final_merge",
+            "from": "conv_normal2"
+        },
+        {
+            "to": "final_merge",
+            "from": "conv_priority2"
+        },
+        {
+            "to": "final_merge",
+            "from": "final_gate1"
+        }
+    ],
+    "final_gate1": [
+        {
+            "to": "final_gate1",
+            "from": "final_merge"
+        },
+        {
+            "to": "final_gate1",
+            "from": "final_gate2"
+        }
+    ],
+    "final_gate2": [
+        {
+            "to": "final_gate2",
+            "from": "final_gate1"
+        },
+        {
+            "to": "final_gate2",
+            "from": "final_gate3"
+        }
+    ],
+    "final_gate3": [
+        {
+            "to": "final_gate3",
+            "from": "final_gate2"
+        },
+        {
+            "to": "final_gate3",
+            "from": "goal"
+        }
+    ],
+    "goal": [
+        {
+            "to": "goal",
+            "from": "final_gate3"
+        }
+    ]
+}
+========================================================================================================================================================================================================================

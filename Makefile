@@ -1,7 +1,7 @@
 SCRIPT = main.py
 PYRIGHT = ./node_modules/.bin/pyright
 
-MAP ?= maps/challenger/01_the_impossible_dream.txt
+MAP ?= maps/easy/02_simple_fork.txt
 
 all: run
 

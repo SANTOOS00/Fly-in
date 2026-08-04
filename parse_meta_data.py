@@ -158,11 +158,10 @@ class MetaParser:
 
 
     def _validate_syntax_meta(self, data: List[str]) -> None:
-        for index, is_not_valid in enumerate(MetaParser.patternsmetadata.
-                                             values()):
+        for index, is_not_valid in enumerate(MetaParser.patternsmetadata.values()):
             if is_not_valid:
                 raise FlyinError("Invalid MetaData property syntax at"
                                  f" position {data[index]}. Expected "
-                                 "format: ''.",
-                                 FlyinError.get_number_line()
+                                 "format: ",
+                                 number_line=FlyinError.get_number_line()
                                 )

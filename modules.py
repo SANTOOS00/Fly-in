@@ -12,7 +12,7 @@ class Hub:
         self.zone: "Hub.Zone" = Hub.Zone.NORMAL
         self.max_drones: int = 1
         self.color: str = '#FFFFFF'
-        self.size_zone: int  = 0
+        self.drones_new: List[int] = []
 
     def __lt__(self, oth: 'Hub') -> bool:
         if self.zone == self.Zone.PRIORITY:
@@ -28,13 +28,14 @@ class Hub:
         return float(self.zone.value)
 
     def is_full(self) -> bool:
-        return self.size_zone == self.max_drones
+        return  self.max_drones > len(self.drones_new)
 
-    def increase_zone_size(self) -> None:
-        self.size_zone += 1
+    def increase_zone_size(self, id_d: int) -> None:
+        if self.drones_new:
+            self.drones_new.remove(id_d)
 
-    def decrease_zone_size(self) -> None:
-        self.size_zone -= 1
+    def decrease_zone_size(self, id_d: int) -> None:
+        self.drones_new.append(id_d)
 
 
     class Color(Enum):
@@ -111,8 +112,8 @@ class Edge:
         self.source = source
         self.destination = destination
         self.max_link_capacity: int = 1
-        self.size_edge = 0
-        self.usage_count = 0
+        self.drones_new: List[int] = []
+        self.usage_count: int = 0
 
     def reset_usage_count(self) -> None:
         self.usage_count = 0
@@ -122,14 +123,15 @@ class Edge:
 
     def has_available_capacity(self) -> bool:
         return (
-            self.max_link_capacity > self.size_edge and self.usage_count < self.max_link_capacity
+            self.max_link_capacity > len(self.drones_new)
+            and self.max_link_capacity > self.usage_count
                 )
 
     def decrease_edge_capacity(self) -> None:
-        self.size_edge -= 1
+        pass
 
     def increase_edge_capacity(self) -> None:
-        self.size_edge += 1
+        pass
 
 
 

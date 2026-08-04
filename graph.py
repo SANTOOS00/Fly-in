@@ -55,7 +55,7 @@ class Graph:
 
     def get_edge(self, from_hub: Hub, to_hub: Hub) ->  Edge | None:
         for hub, edge in self.network[from_hub]:
-            if hub.name == to_hub.name:
+            if hub == to_hub:
                 return edge
         return None
 

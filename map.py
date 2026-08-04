@@ -57,15 +57,15 @@ class Map:
                              line_number=FlyinError.get_number_line())
         self.edges.append(edge)
 
-    def _get_source_hub(self, name_zone: str) -> Hub:
-        return self.get_hub(name_zone)
+    # def get_source_hub(self, name_zone: str) -> Hub:
+    #     return self.get_hub(name_zone)
 
 
-    def _get_destination_hub(self, name_zone: str) -> Hub:
-        return self.get_hub(name_zone)        
+    # def get_destination_hub(self, name_zone: str) -> Hub:
+    #     return self.get_hub(name_zone)        
 
     def get_hub(self, name_zone: str) -> Hub:
-        if self.hubs.get(name_zone) is None:
+        if not self.hubs.get(name_zone):
             raise FlyinError(f"Zone name '{name_zone}' is not defined "
                              "in the configuration file.",
                              line_number=str(FlyinError.get_number_line()))
