@@ -15,9 +15,10 @@ if __name__ == "__main__":
         from map import Map
         launcher = Fly_in()
         launcher.run()
-        # ss = Map()
-        # for hub in ss.hubs.values():
-        #     print(hub.name, hub.color, hub.max_drones)
+        ss = Map()
+        for hub in ss.hubs.values():
+            print(hub.drones_new, hub.name)
+            # print(hub.name, hub.color, hub.max_drones)
     except FlyinError as error:
         print(error, file=sys.stderr)
 

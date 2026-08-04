@@ -127,11 +127,12 @@ class Edge:
             and self.max_link_capacity > self.usage_count
                 )
 
-    def decrease_edge_capacity(self) -> None:
-        pass
+    def decrease_edge_capacity(self, id_d: int) -> None:
+        self.drones_new.append(id_d)
 
-    def increase_edge_capacity(self) -> None:
-        pass
+    def increase_edge_capacity(self, id_d: int) -> None:
+        if self.drones_new:
+            self.drones_new.remove(id_d)
 
 
 
