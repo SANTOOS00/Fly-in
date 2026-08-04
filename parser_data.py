@@ -10,18 +10,12 @@ from base_parse import BaseParser
 class EdgeParser(BaseParser, MetaParser):
     @override
     def parser(self) -> Edge:
-        print(self.line_str)
         self._validate_edge_syntax()
         match = re.match(r'^([^\s-]+)-([^\s-]+)(.*)', self.line_str)
         source, destination, *meta = match.groups()
-        map = Map()
-        print(self.line_str)
-        # print(meta)
-        sou = map.get_hub(source)
-        des = map.get_hub(destination)
         edge = Edge(
-            source=sou,
-            destination=des
+            source=Map().get_hub(source),
+            destination=Map().get_hub(destination)
         )
         self.init_meta_data(edge, meta[0])
         return edge

@@ -161,7 +161,7 @@ class MetaParser:
         for index, is_not_valid in enumerate(MetaParser.patternsmetadata.values()):
             if is_not_valid:
                 raise FlyinError("Invalid MetaData property syntax at"
-                                 f" position {data[index]}. Expected "
+                                 f" position {data[index - 1]}. Expected "
                                  "format: ",
                                  number_line=FlyinError.get_number_line()
                                 )
