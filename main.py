@@ -1,14 +1,16 @@
 from parser import Parseline, FlyinError
 import sys
 from simualtion import Simulation
+from typing import List
+
 
 class Fly_in:
-    @staticmethod
-    def run() -> None:
+    def run(self) -> None:
         parser = Parseline()
         parser.parse_file()
         simu = Simulation()
         simu.run()
+
 
 if __name__ == "__main__":
     try:
@@ -16,15 +18,7 @@ if __name__ == "__main__":
         launcher = Fly_in()
         launcher.run()
         ss = Map()
-        for hub in ss.hubs.values():
-            print(hub.drones_new, hub.name)
-            # print(hub.name, hub.color, hub.max_drones)
+        for edge in ss.edges:
+            print(edge.drones_new)
     except FlyinError as error:
         print(error, file=sys.stderr)
-
-
-
-
-
-
-

@@ -9,7 +9,7 @@ class Drone:
         self.hub_next: Hub | None = None
         self.current_edge: Edge | None = None
         self.hub_visited: List[Hub] = [hub_current]
-        self.edge_turns: float = 0
+        self.edge_turns: int = 0
 
     def is_drone_on_edge(self) -> bool:
         if self.current_edge is None:
@@ -21,7 +21,7 @@ class Drone:
         from map import Map
         # str_hub = Map().get_start()
         # hub = Map().get_hub('dist_gate1')
-        # hub1 = Map().get_hub('conv_restricted2')
+        # hub1 = Map().get_hub(' conv_restricted2')
 
         
         return self.hub_visited
@@ -31,7 +31,7 @@ class Drone:
 
     def move(self, hub_next: Hub | None,
                                graph: Graph) -> None:
-        if hub_next:
+        if hub_next is not None:
             self.hub_visited.append(hub_next)
             edge = graph.get_edge(self.current_hub, hub_next)
             self.update_hub_progress(hub_next, edge)
@@ -48,13 +48,13 @@ class Drone:
     def entre_drone_edge(self, hub_next: Hub, edge : Edge) -> None:
         self.current_hub.increase_zone_size(self.id)
         self.current_edge = edge
-        edge.increase_edge_capacity(self.id)
+        edge.decrease_edge_capacity(self.id)
         self.hub_next = hub_next
         hub_next.decrease_zone_size(self.id)
         self.add_edge_turn()
     
     def update_edge_progress(self) -> None:
-        if self.hub_next.get_zone_value() <= self.edge_turns:
+        if self.hub_next.get_zone_value() <= float(self.edge_turns + 1):
             self.current_hub = self.hub_next
             self.current_edge.increase_edge_capacity(self.id)
             self.current_edge = None

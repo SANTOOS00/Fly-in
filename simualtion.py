@@ -58,9 +58,13 @@ class Simulation:
             torn += 1
             self.track_drone_zones()
             self._reduction_drones()
-            # break
-            print(self.string_output)
-
+            self.graph.reset_all_edge_usage_counts()
+            self.track_drone_zones()
+            self._reduction_drones()
+            self.graph.reset_all_edge_usage_counts()
+            break 
+        # print(torn)
+        return self.drones
 
     def _reduction_drones(self) -> None:
         self.drones = list(filter(lambda dron: dron is not None, self.drones))
@@ -70,6 +74,7 @@ class Simulation:
             if not drone.is_drone_on_edge():
                 hub_next = self.get_next_valid_hub(drone)
                 if not hub_next:
+
                     self.print_drone_in_action(drone)
                     continue
 
@@ -79,6 +84,7 @@ class Simulation:
                 if self.graph.is_end_hub(hub_next):
                     self.remove_drone(drone)
             else:
+                # print(drone.id)
                 drone.move(None, self.graph)
                 self.print_drone_in_action(drone)
 
