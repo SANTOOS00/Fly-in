@@ -17,8 +17,5 @@ if __name__ == "__main__":
         from map import Map
         launcher = Fly_in()
         launcher.run()
-        ss = Map()
-        for edge in ss.edges:
-            print(edge.drones_new)
     except FlyinError as error:
         print(error, file=sys.stderr)

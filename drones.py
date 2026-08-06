@@ -17,13 +17,7 @@ class Drone:
         return True
 
 
-    def get_path_visited(self) -> List[Hub]:
-        from map import Map
-        # str_hub = Map().get_start()
-        # hub = Map().get_hub('dist_gate1')
-        # hub1 = Map().get_hub(' conv_restricted2')
-
-        
+    def get_path_visited(self) -> List[Hub]:        
         return self.hub_visited
 
     def get_current_hub (self) -> None | Hub:
@@ -68,13 +62,10 @@ class Drone:
         self.reset_edge_turns()
 
 
-    # def set_hub_next(self, hub_next: Hub) -> None:
-    #     self.hub_next = hub_next
-
     def entre_hub(self, hub_next: Hub | None) -> None:
-        self.current_hub.decrease_zone_size(self.id)
+        self.current_hub.increase_zone_size(self.id)
         self.current_hub = hub_next
-        hub_next.increase_zone_size(self.id)
+        hub_next.decrease_zone_size(self.id)
 
     def add_edge_turn(self) -> None:
         self.edge_turns += 1

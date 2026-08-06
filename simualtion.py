@@ -25,12 +25,6 @@ class Valid_Json:
         with open(f"{name_file}.txt", "w") as fb:
             json.dump(self.adj_list_to_dict(adj_list), fb, indent=4)
             fb.write('\n')
-            fb.write("====================================")
-            fb.write("====================================")
-            fb.write("====================================")
-            fb.write("====================================")
-            fb.write("====================================")
-            fb.write("====================================")
 
 
 class Simulation:
@@ -58,12 +52,10 @@ class Simulation:
             torn += 1
             self.track_drone_zones()
             self._reduction_drones()
-            self.graph.reset_all_edge_usage_counts()
-            self.track_drone_zones()
-            self._reduction_drones()
-            self.graph.reset_all_edge_usage_counts()
-            break 
-        # print(torn)
+            print(self.string_output)
+            self.string_output = ''
+            self.graph.reset_all_edge_usage_counts() 
+        print(torn)
         return self.drones
 
     def _reduction_drones(self) -> None:
@@ -74,7 +66,6 @@ class Simulation:
             if not drone.is_drone_on_edge():
                 hub_next = self.get_next_valid_hub(drone)
                 if not hub_next:
-
                     self.print_drone_in_action(drone)
                     continue
 
@@ -84,20 +75,19 @@ class Simulation:
                 if self.graph.is_end_hub(hub_next):
                     self.remove_drone(drone)
             else:
-                # print(drone.id)
                 drone.move(None, self.graph)
                 self.print_drone_in_action(drone)
 
 
 
     def print_drone_in_action(self, drone: Drone) -> None:
-        if drone.get_current_hub() == self.start_hub:
-            return None
         if drone.is_drone_on_edge():
             self.string_output += f' D{drone.id}-{drone.current_hub.name}-{drone.hub_next.name}'
+        elif drone.get_current_hub() == self.start_hub:
+            return None
         else:
             self.string_output += f' D{drone.id}-{drone.current_hub.name}'
-
+ 
     def get_next_valid_hub(self, drone: Drone) -> Hub | None:
         adj_list: Adj_List = self.graph.get_copy_adj_list()
         hub_next: Hub | None = None
@@ -107,6 +97,7 @@ class Simulation:
             path, cost = self.dijkstra.run(adj_list,
                                     drone.get_current_hub(),
                                     self.end_hub)
+            print(cost)
             if not path:
                 return None
             if (self.check_is_valid_edge(path[0], path[1])
