@@ -97,7 +97,7 @@ class Simulation:
             path, cost = self.dijkstra.run(adj_list,
                                     drone.get_current_hub(),
                                     self.end_hub)
-            print(cost)
+            # print(cost)
             if not path:
                 return None
             if (self.check_is_valid_edge(path[0], path[1])
