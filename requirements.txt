@@ -1,0 +1,3 @@
+rich
+webcolors
+typing_extensions

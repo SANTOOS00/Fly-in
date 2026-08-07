@@ -5,11 +5,11 @@ MAP ?= maps/challenger/01_the_impossible_dream.txt
 
 all: run
 
-run:
+run: install
 	@python3 $(SCRIPT) $(MAP)
 
 install:
-	npm install --save-dev pyright
+	@pip install -r requirements.txt
 
 clean:
 	@rm -rf __pycache__ .mypy_cache .pytest_cache

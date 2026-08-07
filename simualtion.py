@@ -6,25 +6,7 @@ from graph import Graph
 from dijkstra import Dijkstra
 import json
 from enum import Enum
-
-
-class Valid_Json:
-    @staticmethod
-    def adj_list_to_dict(adj_list: Adj_List):
-        result = {}
-        for hub in adj_list.keys():
-            result[hub.name] = []
-            for hu_ss, _ in adj_list[hub]:
-                result[hub.name].append({
-                    'to': hub.name,
-                    'from': hu_ss.name
-                })
-        return result
-
-    def write_in_data(self, adj_list: Adj_List, name_file: str) -> None:
-        with open(f"{name_file}.txt", "w") as fb:
-            json.dump(self.adj_list_to_dict(adj_list), fb, indent=4)
-            fb.write('\n')
+from color import Color
 
 
 class Simulation:
@@ -44,7 +26,7 @@ class Simulation:
         self.end_hub: Hub = Map().get_end()
         self.start_hub: Hub = Map().get_start()
         self.adj_list: Adj_List | None = None
-        self.string_output: str = ''
+        self.color = Color()
 
     def run(self) -> None:
         torn = 0
@@ -52,7 +34,7 @@ class Simulation:
             torn += 1
             self.track_drone_zones()
             self._reduction_drones()
-            print(self.string_output)
+            self.color.print_string()
             self.string_output = ''
             self.graph.reset_all_edge_usage_counts() 
         print(torn)
@@ -82,11 +64,19 @@ class Simulation:
 
     def print_drone_in_action(self, drone: Drone) -> None:
         if drone.is_drone_on_edge():
-            self.string_output += f' D{drone.id}-{drone.current_hub.name}-{drone.hub_next.name}'
+            self.color.append_string_outout(
+                f' D{drone.id}-{self.color(
+                    drone.current_hub.name,
+                    drone.current_hub.color)}'
+                f'-{self.color(drone.hub_next.name,
+                               drone.hub_next.color)}')
         elif drone.get_current_hub() == self.start_hub:
             return None
         else:
-            self.string_output += f' D{drone.id}-{drone.current_hub.name}'
+            self.color.append_string_outout(f' D{drone.id}-'
+                                            f'{self.color(
+                                                drone.current_hub.name,
+                                                drone.current_hub.color)}')
  
     def get_next_valid_hub(self, drone: Drone) -> Hub | None:
         adj_list: Adj_List = self.graph.get_copy_adj_list()
@@ -97,7 +87,7 @@ class Simulation:
             path, cost = self.dijkstra.run(adj_list,
                                     drone.get_current_hub(),
                                     self.end_hub)
-            # print(cost)
+            # print(cost)   
             if not path:
                 return None
             if (self.check_is_valid_edge(path[0], path[1])

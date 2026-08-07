@@ -11,7 +11,7 @@ class Hub:
         y = y
         self.zone: "Hub.Zone" = Hub.Zone.NORMAL
         self.max_drones: int = 1
-        self.color: str = '#FFFFFF'
+        self.color: str = 'white'
         self.drones_new: List[int] = []
 
     def __lt__(self, oth: 'Hub') -> bool:
@@ -38,33 +38,33 @@ class Hub:
         self.drones_new.append(id_d)
 
 
-    class Color(Enum):
-        BLACK = "black"
-        RED = "red"
-        GREEN = "green"
-        YELLOW = "yellow"
-        BLUE = "blue"
-        MAGENTA = "magenta"
-        CYAN = "cyan"
-        WHITE = "white"
-        ORANGE = "orange"
-        PURPLE = "purple"
-        BROWN = "brown"
-        LIME = "lime"
-        GOLD = "gold"
-        MAROON = "maroon"
-        DARKRED = "darkred"
-        VIOLET = "violet"
-        CRIMSON = "crimson"
-        RAINBOW = "rainbow"
+    # class Color(Enum):
+    #     BLACK = "black"
+    #     RED = "red"
+    #     GREEN = "green"
+    #     YELLOW = "yellow"
+    #     BLUE = "blue"
+    #     MAGENTA = "magenta"
+    #     CYAN = "cyan"
+    #     WHITE = "white"
+    #     ORANGE = "orange"
+    #     PURPLE = "purple"
+    #     BROWN = "brown"
+    #     LIME = "lime"
+    #     GOLD = "gold"
+    #     MAROON = "maroon"
+    #     DARKRED = "darkred"
+    #     VIOLET = "violet"
+    #     CRIMSON = "crimson"
+    #     RAINBOW = "rainbow"
 
-        @classmethod
-        def get_hex(cls, type_color: str) -> str:
-            try:
-                c = cls(type_color.lower())
-                return COLOR_HEX[c]
-            except Exception:
-                return '#FFFFFF'
+    #     @classmethod
+    #     def get_hex(cls, type_color: str) -> str:
+    #         try:
+    #             c = cls(type_color.lower())
+    #             return COLOR_HEX[c]
+    #         except Exception:
+    #             return '#FFFFFF'
 
     class Zone(Enum):
         NORMAL = 1

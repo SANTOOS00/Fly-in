@@ -117,7 +117,6 @@ connection: maze_loop5-maze_loop6
 connection: maze_loop6-maze_loop1
 
 # Escape routes from maze (very limited)
-connection: maze_trap_a2-micro_gate1
 connection: maze_trap_b2-micro_gate1
 connection: maze_loop3-micro_gate2
 
