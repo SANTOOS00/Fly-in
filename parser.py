@@ -41,6 +41,7 @@ class Parseline:
         with open(safe_file.path_file, "r") as fb:
             for raw_line in fb:
                 self._process_line(raw_line)
+            self.map.validate_hub_end_start()
     
     def _process_line(self, raw_line: str):
         FlyinError.add_line_number()
@@ -107,7 +108,5 @@ class Parseline:
             raise FlyinError('type error',
                              line_number=FlyinError.get_number_line())
 
-
-
-
+    
 

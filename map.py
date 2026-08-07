@@ -57,12 +57,22 @@ class Map:
                              line_number=FlyinError.get_number_line())
         self.edges.append(edge)
 
-    # def get_source_hub(self, name_zone: str) -> Hub:
-    #     return self.get_hub(name_zone)
-
-
-    # def get_destination_hub(self, name_zone: str) -> Hub:
-    #     return self.get_hub(name_zone)        
+    def validate_hub_end_start(self) -> None:
+        if self.network.start_hube is None:
+            raise ValueError(
+                "[Error]: Missing Start Hub! \n  You must define at least "
+                "one start hub using this format:\n"
+                "    >> start_hub: name_zone x y [key=val] <<",
+                number_line=FlyinError.get_number_line()
+            )
+        if self.network.end_hube is None:
+            raise FlyinError(
+                "[Error]: Missing End Hub! \n  You must define at least "
+                "one end hub using this format:\n"
+                "     >> start_end: name_zone x y [key=val] <<",
+                number_line=FlyinError.get_number_line()
+            )
+ 
 
     def get_hub(self, name_zone: str) -> Hub:
         if not self.hubs.get(name_zone):

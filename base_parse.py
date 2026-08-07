@@ -1,4 +1,3 @@
-from typing_extensions import override
 from abc import ABC, abstractmethod
 
 class BaseParser(ABC):
