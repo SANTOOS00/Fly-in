@@ -19,14 +19,14 @@ class Dijkstra:
         while heap:
             cost, hub_new = queue.heappop(heap)
             if end_hub == hub_new:
-                return (self.get_path(start_hub), self.distances[hub_new.name])
+                return self.get_path(start_hub)
             for neighbor_hub, _ in graph[hub_new]:
                 new_cost: float = cost + neighbor_hub.get_zone_value()
                 if new_cost < self.distances[neighbor_hub.name]:
                     queue.heappush(heap, (new_cost, neighbor_hub))
                     self.distances[neighbor_hub.name] = new_cost
                     self.paths[neighbor_hub] = hub_new
-        return None, 0
+        return None
         
     def get_path(self, start_hub: Hub) -> List[Hub]:
         path: List[Hub] = []

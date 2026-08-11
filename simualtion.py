@@ -6,7 +6,7 @@ from graph import Graph
 from dijkstra import Dijkstra
 from enum import Enum
 from color import Color
-
+from custom_error import FlyinError
 
 class Simulation:
     class MoveType(Enum):
@@ -29,6 +29,7 @@ class Simulation:
 
     def run(self) -> None:
         torn = 0
+        self.test_name()
         while self.check_finished():
             torn += 1
             self.track_drone_zones()
@@ -37,6 +38,13 @@ class Simulation:
             self.color.clear()
             self.graph.reset_all_edge_usage_counts()
         return self.drones
+
+    def test_name(self) -> None:
+        adj_list: Adj_List = self.graph.get_copy_adj_list()
+        path = self.dijkstra.run(adj_list, self.start_hub, self.end_hub)
+        print(path)
+        if path is None:
+            raise FlyinError("in graph is not path make")
 
     def _reduction_drones(self) -> None:
         self.drones = list(filter(lambda dron: dron is not None, self.drones))
