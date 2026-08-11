@@ -4,7 +4,6 @@ from map import Map
 from modules import Hub, Adj_List
 from graph import Graph
 from dijkstra import Dijkstra
-import json
 from enum import Enum
 from color import Color
 
@@ -35,9 +34,8 @@ class Simulation:
             self.track_drone_zones()
             self._reduction_drones()
             self.color.print_string()
-            self.string_output = ''
-            self.graph.reset_all_edge_usage_counts() 
-        print(torn)
+            self.color.clear()
+            self.graph.reset_all_edge_usage_counts()
         return self.drones
 
     def _reduction_drones(self) -> None:
@@ -60,43 +58,51 @@ class Simulation:
                 drone.move(None, self.graph)
                 self.print_drone_in_action(drone)
 
-
-
     def print_drone_in_action(self, drone: Drone) -> None:
         if drone.is_drone_on_edge():
-            self.color.append_string_outout(
-                f' D{drone.id}-{self.color(
+            self.color.add(
+                f' D{drone.id}-{self.color.join_color_string(
                     drone.current_hub.name,
                     drone.current_hub.color)}'
-                f'-{self.color(drone.hub_next.name,
+                f'-{self.color.join_color_string(drone.hub_next.name,
                                drone.hub_next.color)}')
         elif drone.get_current_hub() == self.start_hub:
             return None
         else:
-            self.color.append_string_outout(f' D{drone.id}-'
-                                            f'{self.color(
-                                                drone.current_hub.name,
-                                                drone.current_hub.color)}')
+            self.color.add(f' D{drone.id}-'
+                           f'{self.color.join_color_string(
+                               drone.current_hub.name,
+                               drone.current_hub.color)}')
  
     def get_next_valid_hub(self, drone: Drone) -> Hub | None:
         adj_list: Adj_List = self.graph.get_copy_adj_list()
-        hub_next: Hub | None = None
+        hub_next: List[Hub] | None = []
         self.graph.remove_path_visidet_drone(adj_list,
-                                             drone.get_path_visited())
+                                                drone.get_path_visited())
         while True:
             path, cost = self.dijkstra.run(adj_list,
                                     drone.get_current_hub(),
                                     self.end_hub)
-            # print(cost)   
             if not path:
-                return None
+                break
             if (self.check_is_valid_edge(path[0], path[1])
                 and self.check_is_valid_hub_next(path[1])):
-                hub_next = path[1]
-                break
+                hub_next.append(path[1])
+                self.graph.remve_edge_is_adj_list(adj_list, path[0], path[1])
+                if len(hub_next) == 2:
+                    break
             else:
                 self.graph.remve_edge_is_adj_list(adj_list, path[0], path[1])
-        return hub_next
+        return self.select_next_hub(hub_next)
+
+    @staticmethod
+    def select_next_hub(hub_nexts: List[Hub] | None) -> Hub:
+        if len(hub_nexts) == 0:
+            return None
+        if len(hub_nexts) == 2 and len(hub_nexts[0].drones_new) > len(hub_nexts[1].drones_new):
+            return hub_nexts[1]
+        return hub_nexts[0]
+
     def check_is_valid_edge(self, from_hub: Hub, to_hub: Hub) -> bool:
         edge = self.graph.get_edge(from_hub, to_hub)
         if edge.has_available_capacity():

@@ -28,6 +28,7 @@ class Graph:
         for edge in edges:
             edge.reset_usage_count()
 
+
     @staticmethod
     def remve_edge_is_adj_list(adj_list: Adj_List, hub_from: Hub, hub_to: Hub) -> None:
         for hub, edge in adj_list[hub_from]:

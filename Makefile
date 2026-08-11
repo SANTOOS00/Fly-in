@@ -6,7 +6,6 @@ MAP ?= maps/challenger/01_the_impossible_dream.txt
 all: run
 
 run: install
-	source 
 	@python3 $(SCRIPT) $(MAP)
 
 install:

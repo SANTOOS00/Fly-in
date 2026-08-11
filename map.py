@@ -58,14 +58,14 @@ class Map:
         self.edges.append(edge)
 
     def validate_hub_end_start(self) -> None:
-        if self.network.start_hube is None:
+        if self.start_hub is None:
             raise ValueError(
                 "[Error]: Missing Start Hub! \n  You must define at least "
                 "one start hub using this format:\n"
                 "    >> start_hub: name_zone x y [key=val] <<",
                 number_line=FlyinError.get_number_line()
             )
-        if self.network.end_hube is None:
+        if self.end_hub is None:
             raise FlyinError(
                 "[Error]: Missing End Hub! \n  You must define at least "
                 "one end hub using this format:\n"

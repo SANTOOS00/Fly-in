@@ -37,35 +37,6 @@ class Hub:
     def decrease_zone_size(self, id_d: int) -> None:
         self.drones_new.append(id_d)
 
-
-    # class Color(Enum):
-    #     BLACK = "black"
-    #     RED = "red"
-    #     GREEN = "green"
-    #     YELLOW = "yellow"
-    #     BLUE = "blue"
-    #     MAGENTA = "magenta"
-    #     CYAN = "cyan"
-    #     WHITE = "white"
-    #     ORANGE = "orange"
-    #     PURPLE = "purple"
-    #     BROWN = "brown"
-    #     LIME = "lime"
-    #     GOLD = "gold"
-    #     MAROON = "maroon"
-    #     DARKRED = "darkred"
-    #     VIOLET = "violet"
-    #     CRIMSON = "crimson"
-    #     RAINBOW = "rainbow"
-
-    #     @classmethod
-    #     def get_hex(cls, type_color: str) -> str:
-    #         try:
-    #             c = cls(type_color.lower())
-    #             return COLOR_HEX[c]
-    #         except Exception:
-    #             return '#FFFFFF'
-
     class Zone(Enum):
         NORMAL = 1
         PRIORITY = 1
@@ -83,28 +54,6 @@ class Hub:
                     return cls.PRIORITY
                 case "RESTRICTED":
                     return cls.RESTRICTED
-
-
-COLOR_HEX = {
-    Hub.Color.BLACK: "#000000",
-    Hub.Color.RED: "#FF0000",
-    Hub.Color.GREEN: "#00FF00",
-    Hub.Color.YELLOW: "#FFFF00",
-    Hub.Color.BLUE: "#0000FF",
-    Hub.Color.MAGENTA: "#FF00FF",
-    Hub.Color.CYAN: "#00FFFF",
-    Hub.Color.WHITE: "#FFFFFF",
-    Hub.Color.ORANGE: "#FFA500",
-    Hub.Color.PURPLE: "#800080",
-    Hub.Color.BROWN: "#A52A2A",
-    Hub.Color.LIME: "#00FF00",
-    Hub.Color.GOLD: "#FFD700",
-    Hub.Color.MAROON: "#800000",
-    Hub.Color.DARKRED: "#8B0000",
-    Hub.Color.VIOLET: "#EE82EE",
-    Hub.Color.CRIMSON: "#DC143C",
-    Hub.Color.RAINBOW: "#FF69B4",
-}
 
 
 class Edge:
