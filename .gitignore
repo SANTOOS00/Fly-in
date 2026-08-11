@@ -1,8 +1,9 @@
 # Python cache
-/__pycache__
+__pycache__/
 *.pyc
 
-# test files
-.test_method
-
+# Environment & Secrets
 .env
+
+# Test files
+.test_method
