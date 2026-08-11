@@ -5,6 +5,4 @@
 # test files
 .test_method
 
-# maps files
-.mapssss.txt
-sss.txt
+.env
