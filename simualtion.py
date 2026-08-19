@@ -37,12 +37,10 @@ class Simulation:
             self.color.print_string()
             self.color.clear()
             self.graph.reset_all_edge_usage_counts()
-        return self.drones
 
     def test_name(self) -> None:
         adj_list: Adj_List = self.graph.get_copy_adj_list()
         path = self.dijkstra.run(adj_list, self.start_hub, self.end_hub)
-        print(path)
         if path is None:
             raise FlyinError("in graph is not path make")
 
@@ -88,7 +86,7 @@ class Simulation:
         self.graph.remove_path_visidet_drone(adj_list,
                                                 drone.get_path_visited())
         while True:
-            path, cost = self.dijkstra.run(adj_list,
+            path = self.dijkstra.run(adj_list,
                                     drone.get_current_hub(),
                                     self.end_hub)
             if not path:
