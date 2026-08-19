@@ -130,5 +130,3 @@ class Simulation:
         index_drone = self.drones.index(drone)
         self.drones[index_drone] = None
         
-
-

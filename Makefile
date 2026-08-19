@@ -4,85 +4,92 @@ MAP_DEF = maps/challenger/01_the_impossible_dream.txt
 
 VENV = venv
 
-REQ = requirement.txt
+PATH_ACTIVE_VENV = $(VENV)/bin/activate
+
+REQ = .requirements.txt
 
 PIP = $(VENV)/bin/pip
 
-PYTHON3 = $(VENV)/bin/python3
+PYTHON3_ENV = $(VENV)/bin/python3
+
+PYTHON3 = python3
 
 CACH = __pycache__ .mypy_cache .flake8
 
+env:
+	@if [ ! -d "$(VENV)" ]; then $(PYTHON3) -m venv $(VENV); fi
 
-run: install # IS VALID LINE
+run: env # IS VALID LINE
 	$(PYTHON3) $(MAIN) $(MAP_DEF)
 
+active_venv:
+	source $(PATH_ACTIVE_VENV)
+
 install:
-	$(PIP) install -r $(REQ)
+	pip install -r $(REQ)
+
+# clean:
+# 	rm -rf $(CACH)
+# 	echo "Cleaned cache files!"
+# 	rm -rf node_modules package-lock.json
+
+# lint:
+# 	@flake8 .
+# 	@mypy . --warn-return-any\
+# 	--warn-unused-ignores\
+# 	--ignore-missing-imports\
+# 	--check-untyped-defs
+# 	--disallow-untyped-defs\
 
 
+# PYTHON = python3
+# VENV = .venv
 
-clean:
-	rm -rf $(CACH)
-	echo "Cleaned cache files!"
-	rm -rf node_modules package-lock.json
+# REQUIREMENT = requirement.txt
 
-lint:
-	@flake8 .
-	@mypy . --warn-return-any\
-	--warn-unused-ignores\
-	--ignore-missing-imports\
-	--disallow-untyped-defs\
-	--check-untyped-defs
+# VENV_BIN = $(VENV)/bin
 
+# PYTHON_PATH = $(VENV_BIN)/python
 
-PYTHON = python3
-VENV = .venv
+# PIP_PATH = $(VENV_BIN)/pip
 
-REQUIREMENT = requirement.txt
+# RM = rm
 
-VENV_BIN = $(VENV)/bin
+# RM_FLAGS = -rf
 
-PYTHON_PATH = $(VENV_BIN)/python
+# CACHE = ./__pycache__ .mypy_cache .flake8
 
-PIP_PATH = $(VENV_BIN)/pip
+# DEFAULT_MAP = ./maps/challenger/01_the_impossible_dream.txt
 
-RM = rm
+# FILES = ./Graph.py Log.py ./Path.py ./Interfaces.py  ./Errors.py ./Parser.py \
+# 				./Enums.py  ./Dijkstra.py ./Colors.py ./Simulation.py  ./Validator.py \
+# 				./FileReader.py ./Singleton.py ./Mettadata.py ./main.py ./GraphBuilder.py
 
-RM_FLAGS = -rf
+# MAIN = main.py
 
-CACHE = ./__pycache__ .mypy_cache .flake8
+# MYPY = mypy
+# MYPY_FLAGS = --warn-return-any --warn-unused-ignores --ignore-missing-imports --disallow-untyped-defs
 
-DEFAULT_MAP = ./maps/challenger/01_the_impossible_dream.txt
+# run: env 
+# 	$(PYTHON_PATH) $(MAIN) $(DEFAULT_MAP)
+# env: # create virtual enviroment
+# 	@if [ ! -d "$(VENV)" ]; then $(PYTHON) -m venv $(VENV); fi
 
-FILES = ./Graph.py Log.py ./Path.py ./Interfaces.py  ./Errors.py ./Parser.py \
-				./Enums.py  ./Dijkstra.py ./Colors.py ./Simulation.py  ./Validator.py \
-				./FileReader.py ./Singleton.py ./Mettadata.py ./main.py ./GraphBuilder.py
-
-MAIN = main.py
-
-MYPY = mypy
-MYPY_FLAGS = --warn-return-any --warn-unused-ignores --ignore-missing-imports --disallow-untyped-defs
-
-run: env 
-	$(PYTHON_PATH) $(MAIN) $(DEFAULT_MAP)
-env: # create virtual enviroment
-	@if [ ! -d "$(VENV)" ]; then $(PYTHON) -m venv $(VENV); fi
-
-install: env
-	@$(PIP_PATH) install -r $(REQUIREMENT)
+# install: env
+# 	@$(PIP_PATH) install -r $(REQUIREMENT)
 
 
-lint: env
-	@$(PYTHON_PATH) -m $(MYPY) $(FILES) $(MYPY_FLAGS)
-	@$(PYTHON_PATH) -m flake8 $(FILES)
+# lint: env
+# 	@$(PYTHON_PATH) -m $(MYPY) $(FILES) $(MYPY_FLAGS)
+# 	@$(PYTHON_PATH) -m flake8 $(FILES)
 
-clean:
-	$(RM) $(RM_FLAGS)  $(CACHE)
-	$(RM) $(RM_FLAGS) $(VENV)
+# clean:
+# 	$(RM) $(RM_FLAGS)  $(CACHE)
+# 	$(RM) $(RM_FLAGS) $(VENV)
 
-debug:
-	$(PYTHON_PATH) -m pdb $(MAIN) $(DEFAULT_MAP)
+# debug:
+# 	$(PYTHON_PATH) -m pdb $(MAIN) $(DEFAULT_MAP)
 
-lint-strict:
-	@$(PYTHON_PATH) -m flake8 $(FILES)
-	@$(PYTHON_PATH) -m $(MYPY) $(FILES) --strict
+# lint-strict:
+# 	@$(PYTHON_PATH) -m flake8 $(FILES)
+# 	@$(PYTHON_PATH) -m $(MYPY) $(FILES) --strict
