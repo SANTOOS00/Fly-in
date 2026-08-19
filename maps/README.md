@@ -63,7 +63,7 @@ Cycles in the graph that can cause infinite loops in poorly designed algorithms.
 
 ## Expected Behavior
 
-All maps are designed to be solvable with a well-implemented algorithm. However:
+All maps are designed to be s   olvable with a well-implemented algorithm. However:
 
 - **Easy maps**: Should solve quickly with any reasonable approach
 - **Medium maps**: May require backtracking, path optimization, or capacity management
