@@ -1,3 +1,4 @@
 rich
 webcolors
 typing_extensions
+mypy
