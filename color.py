@@ -1,5 +1,12 @@
-from webcolors import name_to_hex
-from rich.console import Console
+import sys
+
+try:
+    from webcolors import name_to_hex
+    from rich.console import Console
+except ModuleNotFoundError as e:
+    print(f"\nMissing module: {e}", file=sys.stderr)
+    print("Solution: run the command 'make install'\n", file=sys.stderr)
+    exit()
 
 
 class Color:

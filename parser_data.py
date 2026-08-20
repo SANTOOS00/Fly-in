@@ -1,10 +1,18 @@
 from custom_error import FlyinError
-from typing_extensions import override
 from modules import Hub, Edge
 from map import Map
 import re
 from parse_meta_data import MetaParser
 from base_parse import BaseParser
+import sys
+
+try:
+
+    from typing_extensions import override
+except ModuleNotFoundError as e:
+    print(f"\nMissing module: {e}", file=sys.stderr)
+    print("Solution: run the command 'make install'\n", file=sys.stderr)
+    exit()
 
 
 class EdgeParser(BaseParser, MetaParser):
@@ -54,7 +62,7 @@ class HubParser(BaseParser, MetaParser):
     def parser(self) -> Hub:
         self._validate_syntax()
         match = re.match(r'^([^\s-]+)\s+(-?\d+)\s+(-?\d+)(.*)',
-                         number_line=str(FlyinError.get_number_line()))
+                         self.line_str)
         name, x, y, *meta = match.groups()
         hub = Hub(
             name=name,

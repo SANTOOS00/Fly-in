@@ -86,7 +86,7 @@ class Parseline:
         try:
             self.map.set_number_drones(int(self.clean_line))
         except ValueError:
-            raise FlyinError("val li kaukon f drones hwa",
+            raise FlyinError("val li  number sahih tabi3i",
                              number_line=str(FlyinError.get_number_line()))
 
     def _set_type_line(self) -> None:
