@@ -10,10 +10,20 @@ PYTHON3 = python3
 
 CACH = __pycache__ .mypy_cache
 
+# FILES = base_parse.py dijkstra.py graph.py \
+# 		map.py parse_meta_data.py color.py \
+# 		drones.py main.py parser_data.py \
+# 		custom_error.py Makefile modules.py \
+# 		parser.py simualtion.py
+FILES = base_parse.py dijkstra.py graph.py \
+        map.py parse_meta_data.py color.py \
+        drones.py main.py parser_data.py \
+        custom_error.py Makefile modules.py \
+        parser.py simualtion.py
 FILES = base_parse.py dijkstra.py graph.py \
 		map.py parse_meta_data.py color.py \
 		drones.py main.py parser_data.py \
-		custom_error.py Makefile modules.py \
+		custom_error.py modules.py \
 		parser.py simualtion.py
 
 all:
@@ -33,8 +43,8 @@ clean:
 	@echo "Cleaned cache files!"
 
 lint: env
-	@$(VENV)/bin/flake8 *.py
-	@$(VENV)/bin/mypy *.py --warn-return-any --warn-unused-ignores --ignore-missing-imports --check-untyped-defs --disallow-untyped-defs
+	@$(VENV)/bin/flake8 $(FILES)
+	@$(VENV)/bin/mypy $(FILES) --warn-return-any --warn-unused-ignores --ignore-missing-imports --check-untyped-defs --disallow-untyped-defs
 
 lint-strict: env
 	@$(VENV)/bin/flake8 $(FILES)
