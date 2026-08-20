@@ -2,10 +2,10 @@ from typing import List
 from typing import NewType, Dict
 from enum import Enum
 from typing import Union
- 
+
 
 class Hub:
-    def __init__(self, name:str, x: int, y: int) -> None:
+    def __init__(self, name: str, x: int, y: int) -> None:
         self.name = name
         x = x
         y = y
@@ -28,7 +28,7 @@ class Hub:
         return float(self.zone.value)
 
     def is_full(self) -> bool:
-        return  self.max_drones > len(self.drones_new)
+        return self.max_drones > len(self.drones_new)
 
     def increase_zone_size(self, id_d: int) -> None:
         if self.drones_new:

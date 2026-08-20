@@ -1,6 +1,8 @@
-from typing import Dict, Callable, Any
+from typing import Dict
 
-class   FlyinError(Exception):
+
+class FlyinError(Exception):
+
     _line_number: int = 0
 
     def __init__(self, *message: str, **context) -> None:
@@ -13,7 +15,7 @@ class   FlyinError(Exception):
     @classmethod
     def add_line_number(cls) -> None:
         cls._line_number += 1
-    
+
     @classmethod
     def get_number_line(cls) -> str:
         return str(cls._line_number)

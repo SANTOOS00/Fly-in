@@ -3,6 +3,7 @@ from typing import List, Dict, Tuple
 from modules import Hub, Adj_List
 from map import Map
 
+
 class Dijkstra:
     def __init__(self) -> None:
         self.paths: Dict[Hub, Hub] = {}

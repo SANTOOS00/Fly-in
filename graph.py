@@ -1,7 +1,8 @@
-from typing import Any, List
+from typing import List
 from collections import defaultdict
 from modules import Hub, Edge, Adj_List
 from map import Map
+
 
 class GraphBuilder:
     def __init__(self) -> None:
@@ -18,8 +19,8 @@ class GraphBuilder:
 
 class Graph:
     def __init__(self) -> None:
+        self.star_hub = Map().get_start()
         self.network: Adj_List = GraphBuilder().init_adj_list()
-        self.star_hub = Map().get_start() 
         self.end_hub = Map().get_end()
 
     @staticmethod
@@ -28,16 +29,17 @@ class Graph:
         for edge in edges:
             edge.reset_usage_count()
 
-
     @staticmethod
-    def remve_edge_is_adj_list(adj_list: Adj_List, hub_from: Hub, hub_to: Hub) -> None:
+    def remve_edge_is_adj_list(adj_list: Adj_List,
+                               hub_from: Hub,
+                               hub_to: Hub) -> None:
         for hub, edge in adj_list[hub_from]:
             if hub == hub_to:
                 adj_list[hub_from].remove((hub, edge))
         for hub, edge in adj_list[hub_to]:
-                if hub == hub_from:
-                    adj_list[hub_to].remove((hub, edge))
-        
+            if hub == hub_from:
+                adj_list[hub_to].remove((hub, edge))
+
     def get_copy_adj_list(self) -> Adj_List:
         copy_adj: Adj_List = Adj_List({
             hub: neighbors.copy()
@@ -54,7 +56,7 @@ class Graph:
     def is_end_hub(self, hub: Hub) -> bool:
         return self.end_hub == hub
 
-    def get_edge(self, from_hub: Hub, to_hub: Hub) ->  Edge | None:
+    def get_edge(self, from_hub: Hub, to_hub: Hub) -> Edge | None:
         for hub, edge in self.network[from_hub]:
             if hub == to_hub:
                 return edge

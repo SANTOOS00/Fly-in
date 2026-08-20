@@ -6,6 +6,7 @@ import re
 from parse_meta_data import MetaParser
 from base_parse import BaseParser
 
+
 class EdgeParser(BaseParser, MetaParser):
     @override
     def parser(self) -> Edge:
@@ -21,13 +22,13 @@ class EdgeParser(BaseParser, MetaParser):
 
     def _validate_edge_syntax(self) -> None:
         self._validate_source()
-        self._validate_destination()    
+        self._validate_destination()
 
     def _validate_source(self) -> None:
         if not re.match(r'^([^\s-]+)-', self.line_str):
             raise FlyinError('',
                              line_number=str(FlyinError.get_number_line()))
-    
+
     def _validate_destination(self) -> None:
         if not re.match(r'^([^\s-]+)-([^\s-]+)', self.line_str):
             raise FlyinError('test valid ',
@@ -44,15 +45,16 @@ class EdgeParser(BaseParser, MetaParser):
             val_capacity = int(max_capacity)
         except ValueError:
             raise FlyinError('',
-                       number_line=str(FlyinError.get_number_line()))
+                             number_line=str(FlyinError.get_number_line()))
         return val_capacity
+
 
 class HubParser(BaseParser, MetaParser):
     @override
     def parser(self) -> Hub:
         self._validate_syntax()
         match = re.match(r'^([^\s-]+)\s+(-?\d+)\s+(-?\d+)(.*)',
-                        self.line_str)
+                         number_line=str(FlyinError.get_number_line()))
         name, x, y, *meta = match.groups()
         hub = Hub(
             name=name,

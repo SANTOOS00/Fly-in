@@ -2,6 +2,7 @@ from typing import List
 from graph import Graph
 from modules import Hub, Edge
 
+
 class Drone:
     def __init__(self, id: int, hub_current: Hub | None) -> None:
         self.id: int = id
@@ -16,14 +17,14 @@ class Drone:
             return False
         return True
 
-    def get_path_visited(self) -> List[Hub]:        
+    def get_path_visited(self) -> List[Hub]:
         return self.hub_visited
 
-    def get_current_hub (self) -> Hub:
+    def get_current_hub(self) -> Hub:
         return self.current_hub
 
     def move(self, hub_next: Hub | None,
-                               graph: Graph) -> None:
+             graph: Graph) -> None:
         if hub_next is not None:
             self.hub_visited.append(hub_next)
             edge = graph.get_edge(self.current_hub, hub_next)
@@ -38,14 +39,14 @@ class Drone:
         else:
             self.entre_drone_edge(hub_next, edge)
 
-    def entre_drone_edge(self, hub_next: Hub, edge : Edge) -> None:
+    def entre_drone_edge(self, hub_next: Hub, edge: Edge) -> None:
         self.current_hub.increase_zone_size(self.id)
         self.current_edge = edge
         edge.decrease_edge_capacity(self.id)
         self.hub_next = hub_next
         hub_next.decrease_zone_size(self.id)
         self.add_edge_turn()
-    
+
     def update_edge_progress(self) -> None:
         if self.hub_next.get_zone_value() <= float(self.edge_turns + 1):
             self.current_hub = self.hub_next

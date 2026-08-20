@@ -1,7 +1,6 @@
 from parser import Parseline, FlyinError
 import sys
 from simualtion import Simulation
-from typing import List
 
 
 class Fly_in:
@@ -14,7 +13,6 @@ class Fly_in:
 
 if __name__ == "__main__":
     try:
-        from map import Map
         launcher = Fly_in()
         launcher.run()
     except FlyinError as error:

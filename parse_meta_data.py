@@ -93,10 +93,14 @@ class MetadataValidator:
 
 class MetaParser:
     patternsmetadata = {
-        r'^\s*\w+=[a-zA-Z0-9]+': False,
-        r'^\s*\w+=[a-zA-Z0-9]+(\s+\w+=[a-zA-Z0-9]+)?': False,
-        r'^\s*\w+=[a-zA-Z0-9]+(\s+\w+=[a-zA-Z0-9]+)?(\s+\w+=[a-zA-Z0-9]+)?$': False,
-        r'^\s*\w+=[a-zA-Z0-9]+(\s+\w+=[a-zA-Z0-9]+)*\s*$': False,
+        r'^\s*\w+=[a-zA-Z0-9]+':
+        False,
+        r'^\s*\w+=[a-zA-Z0-9]+(\s+\w+=[a-zA-Z0-9]+)?':
+        False,
+        r'^\s*\w+=[a-zA-Z0-9]+(\s+\w+=[a-zA-Z0-9]+)?(\s+\w+=[a-zA-Z0-9]+)?$':
+        False,
+        r'^\s*\w+=[a-zA-Z0-9]+(\s+\w+=[a-zA-Z0-9]+)*\s*$':
+        False,
     }
 
     def __init__(self) -> None:
@@ -119,10 +123,9 @@ class MetaParser:
         for itm in [k.split("=")[0].strip() for k in data]:
             if itm in seen:
                 raise FlyinError(f"Duplicate metadata item '{itm}',"
-                                          " The first occurrence will "
-                                          "be used.",
-                                          number_line=str(FlyinError.get_number_line())
-                                          )
+                                 " The first occurrence will "
+                                 "be used.",
+                                 number_line=str(FlyinError.get_number_line()))
             else:
                 seen.add(itm)
 
@@ -139,10 +142,10 @@ class MetaParser:
         meta_string = meta_data.strip()
         if not meta_string.startswith("["):
             raise FlyinError("MetaData must start with '['",
-                                      FlyinError.get_number_line())
+                             number_line=str(FlyinError.get_number_line()))
         if not meta_string.endswith("]"):
             raise FlyinError("MetaData missing closing bracket ']'",
-                            number_line=str(FlyinError.get_number_line()))
+                             number_line=str(FlyinError.get_number_line()))
         return (meta_string[1:-1].strip())
 
     def _check_syntax_meta(self, meta_data) -> None:
@@ -156,10 +159,10 @@ class MetaParser:
         self.match = match
 
     def _validate_syntax_meta(self, data: List[str]) -> None:
-        for index, is_not_valid in enumerate(MetaParser.patternsmetadata.values()):
+        for index, is_not_valid in enumerate(MetaParser.patternsmetadata.
+                                             values()):
             if is_not_valid:
                 raise FlyinError("Invalid MetaData property syntax at"
                                  f" position {data[index - 1]}. Expected "
                                  "format: ",
-                                 number_line=str(FlyinError.get_number_line())
-                                )
+                                 number_line=str(FlyinError.get_number_line()))

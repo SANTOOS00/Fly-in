@@ -6,6 +6,7 @@ from modules import Hub, Edge
 import os
 import sys
 
+
 class SafeFileReader:
     def __init__(self, path_file: str):
         self.path_file = Path(path_file)
@@ -27,8 +28,8 @@ class SafeFileReader:
                 f"No read permission: {self.path_file}"
             )
 
+
 class Parseline:
-    
     def __init__(self) -> None:
         self.raw_line: str
         self.type_line: str
@@ -42,7 +43,7 @@ class Parseline:
             for raw_line in fb:
                 self._process_line(raw_line)
             self.map.validate_hub_end_start()
-    
+
     def _process_line(self, raw_line: str):
         FlyinError.add_line_number()
         self.raw_line = raw_line.split("#", maxsplit=1)[0].strip()
@@ -50,7 +51,7 @@ class Parseline:
             return
         self._set_type_line()
         self._dispatch_line()
-  
+
     def _dispatch_line(self):
         match self.type_line.upper():
             case "NB_DRONES":
@@ -85,7 +86,7 @@ class Parseline:
         try:
             self.map.set_number_drones(int(self.clean_line))
         except ValueError:
-            raise FlyinError("val li kaukon f drones hwa wahd number sahih tabi3i",
+            raise FlyinError("val li kaukon f drones hwa",
                              number_line=str(FlyinError.get_number_line()))
 
     def _set_type_line(self) -> None:
@@ -107,6 +108,3 @@ class Parseline:
         else:
             raise FlyinError('type error',
                              number_line=str(FlyinError.get_number_line()))
-
-    
-

@@ -41,7 +41,7 @@ class Map:
                              line_number=str(FlyinError.get_number_line()))
         self.start_hub = start_hub
         self.add_hub(start_hub)
-    
+
     def set_end_hub(self, end_hub: Hub) -> None:
         if self.end_hub is not None:
             raise FlyinError('test',
@@ -52,7 +52,7 @@ class Map:
 
     def add_egde(self, edge: Edge) -> None:
         if {edge.source, edge.destination} in [{edg.source, edg.destination}
-                                              for edg in self.edges]:
+                                               for edg in self.edges]:
             raise FlyinError("testsssssssssssss", dd='add_edge',
                              line_number=str(FlyinError.get_number_line()))
         self.edges.append(edge)
@@ -72,7 +72,7 @@ class Map:
                 "     >> start_end: name_zone x y [key=val] <<",
                 number_line=str(FlyinError.get_number_line())
             )
- 
+
     def get_hub(self, name_zone: str) -> Hub:
         if not self.hubs.get(name_zone):
             raise FlyinError(f"Zone name '{name_zone}' is not defined "
@@ -85,4 +85,3 @@ class Map:
             raise FlyinError('test',
                              line_number=str(FlyinError.get_number_line()))
         self.number_drones = number_drones
-
