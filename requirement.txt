@@ -2,3 +2,4 @@ rich
 webcolors
 typing_extensions
 mypy
+flake8
