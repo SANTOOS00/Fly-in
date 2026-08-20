@@ -29,7 +29,7 @@ class Simulation:
 
     def run(self) -> None:
         torn = 0
-        self.test_name()
+        self.valid_graph_path()
         while self.check_finished():
             torn += 1
             self.track_drone_zones()
@@ -38,7 +38,7 @@ class Simulation:
             self.color.clear()
             self.graph.reset_all_edge_usage_counts()
 
-    def test_name(self) -> None:
+    def valid_graph_path(self) -> None:
         adj_list: Adj_List = self.graph.get_copy_adj_list()
         path = self.dijkstra.run(adj_list, self.start_hub, self.end_hub)
         if path is None:
