@@ -1,2 +1,5 @@
-# Environment
+# Python cache
+__pycache__/
+
+# Environment & Secrets
 .venv
