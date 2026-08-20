@@ -84,6 +84,4 @@ class Edge:
             self.drones_new.remove(id_d)
 
 
-
-
 Adj_List = NewType('Adj_List', Dict[Hub, List[tuple[Hub, Edge]]])

@@ -7,7 +7,7 @@ class   FlyinError(Exception):
         super().__init__(self.format_message(context, message))
         self.context: Dict[str, str] = context
 
-    def format_message(self, context, message) -> str:
+    def format_message(self, context: str, message: str) -> str:
         return f"{message} {context}"
 
     @classmethod

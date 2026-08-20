@@ -86,14 +86,14 @@ class Parseline:
             self.map.set_number_drones(int(self.clean_line))
         except ValueError:
             raise FlyinError("val li kaukon f drones hwa wahd number sahih tabi3i",
-                             line_number=FlyinError.get_number_line())
+                             number_line=str(FlyinError.get_number_line()))
 
     def _set_type_line(self) -> None:
         if self.raw_line.count(":") < 0:
             raise FlyinError(
                 "The line type must match one of the allowed formats "
                 "{nb_drones, start_hub, etc.}. Example: [type: ,,, ]",
-                line_numer=FlyinError.get_number_line())
+                number_line=str(FlyinError.get_number_line()))
         key_raw, self.clean_line = self.raw_line.split(":", 1)
         parsers = {
             "nb_drones": 'DroneParser',
@@ -106,7 +106,7 @@ class Parseline:
             self.type_line = key_raw.lower()
         else:
             raise FlyinError('type error',
-                             line_number=FlyinError.get_number_line())
+                             number_line=str(FlyinError.get_number_line()))
 
     
 

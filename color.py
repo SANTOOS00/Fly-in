@@ -2,12 +2,12 @@ from rich.console import Console
 from webcolors import name_to_hex
 
 
-
 class Color:
     def __init__(self) -> None:
         self.output = ''
         self.console = Console()
         self.name_to_hex = name_to_hex
+
     def add(self, string: str) -> None:
         self.output += string
 

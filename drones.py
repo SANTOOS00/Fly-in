@@ -4,10 +4,10 @@ from modules import Hub, Edge
 
 class Drone:
     def __init__(self, id: int, hub_current: Hub | None) -> None:
-        self.id = id
-        self.current_hub: Hub | None = hub_current
-        self.hub_next: Hub | None = None
+        self.id: int = id
+        self.current_hub: Hub = hub_current
         self.current_edge: Edge | None = None
+        self.hub_next: Hub | None = None
         self.hub_visited: List[Hub] = [hub_current]
         self.edge_turns: int = 0
 
@@ -16,11 +16,10 @@ class Drone:
             return False
         return True
 
-
     def get_path_visited(self) -> List[Hub]:        
         return self.hub_visited
 
-    def get_current_hub (self) -> None | Hub:
+    def get_current_hub (self) -> Hub:
         return self.current_hub
 
     def move(self, hub_next: Hub | None,
@@ -52,17 +51,15 @@ class Drone:
             self.current_hub = self.hub_next
             self.current_edge.increase_edge_capacity(self.id)
             self.current_edge = None
-            self.reset_edge_turns()
+            self.reset_edge_turn()
         else:
             self.add_edge_turn()
 
-
     def entre_drone_hub(self, hub_next: Hub) -> None:
         self.entre_hub(hub_next)
-        self.reset_edge_turns()
+        self.reset_edge_turn()
 
-
-    def entre_hub(self, hub_next: Hub | None) -> None:
+    def entre_hub(self, hub_next: Hub) -> None:
         self.current_hub.increase_zone_size(self.id)
         self.current_hub = hub_next
         hub_next.decrease_zone_size(self.id)
@@ -70,5 +67,5 @@ class Drone:
     def add_edge_turn(self) -> None:
         self.edge_turns += 1
 
-    def reset_edge_turns(self) -> None:
+    def reset_edge_turn(self) -> None:
         self.edge_turns = 0

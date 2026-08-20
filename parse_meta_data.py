@@ -20,14 +20,14 @@ class MetadataValidator:
                 raise FlyinError(
                     "Invalid value for 'max_drones' in metadata: "
                     f"{self.data['max_drones']}",
-                    number_line=FlyinError.get_number_line()
+                    number_line=str(FlyinError.get_number_line())
                     )
             return val
         except Exception:
             raise FlyinError(
                 "Invalid value for 'max_drones' in metadata: "
                 f"{self.data['max_drones']}",
-                FlyinError.get_number_line(),
+                number_line=str(FlyinError.get_number_line())
             )
 
     @property
@@ -39,7 +39,7 @@ class MetadataValidator:
                     "Invalid value for 'max_link_capacity' in metadata: "
                     f"{self.data['max_link_capacity']}. "
                     "It must be an integer greater than or equal to 1.",
-                    FlyinError.get_number_line()
+                    number_line=str(FlyinError.get_number_line())
                     )
             return val
         except Exception:
@@ -47,7 +47,7 @@ class MetadataValidator:
                 "Invalid value for 'max_link_capacity' in metadata: "
                 f"{self.data['max_link_capacity']}. "
                 "It must be an integer greater than or equal to 1.",
-                FlyinError.get_number_line()
+                number_line=str(FlyinError.get_number_line())
             )
 
     @property
@@ -78,9 +78,8 @@ class MetadataValidator:
                     f"key '{self.data}'"
                     f"allowed \n 'max_link_capacity' just",
                     self.line_number,
-                    FlyinError.get_number_line())
+                    number_line=str(FlyinError.get_number_line()))
         else:
-            # print(self.in_type)
             for key in self.data.keys():
                 if key not in allowed:
                     raise FlyinError(
@@ -88,7 +87,7 @@ class MetadataValidator:
                         f"Fix: key '{self.data}'"
                         f"\n           allowed       \n'{allowed}'\n "
                         "           just",
-                        FlyinError.get_number_line()
+                        number_line=str(FlyinError.get_number_line())
                         )
 
 
@@ -122,7 +121,7 @@ class MetaParser:
                 raise FlyinError(f"Duplicate metadata item '{itm}',"
                                           " The first occurrence will "
                                           "be used.",
-                                          FlyinError.get_number_line()
+                                          number_line=str(FlyinError.get_number_line())
                                           )
             else:
                 seen.add(itm)
@@ -143,7 +142,7 @@ class MetaParser:
                                       FlyinError.get_number_line())
         if not meta_string.endswith("]"):
             raise FlyinError("MetaData missing closing bracket ']'",
-                            FlyinError.get_number_line())
+                            number_line=str(FlyinError.get_number_line()))
         return (meta_string[1:-1].strip())
 
     def _check_syntax_meta(self, meta_data) -> None:
@@ -156,12 +155,11 @@ class MetaParser:
         self._validate_syntax_meta(meta_data.split())
         self.match = match
 
-
     def _validate_syntax_meta(self, data: List[str]) -> None:
         for index, is_not_valid in enumerate(MetaParser.patternsmetadata.values()):
             if is_not_valid:
                 raise FlyinError("Invalid MetaData property syntax at"
                                  f" position {data[index - 1]}. Expected "
                                  "format: ",
-                                 number_line=FlyinError.get_number_line()
+                                 number_line=str(FlyinError.get_number_line())
                                 )

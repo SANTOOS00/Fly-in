@@ -19,7 +19,6 @@ class EdgeParser(BaseParser, MetaParser):
         self.init_meta_data(edge, meta[0])
         return edge
 
-
     def _validate_edge_syntax(self) -> None:
         self._validate_source()
         self._validate_destination()    
@@ -27,12 +26,12 @@ class EdgeParser(BaseParser, MetaParser):
     def _validate_source(self) -> None:
         if not re.match(r'^([^\s-]+)-', self.line_str):
             raise FlyinError('',
-                             line_number=FlyinError.get_number_line)
+                             line_number=str(FlyinError.get_number_line()))
     
     def _validate_destination(self) -> None:
         if not re.match(r'^([^\s-]+)-([^\s-]+)', self.line_str):
             raise FlyinError('test valid ',
-                             line_number=FlyinError.get_number_line)
+                             line_number=str(FlyinError.get_number_line()))
 
     def init_meta_data(self, edge: Edge, meta_str: str) -> None:
         if len(meta_str) == 0:
@@ -45,7 +44,7 @@ class EdgeParser(BaseParser, MetaParser):
             val_capacity = int(max_capacity)
         except ValueError:
             raise FlyinError('',
-                       number_line=FlyinError.get_number_line())
+                       number_line=str(FlyinError.get_number_line()))
         return val_capacity
 
 class HubParser(BaseParser, MetaParser):
@@ -82,18 +81,14 @@ class HubParser(BaseParser, MetaParser):
     def _validate_zone_name(self):
         if not re.match(r'^([^\s-]+)(\s)', self.line_str):
             raise FlyinError('Zone name is not valid',
-                             number_line=FlyinError.get_number_line())
+                             line_number=str(FlyinError.get_number_line()))
 
     def _validate_x_coordinate(self):
         if not re.match(r'^([^\s-]+)\s+(-?\d+)', self.line_str):
             raise FlyinError('X coordinate is not valid',
-                             number_line=FlyinError.get_number_line())
-
+                             line_number=str(FlyinError.get_number_line()))
 
     def _validate_y_coordinate(self):
         if not re.match(r'^([^\s-]+)\s+(-?\d+)\s+(-?\d+)(.*)', self.line_str):
             raise FlyinError('Y coordinate is not valid',
-                             number_line=FlyinError.get_number_line())
-
-
-
+                             line_number=str(FlyinError.get_number_line()))
