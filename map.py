@@ -16,7 +16,7 @@ class Map:
         if Map._initialized is True:
             return
         Map._initialized = True
-        self.number_drones: int | None = None
+        self.number_drones: int = 0
         self.start_hub: Hub | None = None
         self.end_hub: Hub | None = None
         self.hubs: Dict[str, Hub] = {}
@@ -25,7 +25,7 @@ class Map:
     def get_start(self) -> Hub | None:
         return self.start_hub
 
-    def get_end(self) -> Hub:
+    def get_end(self) -> Hub | None:
         return self.end_hub
 
     def add_hub(self, hub: Hub) -> None:
@@ -47,7 +47,7 @@ class Map:
             raise FlyinError('test',
                              line_number=str(FlyinError.get_number_line()))
         self.end_hub = end_hub
-        self.end_hub.max_drones = float('inf')
+        self.end_hub.max_drones = Map().number_drones
         self.add_hub(end_hub)
 
     def add_egde(self, edge: Edge) -> None:
@@ -59,7 +59,7 @@ class Map:
 
     def validate_hub_end_start(self) -> None:
         if self.start_hub is None:
-            raise ValueError(
+            raise FlyinError(
                 "[Error]: Missing Start Hub! \n  You must define at least "
                 "one start hub using this format:\n"
                 "    >> start_hub: name_zone x y [key=val] <<",
@@ -73,6 +73,10 @@ class Map:
                 number_line=str(FlyinError.get_number_line())
             )
 
+    def valid_number_drones(self) -> None:
+        if self.number_drones == 0:
+            raise FlyinError('is not number drones')
+
     def get_hub(self, name_zone: str) -> Hub:
         if not self.hubs.get(name_zone):
             raise FlyinError(f"Zone name '{name_zone}' is not defined "
@@ -81,7 +85,7 @@ class Map:
         return self.hubs[name_zone]
 
     def set_number_drones(self, number_drones: int) -> None:
-        if self.number_drones is not None:
+        if self.number_drones != 0:
             raise FlyinError('test',
                              line_number=str(FlyinError.get_number_line()))
         self.number_drones = number_drones

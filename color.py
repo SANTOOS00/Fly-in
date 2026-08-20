@@ -1,7 +1,7 @@
 import sys
 
 try:
-    from webcolors import name_to_hex
+    import webcolors
     from rich.console import Console
 except ModuleNotFoundError as e:
     print(f"\nMissing module: {e}", file=sys.stderr)
@@ -20,9 +20,9 @@ class Color:
     def print_string(self) -> None:
         self.console.print(self.output)
 
-    def join_color_string(self, string: str, color: str) -> str:
+    def join_color_string(self, string: str, color: str) -> str | None:
         try:
-            color_hex = name_to_hex(color)
+            color_hex = webcolors.name_to_hex(color)
         except ValueError:
             color_hex = '#0B192C'
         return f'[{color_hex}]{string}[/]'

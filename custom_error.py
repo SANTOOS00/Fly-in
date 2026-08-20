@@ -1,18 +1,19 @@
-from typing import Dict, List
+from typing import Dict
 
 
 class FlyinError(Exception):
 
     _line_number: int = 0
 
-    def __init__(self, *message: List[str], **context: Dict[str, str]) -> None:
+    def __init__(self, message: str, **context: str) -> None:
         super().__init__(self.format_message(message, context))
         self.context: Dict[str, str] = context
 
-    def format_message(self,
-                       message: List[str],
-                       context: Dict[str, str]
-                       ) -> str:
+    def format_message(
+        self,
+        message: str,
+        context: Dict[str, str]
+    ) -> str:
         return f"{message} {context}"
 
     @classmethod
@@ -20,5 +21,5 @@ class FlyinError(Exception):
         cls._line_number += 1
 
     @classmethod
-    def get_number_line(cls) -> str:
-        return str(cls._line_number)
+    def get_number_line(cls) -> int:
+        return cls._line_number

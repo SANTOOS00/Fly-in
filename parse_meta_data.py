@@ -8,7 +8,7 @@ from modules import Edge
 class MetadataValidator:
     def __init__(self,
                  in_type: BaseParser,
-                 data: Dict[str, Any]) -> None:
+                 data: Dict[str, str]) -> None:
         self.in_type = in_type
         self.data = data
 
@@ -70,14 +70,12 @@ class MetadataValidator:
 
     def allowed_status_meta(self) -> None:
         allowed = ["zone", "color", "max_drones"]
-        from parser import EdgeParser
-        if isinstance(self.in_type, EdgeParser):
+        if type(self.in_type).__name__ == "EdgeParser":
             if self.data.get("max_link_capacity") is False:
                 raise FlyinError(
                     "Invalid connection metadata\n \n ⚠ Fix: "
                     f"key '{self.data}'"
                     f"allowed \n 'max_link_capacity' just",
-                    self.line_number,
                     number_line=str(FlyinError.get_number_line()))
         else:
             for key in self.data.keys():
@@ -104,7 +102,7 @@ class MetaParser:
     }
 
     def __init__(self) -> None:
-        self.match: re.Match
+        # self.match: re.Match
         self.typ_obj: BaseParser
 
     def parse_metadata(self, meta_data: str) -> Dict[str, str] | None:

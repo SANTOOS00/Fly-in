@@ -1,4 +1,3 @@
-
 from pathlib import Path
 from parser_data import HubParser, EdgeParser, FlyinError
 from map import Map
@@ -11,7 +10,7 @@ class SafeFileReader:
     def __init__(self, path_file: str):
         self.path_file = Path(path_file)
 
-    def _valid_arg(self):
+    def _valid_arg(self) -> None:
         if len(sys.argv) != 2:
             raise FlyinError(
                 "Usage: python main.py <file.txt>"
@@ -43,6 +42,7 @@ class Parseline:
             for raw_line in fb:
                 self._process_line(raw_line)
             self.map.validate_hub_end_start()
+            self.map.valid_number_drones()
 
     def _process_line(self, raw_line: str):
         FlyinError.add_line_number()

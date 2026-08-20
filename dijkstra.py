@@ -12,8 +12,8 @@ class Dijkstra:
 
     def run(self,
             graph: Adj_List,
-            start_hub: Hub,
-            end_hub: Hub
+            start_hub: Hub | None,
+            end_hub: Hub | None
             ) -> List[Hub] | None:
 
         self.heap = [(0.0, start_hub)]

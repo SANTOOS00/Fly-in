@@ -19,7 +19,7 @@ class Simulation:
         self.graph = Graph()
         self.dijkstra = Dijkstra()
         self.end_hub: Hub = Map().get_end()
-        self.start_hub: Hub = Map().get_start()
+        self.start_hub: Hub | None = Map().get_start()
         self.adj_list: Adj_List | None = None
         self.color = Color()
 
@@ -36,7 +36,9 @@ class Simulation:
 
     def valid_graph_path(self) -> None:
         adj_list: Adj_List = self.graph.get_copy_adj_list()
-        path = self.dijkstra.run(adj_list, self.start_hub, self.end_hub)
+        path: None | List[Hub] = self.dijkstra.run(adj_list,
+                                                   self.start_hub,
+                                                   self.end_hub)
         if path is None:
             raise FlyinError("in graph is not path make")
 

@@ -1,5 +1,5 @@
-rich
-webcolors
-typing_extensions
-mypy
-flake8
+rich>=13.0.0
+webcolors==1.13
+typing_extensions>=4.10.0
+mypy==1.15.0
+flake8>=7.0.0

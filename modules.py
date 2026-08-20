@@ -1,7 +1,6 @@
 from typing import List
 from typing import NewType, Dict
 from enum import Enum
-from typing import Union
 
 
 class Hub:
@@ -19,7 +18,7 @@ class Hub:
             return True
         if oth.zone == oth.Zone.PRIORITY:
             return False
-        return self.zone.value < oth.zone.value
+        return bool(self.zone.value < oth.zone.value)
 
     def __hash__(self) -> int:
         return hash(self.name)
@@ -28,7 +27,7 @@ class Hub:
         return float(self.zone.value)
 
     def is_full(self) -> bool:
-        return self.max_drones > len(self.drones_new)
+        return bool(self.max_drones > len(self.drones_new))
 
     def increase_zone_size(self, id_d: int) -> None:
         if self.drones_new:
@@ -44,7 +43,7 @@ class Hub:
         BLOCKED = float('inf')
 
         @classmethod
-        def get_type_zone(cls, type_zone: str) -> Union['Hub.Zone', None]:
+        def get_type_zone(cls, type_zone: str) -> 'Hub.Zone':
             match type_zone.upper():
                 case "NORMAL":
                     return cls.NORMAL

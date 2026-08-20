@@ -7,7 +7,6 @@ from base_parse import BaseParser
 import sys
 
 try:
-
     from typing_extensions import override
 except ModuleNotFoundError as e:
     print(f"\nMissing module: {e}", file=sys.stderr)
