@@ -6,6 +6,11 @@ from map import Map
 
 class Dijkstra:
     def __init__(self) -> None:
+        """Initializes the FlyinError exception
+                Args:
+                    messge (str) = 
+                    context (str) =
+                """
         self.paths: Dict[Hub, Hub] = {}
         self.distances: Dict[str, float] = {}
         self.heap: List[Tuple[float, Hub | None]] = []

@@ -41,7 +41,8 @@ class EdgeParser(BaseParser, MetaParser):
 
     def _validate_destination(self) -> None:
         if not re.match(r'^([^\s-]+)-([^\s-]+)', self.line_str):
-            raise FlyinError('test valid ',
+            raise FlyinError("[ERROR]: Invalid destination format! "
+                             "Expected format: 'source-destination'",
                              line_number=str(FlyinError.get_number_line()))
 
     def init_meta_data(self, edge: Edge, meta_str: str) -> None:
@@ -56,7 +57,9 @@ class EdgeParser(BaseParser, MetaParser):
         try:
             val_capacity = int(max_capacity)
         except ValueError:
-            raise FlyinError('',
+            raise FlyinError("[ERROR]: Invalid max capacity "
+                             f"value '{max_capacity}'! "
+                             "Expected a positive integer.",
                              number_line=str(FlyinError.get_number_line()))
         return val_capacity
 

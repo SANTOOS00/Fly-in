@@ -43,8 +43,4 @@ lint-strict: install env
 	@$(VENV)/bin/mypy $(FILES) --strict
 
 debug: env
-	$(VENV)/bin/python3 -m pdb $(MAIN) $(MAP_DEF)
-
-test:
-	@$(VENV)/bin/python3 $(MAIN) $(MAP_DEF) | grep "D" | wc -l
-	
+	@$(VENV)/bin/python3 -m pdb $(MAIN) $(MAP_DEF)

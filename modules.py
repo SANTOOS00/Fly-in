@@ -3,8 +3,17 @@ from typing import NewType, Dict, Tuple
 from enum import Enum
 
 
+Adj_List = NewType('Adj_List', Dict["Hub", List[Tuple["Hub", "Edge"]]])
+
+
 class Hub:
     def __init__(self, name: str, x: int, y: int) -> None:
+        """Initializes the FlyinError exception
+            Args:
+                name (str)= 
+                x (int)=
+                y (int)=
+        """
         self.name = name
         x = x
         y = y
@@ -59,6 +68,11 @@ class Hub:
 
 class Edge:
     def __init__(self, source: Hub, destination: Hub) -> None:
+        """Initializes the FlyinError exception
+            Args:
+                source (Hub)= 
+                destination (Hub)=
+        """
         self.source = source
         self.destination = destination
         self.max_link_capacity: int = 1
@@ -81,6 +95,3 @@ class Edge:
     def increase_edge_capacity(self, id_d: int) -> None:
         if self.drones_new:
             self.drones_new.remove(id_d)
-
-
-Adj_List = NewType('Adj_List', Dict[Hub, List[Tuple[Hub, Edge]]])

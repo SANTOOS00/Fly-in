@@ -30,21 +30,20 @@ class Map:
 
     def add_hub(self, hub: Hub) -> None:
         if self.hubs.get(hub.name):
-            raise FlyinError('test',
-                             type_error="Duplicate Zone",
+            raise FlyinError(f'[ERROR]: Duplicate hub => {hub.name}',
                              line_number=str(FlyinError.get_number_line()))
         self.hubs[hub.name] = hub
 
     def set_start_hub(self, start_hub: Hub) -> None:
         if self.start_hub is not None:
-            raise FlyinError('test',
+            raise FlyinError('[ERROR]: Duplicate start hub',
                              line_number=str(FlyinError.get_number_line()))
         self.start_hub = start_hub
         self.add_hub(start_hub)
 
     def set_end_hub(self, end_hub: Hub) -> None:
         if self.end_hub is not None:
-            raise FlyinError('test',
+            raise FlyinError('[ERROR]: Duplicate end hub',
                              line_number=str(FlyinError.get_number_line()))
         self.end_hub = end_hub
         self.end_hub.max_drones = Map().number_drones
@@ -53,7 +52,8 @@ class Map:
     def add_egde(self, edge: Edge) -> None:
         if {edge.source, edge.destination} in [{edg.source, edg.destination}
                                                for edg in self.edges]:
-            raise FlyinError("testsssssssssssss", dd='add_edge',
+            raise FlyinError("[ERROR]: Duplicate edge detected between "
+                             f"'{edge.source}' and '{edge.destination}'!",
                              line_number=str(FlyinError.get_number_line()))
         self.edges.append(edge)
 
@@ -69,7 +69,7 @@ class Map:
             raise FlyinError(
                 "[Error]: Missing End Hub! \n  You must define at least "
                 "one end hub using this format:\n"
-                "     >> start_end: name_zone x y [key=val] <<",
+                "    >> end_hub: name_zone x y [key=val] <<",
                 number_line=str(FlyinError.get_number_line())
             )
 
@@ -86,6 +86,10 @@ class Map:
 
     def set_number_drones(self, number_drones: int) -> None:
         if self.number_drones != 0:
-            raise FlyinError('test',
+            raise FlyinError('[ERROR]: Drones number has already been set!',
+                             line_number=str(FlyinError.get_number_line()))
+        if self.number_drones <= -1:
+            raise FlyinError('[ERROR]: Number of Drones must '
+                             'be greater than 0!',
                              line_number=str(FlyinError.get_number_line()))
         self.number_drones = number_drones
