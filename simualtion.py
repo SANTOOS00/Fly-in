@@ -33,6 +33,7 @@ class Simulation:
             self.color.print_string()
             self.color.clear()
             self.graph.reset_all_edge_usage_counts()
+        print(torn)
 
     def valid_graph_path(self) -> None:
         adj_list: Adj_List = self.graph.get_copy_adj_list()
@@ -64,19 +65,20 @@ class Simulation:
 
     def print_drone_in_action(self, drone: Drone) -> None:
         if drone.is_drone_on_edge():
-            self.color.add(
-                f' D{drone.id}-{self.color.join_color_string(
-                    drone.current_hub.name,
-                    drone.current_hub.color)}'
-                f'-{self.color.join_color_string(drone.hub_next.name,
-                                                 drone.hub_next.color)}')
+            hub_a = self.color.join_color_string(
+                drone.current_hub.name, drone.current_hub.color
+            )
+            hub_b = self.color.join_color_string(
+                drone.hub_next.name, drone.hub_next.color
+            )
+            self.color.add(f' D{drone.id}-{hub_a}-{hub_b}')
         elif drone.get_current_hub() == self.start_hub:
             return None
         else:
-            self.color.add(f' D{drone.id}-'
-                           f'{self.color.join_color_string(
-                               drone.current_hub.name,
-                               drone.current_hub.color)}')
+            hub = self.color.join_color_string(
+                drone.current_hub.name, drone.current_hub.color
+            )
+            self.color.add(f' D{drone.id}-{hub}')
 
     def get_next_valid_hub(self, drone: Drone) -> Hub | None:
         adj_list: Adj_List = self.graph.get_copy_adj_list()

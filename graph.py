@@ -6,7 +6,7 @@ from map import Map
 
 class GraphBuilder:
     def __init__(self) -> None:
-        self.network: Adj_List = defaultdict(list)
+        self.network: Adj_List = Adj_List(defaultdict(list))
 
     def init_adj_list(self) -> Adj_List:
         from map import Map

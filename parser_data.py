@@ -1,6 +1,7 @@
 from custom_error import FlyinError
 from modules import Hub, Edge
 from map import Map
+from typing import Dict
 import re
 from parse_meta_data import MetaParser
 from base_parse import BaseParser
@@ -11,7 +12,7 @@ try:
 except ModuleNotFoundError as e:
     print(f"\nMissing module: {e}", file=sys.stderr)
     print("Solution: run the command 'make install'\n", file=sys.stderr)
-    exit()
+    sys.exit(1)
 
 
 class EdgeParser(BaseParser, MetaParser):
@@ -19,6 +20,8 @@ class EdgeParser(BaseParser, MetaParser):
     def parser(self) -> Edge:
         self._validate_edge_syntax()
         match = re.match(r'^([^\s-]+)-([^\s-]+)(.*)', self.line_str)
+        if not match:
+            raise FlyinError(f"Invalid line syntax: {self.line_str}")
         source, destination, *meta = match.groups()
         edge = Edge(
             source=Map().get_hub(source),
@@ -44,7 +47,9 @@ class EdgeParser(BaseParser, MetaParser):
     def init_meta_data(self, edge: Edge, meta_str: str) -> None:
         if len(meta_str) == 0:
             return None
-        meta: dict = self.parse_metadata(meta_str)
+        meta: dict[str, str] | None = self.parse_metadata(meta_str)
+        if meta is None:
+            return
         edge.max_link_capacity = int(meta['max_link_capacity'])
 
     def _valid_max_capacity(self, max_capacity: str) -> int:
@@ -62,6 +67,8 @@ class HubParser(BaseParser, MetaParser):
         self._validate_syntax()
         match = re.match(r'^([^\s-]+)\s+(-?\d+)\s+(-?\d+)(.*)',
                          self.line_str)
+        if not match:
+            raise FlyinError(f"Invalid line syntax: {self.line_str}")
         name, x, y, *meta = match.groups()
         hub = Hub(
             name=name,
@@ -74,7 +81,9 @@ class HubParser(BaseParser, MetaParser):
     def init_meta_data(self, hub: Hub, meta_str: str) -> None:
         if len(meta_str) == 0:
             return None
-        meta_dict = self.parse_metadata(meta_str)
+        meta_dict: Dict[str, str] | None = self.parse_metadata(meta_str)
+        if meta_dict is None:
+            return
         if meta_dict.get('color'):
             hub.color = meta_dict['color']
         if meta_dict.get('zone'):
@@ -87,17 +96,17 @@ class HubParser(BaseParser, MetaParser):
         self._validate_x_coordinate()
         self._validate_y_coordinate()
 
-    def _validate_zone_name(self):
+    def _validate_zone_name(self) -> None:
         if not re.match(r'^([^\s-]+)(\s)', self.line_str):
             raise FlyinError('Zone name is not valid',
                              line_number=str(FlyinError.get_number_line()))
 
-    def _validate_x_coordinate(self):
+    def _validate_x_coordinate(self) -> None:
         if not re.match(r'^([^\s-]+)\s+(-?\d+)', self.line_str):
             raise FlyinError('X coordinate is not valid',
                              line_number=str(FlyinError.get_number_line()))
 
-    def _validate_y_coordinate(self):
+    def _validate_y_coordinate(self) -> None:
         if not re.match(r'^([^\s-]+)\s+(-?\d+)\s+(-?\d+)(.*)', self.line_str):
             raise FlyinError('Y coordinate is not valid',
                              line_number=str(FlyinError.get_number_line()))

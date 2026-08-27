@@ -32,7 +32,9 @@ clean:
 	@rm -rf $(CACH) $(VENV)
 	@echo "Cleaned cache files!"
 
-lint: install env
+
+
+lint: install env test
 	@$(VENV)/bin/flake8 $(FILES)
 	@$(VENV)/bin/mypy $(FILES) --warn-return-any --warn-unused-ignores --ignore-missing-imports --check-untyped-defs --disallow-untyped-defs
 
@@ -42,3 +44,7 @@ lint-strict: install env
 
 debug: env
 	$(VENV)/bin/python3 -m pdb $(MAIN) $(MAP_DEF)
+
+test:
+	@$(VENV)/bin/python3 $(MAIN) $(MAP_DEF) | grep "D" | wc -l
+	

@@ -1,5 +1,5 @@
 from typing import List
-from typing import NewType, Dict
+from typing import NewType, Dict, Tuple
 from enum import Enum
 
 
@@ -83,4 +83,4 @@ class Edge:
             self.drones_new.remove(id_d)
 
 
-Adj_List = NewType('Adj_List', Dict[Hub, List[tuple[Hub, Edge]]])
+Adj_List = NewType('Adj_List', Dict[Hub, List[Tuple[Hub, Edge]]])

@@ -1,14 +1,12 @@
 from typing import List, Dict, Any
 from custom_error import FlyinError
 import re
-from base_parse import BaseParser
-from modules import Edge
 
 
 class MetadataValidator:
     def __init__(self,
-                 in_type: BaseParser,
-                 data: Dict[str, str]) -> None:
+                 in_type: str,
+                 data: Dict[str, Any]) -> None:
         self.in_type = in_type
         self.data = data
 
@@ -62,15 +60,15 @@ class MetadataValidator:
 
     def validate_metadata(self) -> Dict[str, Any]:
         self.allowed_status_meta()
-        if isinstance(self.in_type, Edge):
+        if self.in_type == "EdgeParser":
             self._set_max_capacity
         else:
             self._set_max_drones
-        return (self.data)
+        return self.data
 
     def allowed_status_meta(self) -> None:
         allowed = ["zone", "color", "max_drones"]
-        if type(self.in_type).__name__ == "EdgeParser":
+        if self.in_type == "EdgeParser":
             if self.data.get("max_link_capacity") is False:
                 raise FlyinError(
                     "Invalid connection metadata\n \n ⚠ Fix: "
@@ -102,8 +100,7 @@ class MetaParser:
     }
 
     def __init__(self) -> None:
-        # self.match: re.Match
-        self.typ_obj: BaseParser
+        self.match: re.Match
 
     def parse_metadata(self, meta_data: str) -> Dict[str, str] | None:
         meta_data = self._validate_metadata_format(meta_data)
@@ -111,12 +108,12 @@ class MetaParser:
             return None
         self._check_syntax_meta(meta_data)
 
-        valid_meta = MetadataValidator(self,
-                                       self._split_key_values())
+        valid_meta: MetadataValidator = \
+            MetadataValidator(type(self).__name__, self._split_key_values())
         return (valid_meta.validate_metadata())
 
     @staticmethod
-    def check_duplicates(data: tuple[str]) -> None:
+    def check_duplicates(data: list[Any]) -> None:
         seen = set()
         for itm in [k.split("=")[0].strip() for k in data]:
             if itm in seen:
@@ -127,8 +124,8 @@ class MetaParser:
             else:
                 seen.add(itm)
 
-    def _split_key_values(self) -> Dict[str, str]:
-        data: str = self.match.group().split()
+    def _split_key_values(self) -> Dict[str, Any]:
+        data: list = self.match.group().split()
         MetaParser.check_duplicates(data)
         return (
             {key.lower().strip(): val
@@ -146,14 +143,16 @@ class MetaParser:
                              number_line=str(FlyinError.get_number_line()))
         return (meta_string[1:-1].strip())
 
-    def _check_syntax_meta(self, meta_data) -> None:
+    def _check_syntax_meta(self, meta_data: str) -> None:
         for pattern in MetaParser.patternsmetadata:
-            match = re.match(pattern, meta_data)
+            match: re.Match | None = re.match(pattern, meta_data)
             if match is None:
                 MetaParser.patternsmetadata[pattern] = True
             else:
                 MetaParser.patternsmetadata[pattern] = False
         self._validate_syntax_meta(meta_data.split())
+        if match is None:
+            return None
         self.match = match
 
     def _validate_syntax_meta(self, data: List[str]) -> None:
