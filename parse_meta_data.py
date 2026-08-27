@@ -7,11 +7,6 @@ class MetadataValidator:
     def __init__(self,
                  in_type: str,
                  data: Dict[str, Any]) -> None:
-        """Initializes the FlyinError exception
-            Args:
-                messge (str)= 
-                context (str)=
-        """
         self.in_type = in_type
         self.data = data
 

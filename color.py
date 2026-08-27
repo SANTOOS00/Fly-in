@@ -11,11 +11,6 @@ except ModuleNotFoundError as e:
 
 class Color:
     def __init__(self) -> None:
-        """Initializes the FlyinError exception
-            Args:
-                self.output ('') = 
-                self.console (console) =
-        """
         self.output = ''
         self.console = Console()
 

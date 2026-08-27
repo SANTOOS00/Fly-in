@@ -8,12 +8,6 @@ Adj_List = NewType('Adj_List', Dict["Hub", List[Tuple["Hub", "Edge"]]])
 
 class Hub:
     def __init__(self, name: str, x: int, y: int) -> None:
-        """Initializes the FlyinError exception
-            Args:
-                name (str)= 
-                x (int)=
-                y (int)=
-        """
         self.name = name
         x = x
         y = y
@@ -68,11 +62,6 @@ class Hub:
 
 class Edge:
     def __init__(self, source: Hub, destination: Hub) -> None:
-        """Initializes the FlyinError exception
-            Args:
-                source (Hub)= 
-                destination (Hub)=
-        """
         self.source = source
         self.destination = destination
         self.max_link_capacity: int = 1

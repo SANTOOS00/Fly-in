@@ -6,11 +6,6 @@ from map import Map
 
 class GraphBuilder:
     def __init__(self) -> None:
-        """Initializes the FlyinError exception
-            Args:
-                messge (str) = 
-                context (str) =
-        """
         self.network: Adj_List = Adj_List(defaultdict(list))
 
     def init_adj_list(self) -> Adj_List:
@@ -24,11 +19,6 @@ class GraphBuilder:
 
 class Graph:
     def __init__(self) -> None:
-        """Initializes the FlyinError exception
-            Args:
-                messge (str) = 
-                context (str) =
-        """
         self.star_hub = Map().get_start()
         self.network: Adj_List = GraphBuilder().init_adj_list()
         self.end_hub = Map().get_end()

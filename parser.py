@@ -8,12 +8,7 @@ import sys
 
 
 class SafeFileReader:
-    def __init__(self, path_file: str) -> None:
-        """Initializes the FlyinError exception
-            Args:
-                messge (str)= 
-                context (str)=
-        """
+    def __init__(self, path_file: str):
         self.path_file = Path(path_file)
 
     def _valid_arg(self) -> None:
@@ -36,11 +31,6 @@ class SafeFileReader:
 
 class Parseline:
     def __init__(self) -> None:
-        """Initializes the FlyinError exception
-            Args:
-                messge (str)= 
-                context (str)=
-        """
         self.raw_line: str
         self.type_line: str
         self.clean_line: str

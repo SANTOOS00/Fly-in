@@ -34,7 +34,7 @@ clean:
 
 
 
-lint: install env test
+lint: install env
 	@$(VENV)/bin/flake8 $(FILES)
 	@$(VENV)/bin/mypy $(FILES) --warn-return-any --warn-unused-ignores --ignore-missing-imports --check-untyped-defs --disallow-untyped-defs
 

@@ -5,11 +5,6 @@ from modules import Hub, Edge
 
 class Drone:
     def __init__(self, id: int, hub_current: Hub | None) -> None:
-        """Initializes the FlyinError exception
-            Args:
-                messge (str)= 
-                context (str)=
-        """
         self.id: int = id
         self.current_hub: Hub | None = hub_current
         self.current_edge: Edge | None = None

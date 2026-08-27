@@ -6,11 +6,6 @@ class FlyinError(Exception):
     _line_number: int = 0
 
     def __init__(self, message: str, **context: str) -> None:
-        """Initializes the FlyinError exception
-        Args:
-            messge (str) = 
-            context (str) =
-        """
         super().__init__(self.format_message(message, context))
         self.context: Dict[str, str] = context
 
