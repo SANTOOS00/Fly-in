@@ -53,6 +53,8 @@ class Hub:
                     return cls.PRIORITY
                 case "RESTRICTED":
                     return cls.RESTRICTED
+                case _:
+                    raise ValueError(f"Invalid zone type: {type_zone}")
 
 
 class Edge:
@@ -70,10 +72,8 @@ class Edge:
         self.usage_count += 1
 
     def has_available_capacity(self) -> bool:
-        return (
-            self.max_link_capacity > len(self.drones_new)
+        return self.max_link_capacity > len(self.drones_new) \
             and self.max_link_capacity > self.usage_count
-                )
 
     def decrease_edge_capacity(self, id_d: int) -> None:
         self.drones_new.append(id_d)

@@ -31,8 +31,10 @@ class Graph:
 
     @staticmethod
     def remve_edge_is_adj_list(adj_list: Adj_List,
-                               hub_from: Hub,
-                               hub_to: Hub) -> None:
+                               hub_from: Hub | None,
+                               hub_to: Hub | None) -> None:
+        if hub_from is None or hub_to is None:
+            return
         for hub, edge in adj_list[hub_from]:
             if hub == hub_to:
                 adj_list[hub_from].remove((hub, edge))
@@ -48,15 +50,20 @@ class Graph:
         return copy_adj
 
     @staticmethod
-    def remove_path_visidet_drone(adj_list: Adj_List, path: List[Hub]) -> None:
+    def remove_path_visidet_drone(adj_list: Adj_List,
+                                  path: List[Hub | None]) -> None:
         for i, hub in enumerate(path):
+            if hub is None:
+                continue
             if len(path) > i + 1:
                 Graph.remve_edge_is_adj_list(adj_list, hub, path[i + 1])
 
     def is_end_hub(self, hub: Hub) -> bool:
         return self.end_hub == hub
 
-    def get_edge(self, from_hub: Hub, to_hub: Hub) -> Edge | None:
+    def get_edge(self, from_hub: Hub | None, to_hub: Hub) -> Edge | None:
+        if from_hub is None:
+            return None
         for hub, edge in self.network[from_hub]:
             if hub == to_hub:
                 return edge

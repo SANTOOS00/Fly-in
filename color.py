@@ -1,7 +1,7 @@
 import sys
 
 try:
-    import webcolors
+    import webcolors    # type: ignore[import-untyped, unused-ignore]
     from rich.console import Console
 except ModuleNotFoundError as e:
     print(f"\nMissing module: {e}", file=sys.stderr)

@@ -1,5 +1,6 @@
 from pathlib import Path
-from parser_data import HubParser, EdgeParser, FlyinError
+from parser_data import HubParser, EdgeParser
+from custom_error import FlyinError
 from map import Map
 from modules import Hub, Edge
 import os
@@ -16,7 +17,7 @@ class SafeFileReader:
                 "Usage: python main.py <file.txt>"
             )
 
-    def valid_path(self):
+    def valid_path(self) -> None:
         self._valid_arg()
 
         if not self.path_file.exists():
@@ -44,7 +45,7 @@ class Parseline:
             self.map.validate_hub_end_start()
             self.map.valid_number_drones()
 
-    def _process_line(self, raw_line: str):
+    def _process_line(self, raw_line: str) -> None:
         FlyinError.add_line_number()
         self.raw_line = raw_line.split("#", maxsplit=1)[0].strip()
         if not self.raw_line:
@@ -52,7 +53,7 @@ class Parseline:
         self._set_type_line()
         self._dispatch_line()
 
-    def _dispatch_line(self):
+    def _dispatch_line(self) -> None:
         match self.type_line.upper():
             case "NB_DRONES":
                 self._create_number_drones()

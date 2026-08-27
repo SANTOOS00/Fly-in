@@ -12,13 +12,13 @@ class Simulation:
     def __init__(self) -> None:
         hub_current = Map().get_start()
         numb_of_drone = Map().number_drones
-        self.drones: List[Drone] = [
+        self.drones: List[Drone | None] = [
             Drone(id + 1, hub_current=hub_current)
             for id in range(numb_of_drone)
         ]
         self.graph = Graph()
         self.dijkstra = Dijkstra()
-        self.end_hub: Hub = Map().get_end()
+        self.end_hub: Hub | None = Map().get_end()
         self.start_hub: Hub | None = Map().get_start()
         self.adj_list: Adj_List | None = None
         self.color = Color()
@@ -48,6 +48,8 @@ class Simulation:
 
     def track_drone_zones(self) -> None:
         for drone in self.drones:
+            if drone is None:
+                break
             if not drone.is_drone_on_edge():
                 hub_next = self.get_next_valid_hub(drone)
                 if not hub_next:
@@ -65,9 +67,13 @@ class Simulation:
 
     def print_drone_in_action(self, drone: Drone) -> None:
         if drone.is_drone_on_edge():
+            if drone.current_hub is None:
+                return
             hub_a = self.color.join_color_string(
                 drone.current_hub.name, drone.current_hub.color
             )
+            if drone.hub_next is None:
+                return
             hub_b = self.color.join_color_string(
                 drone.hub_next.name, drone.hub_next.color
             )
@@ -75,6 +81,8 @@ class Simulation:
         elif drone.get_current_hub() == self.start_hub:
             return None
         else:
+            if drone.current_hub is None:
+                return
             hub = self.color.join_color_string(
                 drone.current_hub.name, drone.current_hub.color
             )
@@ -82,7 +90,7 @@ class Simulation:
 
     def get_next_valid_hub(self, drone: Drone) -> Hub | None:
         adj_list: Adj_List = self.graph.get_copy_adj_list()
-        hub_next: List[Hub] | None = []
+        hub_next: List[Hub] = []
         self.graph.remove_path_visidet_drone(adj_list,
                                              drone.get_path_visited())
         while True:
@@ -102,7 +110,9 @@ class Simulation:
         return self.select_next_hub(hub_next)
 
     @staticmethod
-    def select_next_hub(hub_nexts: List[Hub] | None) -> Hub:
+    def select_next_hub(hub_nexts: List[Hub] | None) -> Hub | None:
+        if hub_nexts is None:
+            return None
         if len(hub_nexts) == 0:
             return None
         if len(hub_nexts) == 2 and len(hub_nexts[0].
@@ -113,6 +123,8 @@ class Simulation:
 
     def check_is_valid_edge(self, from_hub: Hub, to_hub: Hub) -> bool:
         edge = self.graph.get_edge(from_hub, to_hub)
+        if edge is None:
+            return False
         if edge.has_available_capacity():
             return True
         return False
@@ -129,5 +141,6 @@ class Simulation:
         return True
 
     def remove_drone(self, drone: Drone) -> None:
-        index_drone = self.drones.index(drone)
-        self.drones[index_drone] = None
+        if drone in self.drones:
+            index_drone = self.drones.index(drone)
+            self.drones[index_drone] = None

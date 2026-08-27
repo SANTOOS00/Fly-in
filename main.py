@@ -1,4 +1,5 @@
-from parser import Parseline, FlyinError
+from parser import Parseline
+from custom_error import FlyinError
 import sys
 from simualtion import Simulation
 

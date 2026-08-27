@@ -99,9 +99,6 @@ class MetaParser:
         False,
     }
 
-    def __init__(self) -> None:
-        self.match: re.Match
-
     def parse_metadata(self, meta_data: str) -> Dict[str, str] | None:
         meta_data = self._validate_metadata_format(meta_data)
         if len(meta_data) == 0:
@@ -125,7 +122,7 @@ class MetaParser:
                 seen.add(itm)
 
     def _split_key_values(self) -> Dict[str, Any]:
-        data: list = self.match.group().split()
+        data: List[str] = self.match.group().split()
         MetaParser.check_duplicates(data)
         return (
             {key.lower().strip(): val
@@ -145,7 +142,7 @@ class MetaParser:
 
     def _check_syntax_meta(self, meta_data: str) -> None:
         for pattern in MetaParser.patternsmetadata:
-            match: re.Match | None = re.match(pattern, meta_data)
+            match: re.Match[str] | None = re.match(pattern, meta_data)
             if match is None:
                 MetaParser.patternsmetadata[pattern] = True
             else:
