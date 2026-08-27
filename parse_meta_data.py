@@ -4,6 +4,11 @@ import re
 
 
 class MetadataValidator:
+    """Validate and coerce metadata key/value mappings for hubs and edges.
+
+    The validator receives the parser class name (in_type) to distinguish
+    edge-specific rules from hub metadata validation.
+    """
     def __init__(self,
                  in_type: str,
                  data: Dict[str, Any]) -> None:
@@ -12,6 +17,11 @@ class MetadataValidator:
 
     @property
     def _get_max_drones(self) -> int:
+        """Return a validated integer for 'max_drones' from metadata.
+
+        Raises:
+            FlyinError: When parsing fails or the value is negative.
+        """
         try:
             val = int(self.data['max_drones'])
             if val < 0:
@@ -30,6 +40,11 @@ class MetadataValidator:
 
     @property
     def get_link_capacity(self) -> int:
+        """Return a validated integer for 'max_link_capacity' from metadata.
+
+        Raises:
+            FlyinError: When parsing fails or the value is negative.
+        """
         try:
             val = int(self.data['max_link_capacity'])
             if val < 0:
@@ -50,15 +65,23 @@ class MetadataValidator:
 
     @property
     def _set_max_drones(self) -> None:
+        """Coerce 'max_drones' to an int in the underlying data mapping."""
         if self.data.get('max_drones'):
             self.data['max_drones'] = self._get_max_drones
 
     @property
     def _set_max_capacity(self) -> None:
+        """Coerce 'max_link_capacity' to an int in the
+        underlying data mapping."""
         if self.data.get('max_link_capacity'):
             self.data['max_link_capacity'] = self.get_link_capacity
 
     def validate_metadata(self) -> Dict[str, Any]:
+        """Run overall metadata validation and coercion.
+
+        Returns:
+            The possibly-modified data mapping with corrected integer types.
+        """
         self.allowed_status_meta()
         if self.in_type == "EdgeParser":
             self._set_max_capacity
@@ -67,6 +90,12 @@ class MetadataValidator:
         return self.data
 
     def allowed_status_meta(self) -> None:
+        """Ensure only allowed metadata keys are present for the parser type.
+
+        Raises:
+            FlyinError: When unexpected keys or invalid edge
+            metadata are found.
+        """
         allowed = ["zone", "color", "max_drones"]
         if self.in_type == "EdgeParser":
             if self.data.get("max_link_capacity") is False:
@@ -88,6 +117,7 @@ class MetadataValidator:
 
 
 class MetaParser:
+    """Mixin providing metadata parsing utilities used by line parsers."""
     patternsmetadata = {
         r'^\s*\w+=[a-zA-Z0-9]+':
         False,
@@ -100,6 +130,14 @@ class MetaParser:
     }
 
     def parse_metadata(self, meta_data: str) -> Dict[str, str] | None:
+        """Parse a bracketed metadata string into a dictionary.
+
+        Args:
+            meta_data: The raw metadata text, including surrounding brackets.
+
+        Returns:
+            A dictionary of key->value strings, or None when empty.
+        """
         meta_data = self._validate_metadata_format(meta_data)
         if len(meta_data) == 0:
             return None
@@ -111,6 +149,7 @@ class MetaParser:
 
     @staticmethod
     def check_duplicates(data: list[Any]) -> None:
+        """Raise FlyinError when duplicate metadata keys appear."""
         seen = set()
         for itm in [k.split("=")[0].strip() for k in data]:
             if itm in seen:
@@ -122,6 +161,12 @@ class MetaParser:
                 seen.add(itm)
 
     def _split_key_values(self) -> Dict[str, Any]:
+        """Split a regex match group into a dict of
+        lower-cased key/value pairs.
+
+        Returns:
+            Mapping of metadata keys to their string values.
+        """
         data: List[str] = self.match.group().split()
         MetaParser.check_duplicates(data)
         return (
@@ -131,9 +176,20 @@ class MetaParser:
         )
 
     def _validate_metadata_format(self, meta_data: str) -> str:
+        """Validate surrounding brackets and return inner metadata string.
+
+        Args:
+            meta_data: Raw metadata including surrounding brackets.
+
+        Returns:
+            Inner metadata string without surrounding '[' and ']'.
+
+        Raises:
+            FlyinError: When metadata does not start with '[' or end with ']'.
+        """
         meta_string = meta_data.strip()
         if not meta_string.startswith("["):
-            raise FlyinError("MetaData must start with '['",
+            raise FlyinError("MetaData must start with '[",
                              number_line=str(FlyinError.get_number_line()))
         if not meta_string.endswith("]"):
             raise FlyinError("MetaData missing closing bracket ']'",

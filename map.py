@@ -4,6 +4,12 @@ from custom_error import FlyinError
 
 
 class Map:
+    """Singleton container for the parsed map data (hubs, edges, drone count).
+
+    Map stores the network definition and provides helpers to access and
+    validate the configuration required by the simulation.
+    """
+
     _instance: Optional['Map'] = None
     _initialized: bool = False
 
@@ -13,6 +19,7 @@ class Map:
         return cls._instance
 
     def __init__(self) -> None:
+        """Initialize the singleton storage on first construction."""
         if Map._initialized is True:
             return
         Map._initialized = True
@@ -23,18 +30,29 @@ class Map:
         self.edges: List[Edge] = []
 
     def get_start(self) -> Hub | None:
+        """Return the configured start hub or None if not set."""
         return self.start_hub
 
     def get_end(self) -> Hub | None:
+        """Return the configured end hub or None if not set."""
         return self.end_hub
 
     def add_hub(self, hub: Hub) -> None:
+        """Add a hub to the map, erroring on duplicates.
+
+        Args:
+            hub: Hub to register.
+
+        Raises:
+            FlyinError: When a hub with the same name already exists.
+        """
         if self.hubs.get(hub.name):
             raise FlyinError(f'[ERROR]: Duplicate hub => {hub.name}',
                              line_number=str(FlyinError.get_number_line()))
         self.hubs[hub.name] = hub
 
     def set_start_hub(self, start_hub: Hub) -> None:
+        """Set and register the start hub (only allowed once)."""
         if self.start_hub is not None:
             raise FlyinError('[ERROR]: Duplicate start hub',
                              line_number=str(FlyinError.get_number_line()))
@@ -42,6 +60,8 @@ class Map:
         self.add_hub(start_hub)
 
     def set_end_hub(self, end_hub: Hub) -> None:
+        """Set and register the end hub, updating its capacity
+        to total drones."""
         if self.end_hub is not None:
             raise FlyinError('[ERROR]: Duplicate end hub',
                              line_number=str(FlyinError.get_number_line()))
@@ -50,6 +70,14 @@ class Map:
         self.add_hub(end_hub)
 
     def add_egde(self, edge: Edge) -> None:
+        """Append an Edge to the map ensuring no duplicate undirected links.
+
+        Args:
+            edge: Edge instance to add.
+
+        Raises:
+            FlyinError: When an equivalent undirected edge already exists.
+        """
         if {edge.source, edge.destination} in [{edg.source, edg.destination}
                                                for edg in self.edges]:
             raise FlyinError("[ERROR]: Duplicate edge detected between "
@@ -58,6 +86,11 @@ class Map:
         self.edges.append(edge)
 
     def validate_hub_end_start(self) -> None:
+        """Ensure both start and end hubs are configured.
+
+        Raises:
+            FlyinError: When either start or end hub is missing.
+        """
         if self.start_hub is None:
             raise FlyinError(
                 "[Error]: Missing Start Hub! \n  You must define at least "
@@ -74,10 +107,26 @@ class Map:
             )
 
     def valid_number_drones(self) -> None:
+        """Ensure number of drones was set to a non-zero value.
+
+        Raises:
+            FlyinError: When number_drones is zero (not set).
+        """
         if self.number_drones == 0:
             raise FlyinError('is not number drones')
 
     def get_hub(self, name_zone: str) -> Hub:
+        """Return the Hub instance by name, raising when missing.
+
+        Args:
+            name_zone: Hub name/key to lookup.
+
+        Returns:
+            The Hub instance from the map.
+
+        Raises:
+            FlyinError: When the named hub is not defined.
+        """
         if not self.hubs.get(name_zone):
             raise FlyinError(f"Zone name '{name_zone}' is not defined "
                              "in the configuration file.",
@@ -85,6 +134,14 @@ class Map:
         return self.hubs[name_zone]
 
     def set_number_drones(self, number_drones: int) -> None:
+        """Set the global number of drones for the simulation.
+
+        Args:
+            number_drones: Integer number of drones to set.
+
+        Raises:
+            FlyinError: When the number has already been set or is invalid.
+        """
         if self.number_drones != 0:
             raise FlyinError('[ERROR]: Drones number has already been set!',
                              line_number=str(FlyinError.get_number_line()))

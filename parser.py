@@ -8,16 +8,36 @@ import sys
 
 
 class SafeFileReader:
+    """Utility to validate the CLI file argument and filesystem access."""
+
     def __init__(self, path_file: str):
+        """Initialize with the provided path string.
+
+        Args:
+            path_file: Path to the input file as provided on the CLI.
+        """
         self.path_file = Path(path_file)
 
     def _valid_arg(self) -> None:
+        """Ensure exactly one CLI argument (input file) is provided.
+
+        Raises:
+            FlyinError: When the number of CLI arguments is incorrect.
+        """
         if len(sys.argv) != 2:
             raise FlyinError(
                 "Usage: python main.py <file.txt>"
             )
 
     def valid_path(self) -> None:
+        """Validate that the provided path exists and is readable.
+
+        This calls the internal argument validator and then checks filesystem
+        existence and read permission.
+
+        Raises:
+            FlyinError: If the file does not exist or is not readable.
+        """
         self._valid_arg()
 
         if not self.path_file.exists():
@@ -30,13 +50,26 @@ class SafeFileReader:
 
 
 class Parseline:
+    """High-level line-oriented parser that dispatches typed lines.
+
+    Parseline reads the input file line-by-line, strips comments, determines
+    the line type key, and invokes the correct parser to populate the Map
+    singleton with hubs, edges, and drone counts.
+    """
+
     def __init__(self) -> None:
+        """Initialize temporary parsing state and reference the global Map."""
         self.raw_line: str
         self.type_line: str
         self.clean_line: str
         self.map = Map()
 
     def parse_file(self) -> None:
+        """Read the CLI-provided file and parse all meaningful lines.
+
+        Raises:
+            FlyinError: If file validation fails or parsed content is invalid.
+        """
         safe_file = SafeFileReader(sys.argv[1])
         safe_file.valid_path()
         with open(safe_file.path_file, "r") as fb:
@@ -46,6 +79,11 @@ class Parseline:
             self.map.valid_number_drones()
 
     def _process_line(self, raw_line: str) -> None:
+        """Process a single raw input line: strip comments and dispatch.
+
+        Args:
+            raw_line: The raw line read from the input file.
+        """
         FlyinError.add_line_number()
         self.raw_line = raw_line.split("#", maxsplit=1)[0].strip()
         if not self.raw_line:
@@ -54,6 +92,7 @@ class Parseline:
         self._dispatch_line()
 
     def _dispatch_line(self) -> None:
+        """Call the concrete creator based on the parsed type key."""
         match self.type_line.upper():
             case "NB_DRONES":
                 self._create_number_drones()
@@ -67,23 +106,32 @@ class Parseline:
                 self._create_edge()
 
     def _create_start_hube(self) -> None:
+        """Parse and register the start hub from the current clean line."""
         hub: Hub = HubParser(self.clean_line.strip()).parser()
 
         self.map.set_start_hub(hub)
 
     def _create_hube(self) -> None:
+        """Parse and add a hub to the Map from the current clean line."""
         hub: Hub = HubParser(self.clean_line.strip()).parser()
         self.map.add_hub(hub)
 
     def _create_end_hube(self) -> None:
+        """Parse and register the end hub from the current clean line."""
         hub: Hub = HubParser(self.clean_line.strip()).parser()
         self.map.set_end_hub(hub)
 
     def _create_edge(self) -> None:
+        """Parse and add an edge (connection) to the Map."""
         edge: Edge = EdgeParser(self.clean_line.strip()).parser()
         self.map.add_egde(edge)
 
     def _create_number_drones(self) -> None:
+        """Parse and set the number of drones from the clean line.
+
+        Raises:
+            FlyinError: When the number cannot be parsed as an integer.
+        """
         try:
             self.map.set_number_drones(int(self.clean_line))
         except ValueError:
@@ -91,6 +139,12 @@ class Parseline:
                              number_line=str(FlyinError.get_number_line()))
 
     def _set_type_line(self) -> None:
+        """Determine the line type key and extract the payload portion.
+
+        The method splits on the first ':' to separate the key from the value
+        and maps known keys to the corresponding parser. Unknown keys raise
+        FlyinError.
+        """
         if self.raw_line.count(":") < 0:
             raise FlyinError(
                 "The line type must match one of the allowed formats "

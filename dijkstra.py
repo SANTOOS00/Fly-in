@@ -5,7 +5,17 @@ from map import Map
 
 
 class Dijkstra:
+    """Find the lowest-cost path between hubs using Dijkstra's algorithm.
+
+    This class stores intermediate path and distance tables during a run and
+    exposes methods to execute the search and reconstruct the resulting path.
+    """
+
     def __init__(self) -> None:
+        """Initialize internal path, distance, and heap storage.
+
+        The dictionaries and heap are reset for each new Dijkstra run.
+        """
         self.paths: Dict[Hub, Hub] = {}
         self.distances: Dict[str, float] = {}
         self.heap: List[Tuple[float, Hub | None]] = []
@@ -15,6 +25,21 @@ class Dijkstra:
             start_hub: Hub | None,
             end_hub: Hub | None
             ) -> List[Hub] | None:
+        """Find the lowest-cost path between two hubs.
+
+        Args:
+            graph: Graph adjacency list mapping a Hub to a list of (neighbor,
+                edge) tuples. The algorithm uses neighbor hubs' zone values
+                to compute traversal cost.
+            start_hub: Hub where the search starts. If None, the run returns
+                None.
+            end_hub: Hub where the search ends. If reached, the path from
+                start_hub to end_hub is reconstructed and returned.
+
+        Returns:
+            A list of Hub instances representing the ordered path from start
+            to end, or None if no path exists or inputs are invalid.
+        """
 
         self.heap = [(0.0, start_hub)]
         self._set_vertexs_inf(start_hub)
@@ -33,20 +58,37 @@ class Dijkstra:
         return None
 
     def get_path(self, start_hub: Hub | None) -> List[Hub] | None:
+        """Reconstruct the path from the start hub to the end hub
+             stored in Map.
+
+        Args:
+            start_hub: Hub from which the path reconstruction begins. If None,
+                returns None.
+
+        Returns:
+            Ordered list of Hub objects from start to end, or None when a hub
+            is unavailable.
+        """
         if start_hub is None:
             return None
         path: List[Hub] = []
-        sourch: Hub | None = Map().get_end()
-        if sourch is None:
+        source: Hub | None = Map().get_end()
+        if source is None:
             return None
-        while sourch != start_hub:
-            path.append(sourch)
-            sourch = self.paths[sourch]
-        path.append(sourch)
+        while source != start_hub:
+            path.append(source)
+            source = self.paths[source]
+        path.append(source)
         path.reverse()
         return path
 
     def _set_vertexs_inf(self, start: Hub | None) -> None:
+        """Reset all hub distances to infinity and set the start distance.
+
+        Args:
+            start: Hub from which the path search begins. If None, the
+                function returns without changes.
+        """
         if start is None:
             return
         hubs = Map().hubs
