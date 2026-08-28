@@ -32,7 +32,7 @@ class EdgeParser(BaseParser, MetaParser):
         self._validate_edge_syntax()
         match = re.match(r'^([^\s-]+)-([^\s-]+)(.*)', self.line_str)
         if not match:
-            raise FlyinError(f"Invalid line syntax: {self.line_str}")
+            raise FlyinError(f"[ERROR]: Invalid line syntax: {self.line_str}")
         source, destination, *meta = match.groups()
         edge = Edge(
             source=Map().get_hub(source),
@@ -49,15 +49,15 @@ class EdgeParser(BaseParser, MetaParser):
     def _validate_source(self) -> None:
         """Validate the source portion of the connection syntax."""
         if not re.match(r'^([^\s-]+)-', self.line_str):
-            raise FlyinError('',
-                             line_number=str(FlyinError.get_number_line()))
+            raise FlyinError('[ERROR]: Invalid or missing source format in connection syntax.',
+                             line_number=FlyinError.get_number_line())
 
     def _validate_destination(self) -> None:
         """Validate the destination portion of the connection syntax."""
         if not re.match(r'^([^\s-]+)-([^\s-]+)', self.line_str):
             raise FlyinError("[ERROR]: Invalid destination format! "
                              "Expected format: 'source-destination'",
-                             line_number=str(FlyinError.get_number_line()))
+                             line_number=FlyinError.get_number_line())
 
     def init_meta_data(self, edge: Edge, meta_str: str) -> None:
         """Apply parsed metadata to the new Edge instance.
@@ -86,7 +86,7 @@ class EdgeParser(BaseParser, MetaParser):
             raise FlyinError("[ERROR]: Invalid max capacity "
                              f"value '{max_capacity}'! "
                              "Expected a positive integer.",
-                             number_line=str(FlyinError.get_number_line()))
+                             number_line=FlyinError.get_number_line())
         return val_capacity
 
 
@@ -125,14 +125,17 @@ class HubParser(BaseParser, MetaParser):
         if len(meta_str) == 0:
             return None
         meta_dict: Dict[str, str] | None = self.parse_metadata(meta_str)
+        if 'max_drones' in [type for type in meta_dict.keys()]:
+            meta_dict.update('max_drones', 1)
         if meta_dict is None:
             return
         if meta_dict.get('color'):
             hub.color = meta_dict['color']
         if meta_dict.get('zone'):
             hub.zone = hub.Zone.get_type_zone(meta_dict['zone'])
-        if meta_dict.get('max_drones'):
-            hub.max_drones = int(meta_dict['max_drones'])
+        if 
+        # hub.max_drones = int(meta_dict['max_drones'])
+        
 
     def _validate_syntax(self) -> None:
         """Run individual syntax checks for the hub definition."""
@@ -143,17 +146,17 @@ class HubParser(BaseParser, MetaParser):
     def _validate_zone_name(self) -> None:
         """Validate the hub's zone/name token is present."""
         if not re.match(r'^([^\s-]+)(\s)', self.line_str):
-            raise FlyinError('Zone name is not valid',
-                             line_number=str(FlyinError.get_number_line()))
+            raise FlyinError('[ERROR]: Zone name is not valid',
+                             line_number=FlyinError.get_number_line())
 
     def _validate_x_coordinate(self) -> None:
         """Validate the X coordinate token is present and numeric."""
         if not re.match(r'^([^\s-]+)\s+(-?\d+)', self.line_str):
-            raise FlyinError('X coordinate is not valid',
-                             line_number=str(FlyinError.get_number_line()))
+            raise FlyinError('[ERROR]: X coordinate is not valid',
+                             line_number=FlyinError.get_number_line())
 
     def _validate_y_coordinate(self) -> None:
         """Validate the Y coordinate token is present and numeric."""
         if not re.match(r'^([^\s-]+)\s+(-?\d+)\s+(-?\d+)(.*)', self.line_str):
-            raise FlyinError('Y coordinate is not valid',
-                             line_number=str(FlyinError.get_number_line()))
+            raise FlyinError('[ERROR]: Y coordinate is not valid',
+                             line_number=FlyinError.get_number_line())

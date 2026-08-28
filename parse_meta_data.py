@@ -26,16 +26,16 @@ class MetadataValidator:
             val = int(self.data['max_drones'])
             if val < 0:
                 raise FlyinError(
-                    "Invalid value for 'max_drones' in metadata: "
+                    "[ERROR]: Invalid value for 'max_drones' in metadata: "
                     f"{self.data['max_drones']}",
-                    number_line=str(FlyinError.get_number_line())
+                    number_line=FlyinError.get_number_line()
                     )
             return val
         except Exception:
             raise FlyinError(
-                "Invalid value for 'max_drones' in metadata: "
+                "[ERROR]: Invalid value for 'max_drones' in metadata: "
                 f"{self.data['max_drones']}",
-                number_line=str(FlyinError.get_number_line())
+                number_line=FlyinError.get_number_line()
             )
 
     @property
@@ -49,18 +49,18 @@ class MetadataValidator:
             val = int(self.data['max_link_capacity'])
             if val < 0:
                 raise FlyinError(
-                    "Invalid value for 'max_link_capacity' in metadata: "
+                    "[ERROR]: Invalid value for 'max_link_capacity' in metadata: "
                     f"{self.data['max_link_capacity']}. "
                     "It must be an integer greater than or equal to 1.",
-                    number_line=str(FlyinError.get_number_line())
+                    number_line=FlyinError.get_number_line()
                     )
             return val
         except Exception:
             raise FlyinError(
-                "Invalid value for 'max_link_capacity' in metadata: "
+                "[ERROR]: Invalid value for 'max_link_capacity' in metadata: "
                 f"{self.data['max_link_capacity']}. "
                 "It must be an integer greater than or equal to 1.",
-                number_line=str(FlyinError.get_number_line())
+                number_line=FlyinError.get_number_line()
             )
 
     @property
@@ -100,19 +100,18 @@ class MetadataValidator:
         if self.in_type == "EdgeParser":
             if self.data.get("max_link_capacity") is False:
                 raise FlyinError(
-                    "Invalid connection metadata\n \n ⚠ Fix: "
+                    "[ERROR]: Invalid connection metadata ⚠ Fix: "
                     f"key '{self.data}'"
-                    f"allowed \n 'max_link_capacity' just",
-                    number_line=str(FlyinError.get_number_line()))
+                    f"allowed 'max_link_capacity' just",
+                    number_line=FlyinError.get_number_line())
         else:
             for key in self.data.keys():
                 if key not in allowed:
                     raise FlyinError(
-                        "Invalid connection metadata\n \n ⚠ "
-                        f"Fix: key '{self.data}'"
-                        f"\n           allowed       \n'{allowed}'\n "
-                        "           just",
-                        number_line=str(FlyinError.get_number_line())
+                        "[ERROR]: Invalid connection metadata ⚠ "
+                        f"Fix: key '{self.data} allowed '{allowed}' "
+                        "just",
+                        number_line=FlyinError.get_number_line()
                         )
 
 
@@ -153,10 +152,10 @@ class MetaParser:
         seen = set()
         for itm in [k.split("=")[0].strip() for k in data]:
             if itm in seen:
-                raise FlyinError(f"Duplicate metadata item '{itm}',"
+                raise FlyinError(f"[ERROR]: Duplicate metadata item '{itm}',"
                                  " The first occurrence will "
                                  "be used.",
-                                 number_line=str(FlyinError.get_number_line()))
+                                 number_line=FlyinError.get_number_line())
             else:
                 seen.add(itm)
 
@@ -189,11 +188,11 @@ class MetaParser:
         """
         meta_string = meta_data.strip()
         if not meta_string.startswith("["):
-            raise FlyinError("MetaData must start with '[",
-                             number_line=str(FlyinError.get_number_line()))
+            raise FlyinError("[ERROR]: MetaData must start with '[",
+                             number_line=FlyinError.get_number_line())
         if not meta_string.endswith("]"):
-            raise FlyinError("MetaData missing closing bracket ']'",
-                             number_line=str(FlyinError.get_number_line()))
+            raise FlyinError("[ERROR]: MetaData missing closing bracket ']'",
+                             number_line=FlyinError.get_number_line())
         return (meta_string[1:-1].strip())
 
     def _check_syntax_meta(self, meta_data: str) -> None:
@@ -212,7 +211,7 @@ class MetaParser:
         for index, is_not_valid in enumerate(MetaParser.patternsmetadata.
                                              values()):
             if is_not_valid:
-                raise FlyinError("Invalid MetaData property syntax at"
+                raise FlyinError("[ERROR]: Invalid MetaData property syntax at"
                                  f" position {data[index - 1]}. Expected "
                                  "format: ",
-                                 number_line=str(FlyinError.get_number_line()))
+                                 number_line=FlyinError.get_number_line())

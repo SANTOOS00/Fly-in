@@ -46,7 +46,9 @@ class Dijkstra:
         while self.heap:
             cost, hub_new = queue.heappop(self.heap)
             if hub_new is None:
-                return None
+                continue
+            if hub_new.max_drones == 0:
+                continue
             if end_hub == hub_new:
                 return self.get_path(start_hub)
             for neighbor_hub, _ in graph[hub_new]:

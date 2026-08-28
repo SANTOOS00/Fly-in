@@ -115,7 +115,7 @@ class Hub:
                 case "RESTRICTED":
                     return cls.RESTRICTED
                 case _:
-                    raise ValueError(f"Invalid zone type: {type_zone}")
+                    raise ValueError(f"[ERROR]: Invalid zone type: {type_zone}")
 
 
 class Edge:

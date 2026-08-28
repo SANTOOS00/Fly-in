@@ -26,7 +26,7 @@ class SafeFileReader:
         """
         if len(sys.argv) != 2:
             raise FlyinError(
-                "Usage: python main.py <file.txt>"
+                "[ERROR]: Usage: python main.py <file.txt>"
             )
 
     def valid_path(self) -> None:
@@ -41,11 +41,11 @@ class SafeFileReader:
         self._valid_arg()
 
         if not self.path_file.exists():
-            raise FlyinError(f"File not found: {self.path_file}")
+            raise FlyinError(f"[ERROR]: File not found: {self.path_file}")
 
         if not os.access(self.path_file, os.R_OK):
             raise FlyinError(
-                f"No read permission: {self.path_file}"
+                f"[ERROR]: No read permission: {self.path_file}"
             )
 
 
@@ -76,7 +76,6 @@ class Parseline:
             for raw_line in fb:
                 self._process_line(raw_line)
             self.map.validate_hub_end_start()
-            self.map.valid_number_drones()
 
     def _process_line(self, raw_line: str) -> None:
         """Process a single raw input line: strip comments and dispatch.
@@ -135,8 +134,9 @@ class Parseline:
         try:
             self.map.set_number_drones(int(self.clean_line))
         except ValueError:
-            raise FlyinError("val li  number sahih tabi3i",
-                             number_line=str(FlyinError.get_number_line()))
+            raise FlyinError("[ERROR]: Failed to parse number of drones. The "
+                             "value must be a valid integer.",
+                             number_line=FlyinError.get_number_line())
 
     def _set_type_line(self) -> None:
         """Determine the line type key and extract the payload portion.
@@ -147,9 +147,9 @@ class Parseline:
         """
         if self.raw_line.count(":") < 0:
             raise FlyinError(
-                "The line type must match one of the allowed formats "
+                "[ERROR]: The line type must match one of the allowed formats "
                 "{nb_drones, start_hub, etc.}. Example: [type: ,,, ]",
-                number_line=str(FlyinError.get_number_line()))
+                number_line=FlyinError.get_number_line())
         key_raw, self.clean_line = self.raw_line.split(":", 1)
         parsers = {
             "nb_drones": 'DroneParser',
@@ -161,5 +161,6 @@ class Parseline:
         if parsers.get(key_raw.lower()):
             self.type_line = key_raw.lower()
         else:
-            raise FlyinError('type error',
-                             number_line=str(FlyinError.get_number_line()))
+            raise FlyinError(f"[ERROR]: Unknown line type '{key_raw.strip()}'. "
+                             f"Must be one of {set(parsers.keys())}.",
+                             number_line=FlyinError.get_number_line())

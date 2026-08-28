@@ -42,10 +42,10 @@ class FlyinError(Exception):
         cls._line_number += 1
 
     @classmethod
-    def get_number_line(cls) -> int:
+    def get_number_line(cls) -> str:
         """Return the current class-level line-number counter value.
 
         Returns:
             The integer count of lines associated with errors so far.
         """
-        return cls._line_number
+        return str(cls._line_number)

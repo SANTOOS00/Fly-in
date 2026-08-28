@@ -56,11 +56,14 @@ class Simulation:
             FlyinError: If no path is found in the graph.
         """
         adj_list: Adj_List = self.graph.get_copy_adj_list()
+        if not adj_list:
+            raise FlyinError("[ERROR]: The graph adjacency list is empty. "
+                             "No hubs or connections found.")
         path: None | List[Hub] = self.dijkstra.run(adj_list,
                                                    self.start_hub,
                                                    self.end_hub)
         if path is None:
-            raise FlyinError("in graph is not path make")
+            raise FlyinError("[ERROR]: Unreachable target - no path found in the graph.")
 
     def _reduction_drones(self) -> None:
         """Remove finished (None) drone slots from the internal list."""

@@ -108,7 +108,7 @@ class Drone:
         """
         if self.current_hub is None:
             raise ValueError(
-                f"Drone {self.id} is not currently attached to any hub.")
+                f"[ERROR]: Drone {self.id} is not currently attached to any hub.")
         self.current_hub.increase_zone_size(self.id)
         self.current_edge = edge
         edge.decrease_edge_capacity(self.id)
