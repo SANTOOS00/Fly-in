@@ -1,0 +1,2 @@
+
+the plus signe '+' must be handled in metadata max_link_capacity AND max_drones

@@ -49,8 +49,8 @@ class MetadataValidator:
             val = int(self.data['max_link_capacity'])
             if val < 0:
                 raise FlyinError(
-                    "[ERROR]: Invalid value for 'max_link_capacity' in metadata: "
-                    f"{self.data['max_link_capacity']}. "
+                    "[ERROR]: Invalid value for 'max_link_capacity'"
+                    f" in metadata: {self.data['max_link_capacity']}. "
                     "It must be an integer greater than or equal to 1.",
                     number_line=FlyinError.get_number_line()
                     )
@@ -118,14 +118,14 @@ class MetadataValidator:
 class MetaParser:
     """Mixin providing metadata parsing utilities used by line parsers."""
     patternsmetadata = {
-        r'^\s*\w+=[a-zA-Z0-9]+':
+        r'^\s*\w+=([+]?[a-zA-Z0-9])+':
         False,
-        r'^\s*\w+=[a-zA-Z0-9]+(\s+\w+=[a-zA-Z0-9]+)?':
+        r'^\s*\w+=([+]?[a-zA-Z0-9])+(\s+\w+=([+]?[a-zA-Z0-9])+)?':
         False,
-        r'^\s*\w+=[a-zA-Z0-9]+(\s+\w+=[a-zA-Z0-9]+)?(\s+\w+=[a-zA-Z0-9]+)?$':
+        r'^\s*\w+=([+]?[a-zA-Z0-9])+(\s+\w+=([+]?[a-zA-Z0-9])+)'
+        r'?(\s+\w+=([+]?[a-zA-Z0-9])+)?$':
         False,
-        r'^\s*\w+=[a-zA-Z0-9]+(\s+\w+=[a-zA-Z0-9]+)*\s*$':
-        False,
+        r'^\s*\w+=([+]?[a-zA-Z0-9])+(\s+\w+=([+]?[a-zA-Z0-9])+)*\s*$': False,
     }
 
     def parse_metadata(self, meta_data: str) -> Dict[str, str] | None:

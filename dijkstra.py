@@ -51,8 +51,10 @@ class Dijkstra:
                 continue
             if end_hub == hub_new:
                 return self.get_path(start_hub)
-            for neighbor_hub, _ in graph[hub_new]:
+            for neighbor_hub, edge in graph[hub_new]:
                 new_cost: float = cost + neighbor_hub.get_zone_value()
+                if edge.max_link_capacity == 0:
+                    continue
                 if new_cost < self.distances[neighbor_hub.name]:
                     queue.heappush(self.heap, (new_cost, neighbor_hub))
                     self.distances[neighbor_hub.name] = new_cost

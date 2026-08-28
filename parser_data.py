@@ -49,15 +49,16 @@ class EdgeParser(BaseParser, MetaParser):
     def _validate_source(self) -> None:
         """Validate the source portion of the connection syntax."""
         if not re.match(r'^([^\s-]+)-', self.line_str):
-            raise FlyinError('[ERROR]: Invalid or missing source format in connection syntax.',
-                             line_number=FlyinError.get_number_line())
+            raise FlyinError('[ERROR]: Invalid or missing source '
+                             'format in connection syntax.',
+                             number_line=FlyinError.get_number_line())
 
     def _validate_destination(self) -> None:
         """Validate the destination portion of the connection syntax."""
         if not re.match(r'^([^\s-]+)-([^\s-]+)', self.line_str):
             raise FlyinError("[ERROR]: Invalid destination format! "
                              "Expected format: 'source-destination'",
-                             line_number=FlyinError.get_number_line())
+                             number_line=FlyinError.get_number_line())
 
     def init_meta_data(self, edge: Edge, meta_str: str) -> None:
         """Apply parsed metadata to the new Edge instance.
@@ -101,7 +102,7 @@ class HubParser(BaseParser, MetaParser):
             A Hub object initialized with parsed coordinates and metadata.
         """
         self._validate_syntax()
-        match = re.match(r'^([^\s-]+)\s+(-?\d+)\s+(-?\d+)(.*)',
+        match = re.match(r'^([^\s-]+)\s+([-+]?\d+)\s+([-+]?\d+)(.*)',
                          self.line_str)
         if not match:
             raise FlyinError(f"Invalid line syntax: {self.line_str}")
@@ -144,16 +145,17 @@ class HubParser(BaseParser, MetaParser):
         """Validate the hub's zone/name token is present."""
         if not re.match(r'^([^\s-]+)(\s)', self.line_str):
             raise FlyinError('[ERROR]: Zone name is not valid',
-                             line_number=FlyinError.get_number_line())
+                             number_line=FlyinError.get_number_line())
 
     def _validate_x_coordinate(self) -> None:
         """Validate the X coordinate token is present and numeric."""
-        if not re.match(r'^([^\s-]+)\s+(-?\d+)', self.line_str):
+        if not re.match(r'^([^\s-]+)\s+([+-]?\d+)', self.line_str):
             raise FlyinError('[ERROR]: X coordinate is not valid',
-                             line_number=FlyinError.get_number_line())
+                             number_line=FlyinError.get_number_line())
 
     def _validate_y_coordinate(self) -> None:
         """Validate the Y coordinate token is present and numeric."""
-        if not re.match(r'^([^\s-]+)\s+(-?\d+)\s+(-?\d+)(.*)', self.line_str):
+        if not re.match(r'^([^\s-]+)\s+([-+]?\d+)\s+([-+]?\d+)(.*)',
+                        self.line_str):
             raise FlyinError('[ERROR]: Y coordinate is not valid',
-                             line_number=FlyinError.get_number_line())
+                             number_line=FlyinError.get_number_line())

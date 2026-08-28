@@ -20,21 +20,21 @@ class FlyinError(Exception):
         super().__init__(self.format_message(message, context))
         self.context: Dict[str, str] = context
 
-    def format_message(
-        self,
-        message: str,
-        context: Dict[str, str]
-    ) -> str:
+    def format_message(self,
+                       message: str,
+                       context: Dict[str, str]
+                       ) -> str:
         """Format the message together with the provided context.
-
         Args:
             message: Base message text.
             context: Mapping of contextual keys/values to include.
-
         Returns:
             A single string combining message and context for display.
         """
-        return f"{message} {context}"
+        line_num = context.get("number_line") if context else None
+        if line_num is not None:
+            return f"message: {message}\nline_number: {line_num}"
+        return f"message: {message}"
 
     @classmethod
     def add_line_number(cls) -> None:

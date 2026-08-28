@@ -123,7 +123,7 @@ class Parseline:
     def _create_edge(self) -> None:
         """Parse and add an edge (connection) to the Map."""
         edge: Edge = EdgeParser(self.clean_line.strip()).parser()
-        self.map.add_egde(edge)
+        self.map.add_edge(edge)
 
     def _create_number_drones(self) -> None:
         """Parse and set the number of drones from the clean line.
@@ -161,6 +161,6 @@ class Parseline:
         if parsers.get(key_raw.lower()):
             self.type_line = key_raw.lower()
         else:
-            raise FlyinError(f"[ERROR]: Unknown line type '{key_raw.strip()}'. "
-                             f"Must be one of {set(parsers.keys())}.",
+            raise FlyinError(f"[ERROR]: Unknown line type '{key_raw.strip()}'."
+                             f" Must be one of {set(parsers.keys())}.",
                              number_line=FlyinError.get_number_line())

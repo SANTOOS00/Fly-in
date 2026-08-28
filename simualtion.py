@@ -63,7 +63,8 @@ class Simulation:
                                                    self.start_hub,
                                                    self.end_hub)
         if path is None:
-            raise FlyinError("[ERROR]: Unreachable target - no path found in the graph.")
+            raise FlyinError("[ERROR]: Unreachable target - no path "
+                             "found in the graph.")
 
     def _reduction_drones(self) -> None:
         """Remove finished (None) drone slots from the internal list."""
