@@ -1,2 +1,1 @@
-
-the plus signe '+' must be handled in metadata max_link_capacity AND max_drones
+meta data [] in conection and hub fix

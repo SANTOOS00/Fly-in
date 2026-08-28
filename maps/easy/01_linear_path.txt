@@ -3,9 +3,9 @@
 nb_drones: 12
 hub: alo] +1 0 [color=red]
 start_hub: [start 0 0
-hub: waypoint2 2 0 
+hub: waypoint[]2 2 0 
 end_hub: [] 3 0 [color=red]
 
-connection: [start-alo] [max_link_capacity=2+30]
-connection: alo]-waypoint2
-connection: waypoint2-[]
+connection: [start-alo] [max_link_capacity=23[]0]
+connection: alo]-waypoint[]2
+connection: waypoint[]2-[]
