@@ -125,17 +125,14 @@ class HubParser(BaseParser, MetaParser):
         if len(meta_str) == 0:
             return None
         meta_dict: Dict[str, str] | None = self.parse_metadata(meta_str)
-        if 'max_drones' in [type for type in meta_dict.keys()]:
-            meta_dict.update('max_drones', 1)
         if meta_dict is None:
             return
         if meta_dict.get('color'):
             hub.color = meta_dict['color']
         if meta_dict.get('zone'):
             hub.zone = hub.Zone.get_type_zone(meta_dict['zone'])
-        if 
-        # hub.max_drones = int(meta_dict['max_drones'])
-        
+        if "max_drones" in meta_dict.keys():
+            hub.max_drones = int(meta_dict['max_drones'])
 
     def _validate_syntax(self) -> None:
         """Run individual syntax checks for the hub definition."""
