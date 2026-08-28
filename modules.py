@@ -3,10 +3,11 @@ from typing import NewType, Dict, Tuple
 from enum import Enum
 
 
-Adj_List = NewType('Adj_List', Dict["Hub", List[Tuple["Hub", "Edge"]]])
+Adj_List = NewType('Adj_List', Dict["Hub", List[Tuple["Hub | None",
+                                                      "Edge | None"]]])
 
 
-class Hub:
+class Hub: 
     """Representation of a hub (node) in the map graph.
 
     Attributes:
@@ -27,8 +28,8 @@ class Hub:
             y: Y coordinate (unused in logic but stored conceptually).
         """
         self.name = name
-        x = x
-        y = y
+        self.x = x
+        self.y = y
         self.zone: "Hub.Zone" = Hub.Zone.NORMAL
         self.max_drones: int = 1
         self.color: str = 'white'

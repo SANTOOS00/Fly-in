@@ -1,11 +1,13 @@
 # Easy Level 1: Simple linear path
 
 nb_drones: 12
-hub: alo] +1 0 [color[]=red]
-start_hub: [start 0 0
-hub: waypoint[]2 2 0 
-end_hub: [] 3 0 [color=red]
+start_hub: start[ 0 0 [color=red]
+hub: A 1 0 [color=red]
+hub: B 2 0 [color=gris]
+hub: C 1 5 [color=pink]
+hub: D 1 4 [color=yellow]
+hub: E 1 3 [max_drones=20 color=green zone=restricted]
+hub: F 1 2 [max_drones=1 color=brown zone=priority]
+end_hub: end 3 0 [color=blew]
 
-connection: [start-alo] [max_link_capacity=230]
-connection: alo]-waypoint[]2
-connection: waypoint[]2-[]
+connection: end-F [max_link_capacity=2]

@@ -33,8 +33,8 @@ class FlyinError(Exception):
         """
         line_num = context.get("number_line") if context else None
         if line_num is not None:
-            return f"message: {message}\nline_number: {line_num}"
-        return f"message: {message}"
+            return f"\nmessage: {message}\n\nline_number: {line_num}"
+        return f"\nmessage: {message}"
 
     @classmethod
     def add_line_number(cls) -> None:

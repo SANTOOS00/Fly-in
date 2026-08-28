@@ -53,6 +53,10 @@ class Map:
         if self.hubs.get(hub.name):
             raise FlyinError(f'[ERROR]: Duplicate hub => {hub.name}',
                              number_line=FlyinError.get_number_line())
+        if [hub.x, hub.y] in [[h.x, h.y] for h in self.hubs.values()]:
+            raise FlyinError("[ERROR]: Duplicate hub position: "
+                             f"(x={hub.x}, y={hub.y})",
+                             number_line=FlyinError.get_number_line())
         self.hubs[hub.name] = hub
 
     def set_start_hub(self, start_hub: Hub) -> None:
@@ -85,7 +89,8 @@ class Map:
         if {edge.source, edge.destination} in [{edg.source, edg.destination}
                                                for edg in self.edges]:
             raise FlyinError("[ERROR]: Duplicate edge detected between "
-                             f"'{edge.source}' and '{edge.destination}'!",
+                             f"'{edge.source.name}' and "
+                             f"'{edge.destination.name}'!",
                              number_line=FlyinError.get_number_line())
         self.edges.append(edge)
 
@@ -141,7 +146,6 @@ class Map:
         Raises:
             FlyinError: When the number has already been set or is invalid.
         """
-        print(number_drones)
         if number_drones < 1:
             raise FlyinError('[ERROR]: number of drones is not valid.'
                              ' Minimum required value is 1.',

@@ -1,1 +1,3 @@
-meta data [] in conection and hub fix
+Duplication coordonites (x,y) must  fixed
+Printing message error in the connection names deplicated must be fixed
+The max_link_capacity 1_0 must be fixed in the metadata connection

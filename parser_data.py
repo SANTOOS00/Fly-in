@@ -102,7 +102,6 @@ class HubParser(BaseParser, MetaParser):
             A Hub object initialized with parsed coordinates and metadata.
         """
         self._validate_syntax()
-        print("sss")
         match = re.match(r'^([^\s-]+)\s+([-+]?\d+)\s+([-+]?\d+)(.*)',
                          self.line_str)
         if not match:

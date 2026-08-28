@@ -118,7 +118,7 @@ class MetadataValidator:
 class MetaParser:
     """Mixin providing metadata parsing utilities used by line parsers."""
     patternsmetadata = {
-        r'^\s*\w+=\+?[a-zA-Z0-9\[\]\(\)\{\}]+':
+        r'^\s*\w+=\+?([a-zA-Z0-9\[\]\(\)\{\}]_*)+':
             False,
 
         r'^\s*\w+=\+?[a-zA-Z0-9\[\]\(\)\{\}]+'
@@ -210,20 +210,19 @@ class MetaParser:
                 MetaParser.patternsmetadata[pattern] = True
             else:
                 MetaParser.patternsmetadata[pattern] = False
-        print(MetaParser.patternsmetadata)
         self._validate_syntax_meta(meta_data.split())
         if match is None:
             return None
         self.match = match
 
     def _validate_syntax_meta(self, data: List[str]) -> None:
-        for index, is_not_valid in enumerate(MetaParser.patternsmetadata.
-                                             values()):
+        for is_not_valid in MetaParser.patternsmetadata.values():
             if is_not_valid:
-                raise FlyinError(
-                    "[ERROR]: Invalid MetaData property syntax at "
-                    f"position {data[index - 1]}. Expected format: "
-                    "key=value. For hubs, valid properties are:"
-                    " color, zone, max_drones.",
-                    number_line=FlyinError.get_number_line()
-                )
+                raise FlyinError("[ERROR]: Invalid metadata property syntax at"
+                                 f" position {data}. Expected format: "
+                                 "key=value. For hubs, valid properties are: "
+                                 "Hub: color=name_string, zone=[normal ,"
+                                 "priority ,restricted, blocked"
+                                 " max_drones=integer. "
+                                 "For connections: max_link_capacity=integer.",
+                                 number_line=FlyinError.get_number_line())

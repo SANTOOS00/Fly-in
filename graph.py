@@ -1,7 +1,8 @@
+from map import Map
 from typing import List
 from collections import defaultdict
 from modules import Hub, Edge, Adj_List
-from map import Map
+from custom_error import FlyinError
 
 
 class GraphBuilder:
@@ -13,21 +14,36 @@ class GraphBuilder:
 
     def __init__(self) -> None:
         self.network: Adj_List = Adj_List(defaultdict(list))
+        self.edges = Map().edges
+        self.hubs = Map().hubs
+        self.start_hub = Map().start_hub
 
-    def init_adj_list(self) -> Adj_List:
+    def build_adjacency_list(self) -> Adj_List:
         """Populate and return the adjacency list from Map edges.
 
         Returns:
             An Adj_List mapping each Hub to a list of (neighbor_hub, Edge)
             tuples representing the undirected graph.
         """
-        from map import Map
-        edges = Map().edges
-        for edge in edges:
-            self.network[edge.destination].append((edge.source, edge))
-            self.network[edge.source].append((edge.destination, edge))
+        self._initialize_hubs()
+        self._add_edges_to_network()
+        for hub in self.hubs:
+            if not self.network[hub]:
+                self.network[hub].append((None, None))
+
+        if self.network.get(self.start_hub) is None:
+            raise FlyinError("[ERROR]: Unreachable target - no path "
+                             "found in the graph.")
         return self.network
 
+    def _initialize_hubs(self) -> None:
+        for hub in self.hubs:
+            self.network[hub] = []
+
+    def _add_edges_to_network(self) -> None:
+        for edge in self.edges:
+            self.network[edge.destination].append((edge.source, edge))
+            self.network[edge.source].append((edge.destination, edge))
 
 class Graph:
     """Graph convenience wrapper that provides adjacency utilities.
@@ -39,7 +55,7 @@ class Graph:
     def __init__(self) -> None:
         """Initialize graph wrapper by building the adjacency list."""
         self.star_hub = Map().get_start()
-        self.network: Adj_List = GraphBuilder().init_adj_list()
+        self.network: Adj_List = GraphBuilder().build_adjacency_list()
         self.end_hub = Map().get_end()
 
     @staticmethod

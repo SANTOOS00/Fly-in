@@ -52,6 +52,8 @@ class Dijkstra:
             if end_hub == hub_new:
                 return self.get_path(start_hub)
             for neighbor_hub, edge in graph[hub_new]:
+                if neighbor_hub is None:
+                    continue
                 new_cost: float = cost + neighbor_hub.get_zone_value()
                 if edge.max_link_capacity == 0:
                     continue
