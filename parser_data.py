@@ -102,11 +102,13 @@ class HubParser(BaseParser, MetaParser):
             A Hub object initialized with parsed coordinates and metadata.
         """
         self._validate_syntax()
+        print("sss")
         match = re.match(r'^([^\s-]+)\s+([-+]?\d+)\s+([-+]?\d+)(.*)',
                          self.line_str)
         if not match:
             raise FlyinError(f"Invalid line syntax: {self.line_str}")
         name, x, y, *meta = match.groups()
+
         hub = Hub(
             name=name,
             x=int(x),
@@ -123,6 +125,7 @@ class HubParser(BaseParser, MetaParser):
             meta_str: Raw metadata substring starting with
             '[' and ending with ']'.
         """
+
         if len(meta_str) == 0:
             return None
         meta_dict: Dict[str, str] | None = self.parse_metadata(meta_str)

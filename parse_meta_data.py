@@ -118,14 +118,20 @@ class MetadataValidator:
 class MetaParser:
     """Mixin providing metadata parsing utilities used by line parsers."""
     patternsmetadata = {
-        r'^\s*\w+=([+]?[a-zA-Z0-9])+':
-        False,
-        r'^\s*\w+=([+]?[a-zA-Z0-9])+(\s+\w+=([+]?[a-zA-Z0-9])+)?':
-        False,
-        r'^\s*\w+=([+]?[a-zA-Z0-9])+(\s+\w+=([+]?[a-zA-Z0-9])+)'
-        r'?(\s+\w+=([+]?[a-zA-Z0-9])+)?$':
-        False,
-        r'^\s*\w+=([+]?[a-zA-Z0-9])+(\s+\w+=([+]?[a-zA-Z0-9])+)*\s*$': False,
+        r'^\s*\w+=\+?[a-zA-Z0-9\[\]\(\)\{\}]+':
+            False,
+
+        r'^\s*\w+=\+?[a-zA-Z0-9\[\]\(\)\{\}]+'
+        r'(\s+\w+=\+?[a-zA-Z0-9\[\]\(\)\{\}]+)?':
+            False,
+
+        r'^\s*\w+=\+?[a-zA-Z0-9\[\]\(\)\{\}]+'
+        r'(\s+\w+=\+?[a-zA-Z0-9\[\]\(\)\{\}]+)*$':
+            False,
+
+        r'^\s*\w+=\+?[a-zA-Z0-9\[\]\(\)\{\}]+'
+        r'(\s+\w+=\+?[a-zA-Z0-9\[\]\(\)\{\}]+)*\s*$':
+            False,
     }
 
     def parse_metadata(self, meta_data: str) -> Dict[str, str] | None:
@@ -137,6 +143,7 @@ class MetaParser:
         Returns:
             A dictionary of key->value strings, or None when empty.
         """
+
         meta_data = self._validate_metadata_format(meta_data)
         if len(meta_data) == 0:
             return None
@@ -196,12 +203,14 @@ class MetaParser:
         return (meta_string[1:-1].strip())
 
     def _check_syntax_meta(self, meta_data: str) -> None:
+        """Check metadata syntax against known patterns."""
         for pattern in MetaParser.patternsmetadata:
             match: re.Match[str] | None = re.match(pattern, meta_data)
             if match is None:
                 MetaParser.patternsmetadata[pattern] = True
             else:
                 MetaParser.patternsmetadata[pattern] = False
+        print(MetaParser.patternsmetadata)
         self._validate_syntax_meta(meta_data.split())
         if match is None:
             return None
@@ -211,7 +220,10 @@ class MetaParser:
         for index, is_not_valid in enumerate(MetaParser.patternsmetadata.
                                              values()):
             if is_not_valid:
-                raise FlyinError("[ERROR]: Invalid MetaData property syntax at"
-                                 f" position {data[index - 1]}. Expected "
-                                 "format: ",
-                                 number_line=FlyinError.get_number_line())
+                raise FlyinError(
+                    "[ERROR]: Invalid MetaData property syntax at "
+                    f"position {data[index - 1]}. Expected format: "
+                    "key=value. For hubs, valid properties are:"
+                    " color, zone, max_drones.",
+                    number_line=FlyinError.get_number_line()
+                )

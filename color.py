@@ -48,7 +48,7 @@ class Color:
         try:
             color_hex = webcolors.name_to_hex(color)
         except ValueError:
-            color_hex = '#0B192C'
+            color_hex = "#05806F"
         return f'[{color_hex}]{string}[/]'
 
     def clear(self) -> None:
