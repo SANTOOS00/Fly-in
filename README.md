@@ -20,80 +20,148 @@ The simulation is performed turn by turn until all drones reach the destination.
 The project focuses on **graph algorithms, pathfinding, scheduling, parsing, simulation, capacity management, and optimization**, while ensuring that the solution can adapt to different network topologies and different numbers of drones.
 
 
-## **Instructions**
+## Features
 
-### **Installation**
+- **Dijkstra's Algorithm**: Efficient pathfinding to calculate the shortest routes between zones.
+- **Multi-Drone Scheduling**: Simultaneous movement of multiple drones with conflict resolution.
+- **Zone Type System**: Four zone types (normal, restricted, priority, blocked) with different traversal costs and behaviors.
+- **Capacity Management**: Enforces maximum drone limits on both zones and connections.
+- **Alternative Path Generation**: Inspired by Yen's K-Shortest Paths idea to find multiple viable routes.
+- **Dynamic Drone Routing**: Assigns drones to paths that minimize total simulation turns while respecting capacities.
+- **Turn-by-Turn Simulation**: Precise simulation with waiting logic when zones or connections are at capacity.
+- **Colored Terminal Visualization**: Rich-formatted output with color-coded zones for enhanced readability.
+- **Comprehensive Input Validation**: Validates map file structure, metadata, and graph connectivity with clear error messages.
 
-Clone the repository and enter the project directory:
 
-```bash
-git clone <repository-url>
-cd <project-directory>
+
+## Algorithm and Implementation Strategy
+
+### Pathfinding Core
+
+The project uses Dijkstra's algorithm as the core pathfinding engine. The algorithm computes the lowest-cost route between the start and destination zones using a min-heap priority queue and distance table. Zone types translate into movement costs:
+
+- `normal`: cost = 1
+- `priority`: cost = 0 (treated as faster traversal)
+- `restricted`: cost = 2 (higher traversal cost)
+- `blocked`: impassable (infinite cost)
+
+After finding a shortest path, the implementation can modify the graph (temporarily remove selected edges) and re-run Dijkstra to generate alternative routing options for subsequent drones. This is an adaptation of the general idea behind Yen's K-Shortest Paths algorithm but simplified for the project's constraints.
+
+### Multi-Path Generation and Assignment
+
+1. Generate the first shortest path with Dijkstra from start to end.
+2. Temporarily remove or penalize edges used by that path and re-run Dijkstra to find another distinct path.
+3. Repeat until enough alternative paths are available or no more routes exist.
+4. Evaluate combinations of assigning drones to available paths and simulate to estimate total turns.
+5. Choose the assignment that minimizes the total number of simulation turns while respecting capacity constraints.
+
+### Scheduling and Simulation
+
+- Simulation progresses in discrete turns. During each turn:
+  - Each drone attempts to move forward along its assigned path.
+  - Before moving, the simulation checks zone and edge capacities.
+  - If a move would violate a capacity, the drone waits in place.
+  - All moves for the turn are applied simultaneously (subject to capacity checks), preventing order-dependent advantages.
+- The simulation ends when all drones have reached the destination.
+
+### Conflict Resolution
+
+- If multiple drones contend for the same zone or edge, priority is resolved by:
+  1. Preserving previously occupied positions (a drone already in a zone keeps it unless it moves out).
+  2. Allowing movement only when destination capacity permits.
+  3. Breaking ties deterministically (for example, by drone ID order) to ensure reproducible results.
+
+## Visual Representation
+
+The program outputs a human-readable turn-by-turn log to the terminal, optionally enriched with color using the project's color utilities. Typical output includes:
+
+- Colored zone names and coordinates (when color metadata is provided in the map file).
+- Drone identifiers and their current positions each turn.
+- The global turn counter and a final summary when the simulation ends.
+
+Color metadata in the map file follows this form on hub lines: `[color=red]`. The code maps CSS-like color names (or hex values) to terminal colors.
+
+## Usage Example
+
+### Example Map File (maps/simple_example.txt)
+
+```text
+nb_drones: 4
+
+start_hub: start 0 0 [color=green]
+hub: junction 1 0 [color=yellow max_drones=2]
+hub: path_a 2 1 [color=blue]
+hub: path_b 2 -1 [color=blue]
+end_hub: goal 3 0 [color=red]
+
+connection: start-junction [max_link_capacity=2]
+connection: junction-path_a
+connection: junction-path_b
+connection: path_a-goal
+connection: path_b-goal
 ```
 
-Create and activate the Python virtual environment:
-
-```bash
-make env
-```
-
-Install the project dependencies:
+### Running the Simulation
 
 ```bash
 make install
 ```
 
-### **Running the Project**
-
-To run the project with a map definition file, use:
 
 ```bash
-make run MAP_DEF=<path-to-map-file>
+make run MAP_DEF=maps/simple_example.txt
 ```
 
-For example:
+Expected behavior:
+- The program parses and validates the map file.
+- It generates one or more paths from `warehouse` to `delivery`.
+- It assigns the 3 drones to the available paths and runs the turn-by-turn simulation.
+- The terminal prints each turn's movements and a final line with the minimum number of turns required for all drones to reach the destination.
 
-```bash
-make run MAP_DEF=maps/example.txt
+Sample output fragment:
+
+```
+ D1-junction D2-junction
+ D1-path_b D2-path_a D3-junction D4-junction
+ D1-goal D2-goal D3-path_b D4-path_a
+ D3-goal D4-goal
+4
+
 ```
 
-The program reads and validates the map file, calculates efficient routes for the drones, and starts the simulation.
+## Error Handling
 
-The map file must follow the format specified by the project requirements. It must contain the number of drones, one starting zone, one destination zone, the other zones, and their connections.
+The project includes focused error checking with descriptive messages. Common errors include:
 
-Example:
+- File not found or unreadable map file — check the path and permissions.
+- Malformed map lines or invalid metadata — the parser reports the offending line and a message.
+- Missing start or end hub — both are required and must be unique.
+- Disconnected graph (no path from start to end) — ensure the map's connections create at least one route.
+- Invalid zone types or metadata values — use only supported types and valid key=value pairs.
 
-```text
-nb_drones: 5
-start_hub: hub 0 0 [color=green]
-end_hub: goal 10 10 [color=yellow]
-hub: roof1 3 4 [zone=restricted color=red]
-hub: roof2 6 2 [zone=normal color=blue]
-hub: corridorA 4 3 [zone=priority color=green max_drones=2]
-connection: hub-roof1
-connection: hub-corridorA
-connection: roof1-roof2
-connection: roof2-goal
-connection: corridorA-goal
-```
+Errors are surfaced as human-readable messages and (where appropriate) the program exits with a non-zero status.
 
-### **Makefile Commands**
+## Performance and Complexity
 
-The project provides several Makefile commands to simplify development and execution.
+- Dijkstra's algorithm runs in O((V + E) log V) time per path computation (V = number of zones, E = number of connections).
+- Generating multiple alternative paths (k paths) requires roughly O(k × (V + E) log V) due to repeated Dijkstra runs.
+- The simulation advances turn-by-turn and costs O(T × D) time where T is total turns and D is number of drones.
 
-| Command                   | Description                                       |
-| ------------------------- | ------------------------------------------------- |
-| `make env`                | Creates the Python virtual environment.           |
-| `make install`            | Installs the required project dependencies.       |
-| `make`                    | Runs the default Makefile target.                 |
-| `make run MAP_DEF=<path>` | Runs the simulation using the specified map file. |
-| `make lint`               | Runs the project's code linter.                   |
-| `make lint-strict`        | Runs the linter with stricter checks.             |
-| `make debug`              | Runs the project in debug mode.                   |
-| `make clean`              | Removes generated files and build artifacts.      |
+Space complexity is O(V + E) for the adjacency representation plus O(D) for drone tracking.
+
+Optimization notes:
+- Using a binary heap (heapq) for Dijkstra's priority queue minimizes overhead.
+- Avoiding full re-computation when only minor graph changes are needed can help (future improvement).
+
+## Technical Choices
+
+- Dijkstra's algorithm: chosen for guaranteed shortest-path results with non-negative weights and no heuristic requirement.
+- Adjacency list: space-efficient representation for sparse graphs.
+- Python `heapq`: simple and effective priority queue for Dijkstra.
+- Custom exceptions and clear parser errors to improve debuggability.
+- Rich-based terminal coloring (or equivalent) to keep output readable across platforms.
 
 ## Resources
-
 ### References
 
 The following resources were used during the development of the project:
@@ -125,56 +193,3 @@ For finding alternative paths, I took inspiration from the idea behind **Yen's K
 My approach finds a path for a drone using Dijkstra's algorithm. After a path is selected, the graph is modified by removing selected edges from the chosen route. Dijkstra's algorithm is then run again to find another possible path for the next drone. This process is repeated to generate different routing possibilities.
 
 The generated paths are evaluated according to the number of simulation turns required for all drones to reach the destination. The objective is to distribute the drones between suitable paths and minimize the total number of turns while respecting zone and connection capacity constraints.
-
-AI was used for:
-
-* Understanding and clarifying the project requirements.
-* Learning and reviewing Dijkstra's algorithm.
-* Understanding the general concept behind Yen's K-Shortest Paths algorithm.
-* Discussing possible approaches for finding alternative paths.
-* Understanding Python concepts and libraries.
-* Helping identify and understand errors during development.
-* Getting suggestions for debugging and code improvements.
-* Organizing and improving the README documentation.
-
-AI did not provide the complete implementation of the algorithm. The final algorithmic strategy, the adaptation of the pathfinding approach, the code, and the implementation decisions were developed and reviewed by me.
-
-
-
-# Fly-in
-![example](https://github.com/SANTOOS00/my_resource/blob/main/image/example_fly_in.png?raw=true)
-GRaph explination: https://medium.com/basecs/a-gentle-introduction-to-graph-theory-77969829ead8
-shortest path algo graph 
-
-
-[algo yen's](https://www.linchenguang.com/2018/01/30/Yen-s-algorithm/)
-[color](https://www.cambridgeincolour.com/tutorials/bit-depth.htm)
-[color](https://en.wikipedia.org/wiki/Color_depth)
-[color](https://www.renewedvision.com/blog/color-depth-and-channels-explained)
-
-
-
-
-
-
-# Fly-in Drones
-
-## Description
-
-## Features
-
-## Instructions
-
-## Algorithm and Implementation Strategy
-
-## Visual Representation
-
-## Usage Example
-
-## Error Handling
-
-## Performance and Complexity
-
-## Technical Choices
-
-## Resources
