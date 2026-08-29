@@ -32,8 +32,6 @@ clean:
 	@find . -type d -name "__pycache__" -exec rm -rf {} +
 	@echo "Cleaned cache files!"
 
-
-
 lint: install env
 	@$(VENV)/bin/flake8 $(FILES)
 	@$(VENV)/bin/mypy $(FILES) --warn-return-any --warn-unused-ignores --ignore-missing-imports --check-untyped-defs --disallow-untyped-defs
