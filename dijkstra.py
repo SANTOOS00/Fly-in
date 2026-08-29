@@ -55,6 +55,8 @@ class Dijkstra:
                 if neighbor_hub is None:
                     continue
                 new_cost: float = cost + neighbor_hub.get_zone_value()
+                if edge is None:
+                    continue
                 if edge.max_link_capacity == 0:
                     continue
                 if new_cost < self.distances[neighbor_hub.name]:

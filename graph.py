@@ -27,23 +27,38 @@ class GraphBuilder:
         """
         self._initialize_hubs()
         self._add_edges_to_network()
-        for hub in self.hubs:
+        for hub in self.hubs.values():
             if not self.network[hub]:
                 self.network[hub].append((None, None))
-
+        if self.start_hub is None:
+            return self.network
         if self.network.get(self.start_hub) is None:
             raise FlyinError("[ERROR]: Unreachable target - no path "
                              "found in the graph.")
         return self.network
 
     def _initialize_hubs(self) -> None:
-        for hub in self.hubs:
+        """Initialize adjacency list entries for all hubs.
+
+        Ensures every hub in the map has a corresponding key in the
+        adjacency list with an empty neighbor list before edges are added.
+        """
+        for hub in self.hubs.values():
             self.network[hub] = []
 
     def _add_edges_to_network(self) -> None:
+        """Add all Map edges into the adjacency list as bidirectional entries.
+
+        Iterates over each Edge object from the Map and appends a tuple of
+        (neighbor_hub, edge) to both the destination and source entries in
+        the adjacency list. Storing the Edge object alongside the neighbor
+        allows callers to inspect edge-specific metadata (e.g., capacities
+        and usage counts) when computing paths or performing simulations.
+        """
         for edge in self.edges:
             self.network[edge.destination].append((edge.source, edge))
             self.network[edge.source].append((edge.destination, edge))
+
 
 class Graph:
     """Graph convenience wrapper that provides adjacency utilities.

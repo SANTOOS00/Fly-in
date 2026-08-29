@@ -7,7 +7,7 @@ Adj_List = NewType('Adj_List', Dict["Hub", List[Tuple["Hub | None",
                                                       "Edge | None"]]])
 
 
-class Hub: 
+class Hub:
     """Representation of a hub (node) in the map graph.
 
     Attributes:

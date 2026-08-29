@@ -8,7 +8,7 @@ REQ = requirements.txt
 
 PYTHON3 = python3
 
-CACH = __pycache__ .mypy_cache
+CACH = __pycache__
 
 FILES = base_parse.py dijkstra.py graph.py \
 		map.py parse_meta_data.py color.py \
@@ -29,7 +29,7 @@ run: env
 	@$(VENV)/bin/python3 $(MAIN) $(MAP_DEF)
 
 clean:
-	@rm -rf $(CACH) $(VENV)
+	@find . -type d -name "__pycache__" -exec rm -rf {} +
 	@echo "Cleaned cache files!"
 
 
