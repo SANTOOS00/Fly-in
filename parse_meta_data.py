@@ -1,8 +1,9 @@
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Match, Optional
 from custom_error import FlyinError
 import re
 import json
 from pathlib import Path
+import os
 
 
 class MetadataValidator:
@@ -122,7 +123,7 @@ class MetaParser:
 
     def __init__(self) -> None:
         """Initialize the parser state."""
-        self.match: re.Match
+        self.match: Optional[Match[str]]
 
     def parse_metadata(self, meta_data: str) -> Dict[str, str] | None:
         """Parse a bracketed metadata string into a dictionary.
@@ -144,7 +145,7 @@ class MetaParser:
         return (valid_meta.validate_metadata())
 
     @staticmethod
-    def check_duplicates(data: list[Any]) -> None:
+    def check_duplicates(data: List[str]) -> None:
         """Raise FlyinError when duplicate metadata keys appear."""
         seen = set()
         for itm in [k.split("=")[0].strip() for k in data]:
@@ -163,7 +164,8 @@ class MetaParser:
         Returns:
             Mapping of metadata keys to their string values.
         """
-        data: List[str] = self.match.group().split()
+        if self.match is not None:
+            data: List[str] = self.match.group().split()
         MetaParser.check_duplicates(data)
         return (
             {key.lower().strip(): val
@@ -194,32 +196,36 @@ class MetaParser:
 
     def _check_syntax_meta(self, meta_data: str) -> None:
         """Check metadata syntax against known patterns."""
-        patterns = self.__get_patternmetadata()
-        list_action = []
+        patterns: Dict[str, str] = self.__get_patternmetadata()
+        list_action: List[bool] = []
         for pattern in patterns.values():
-            match: re.Match[str] | None = re.match(pattern, meta_data)
+            match: Optional[Match[str]] = re.match(pattern, meta_data)
             if match is None:
                 list_action.append(True)
             else:
                 list_action.append(False)
 
         self._validate_syntax_meta(list_action, meta_data.split())
-        if match is None:
-            return None
         self.match = match
 
-    def __get_patternmetadata(self) -> Dict[re.Match, bool]:
+    def __get_patternmetadata(self) -> Dict[str, str]:
         """Load the metadata validation patterns from the project JSON file."""
         path_pattern = Path('patternsmetadata.json')
         if not path_pattern.exists():
-            raise FlyinError( "The 'patternsmetadata.json' file is missing. "
-                              "Please make sure it is downloaded"
-                              " from the project repository.")
+            raise FlyinError("The 'patternsmetadata.json' file is missing. "
+                             "Please make sure it is downloaded"
+                             " from the project repository.")
+        if not os.access(path_pattern, os.R_OK):
+            raise FlyinError("The 'patternsmetadata.json' file exists but "
+                             "is not readable. Please check file permissions.")
+
         with open(path_pattern, 'r') as fd:
-            patterns = json.load(fd)
+            patterns: Dict[str, str] = json.load(fd)
         return patterns
 
-    def _validate_syntax_meta(self, list_action, data: List[str]) -> None:
+    def _validate_syntax_meta(self,
+                              list_action: List[bool],
+                              data: List[str]) -> None:
         """Raise an error when metadata does not match the expected syntax."""
         for is_not_valid in list_action:
             if is_not_valid:
