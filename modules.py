@@ -1,5 +1,6 @@
 from typing import List
 from typing import NewType, Dict, Tuple
+from custom_error import FlyinError
 from enum import Enum
 
 
@@ -116,8 +117,9 @@ class Hub:
                 case "RESTRICTED":
                     return cls.RESTRICTED
                 case _:
-                    raise ValueError("[ERROR]: Invalid "
-                                     f"zone type: {type_zone}")
+                    raise FlyinError("[ERROR]: Invalid "
+                                     f"zone type: {type_zone}",
+                                     number_line=FlyinError.get_number_line())
 
 
 class Edge:

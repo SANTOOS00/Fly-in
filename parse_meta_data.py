@@ -1,6 +1,8 @@
 from typing import List, Dict, Any
 from custom_error import FlyinError
 import re
+import json
+from pathlib import Path
 
 
 class MetadataValidator:
@@ -117,22 +119,10 @@ class MetadataValidator:
 
 class MetaParser:
     """Mixin providing metadata parsing utilities used by line parsers."""
-    patternsmetadata = {
-        r'^\s*\w+=\+?([a-zA-Z0-9\[\]\(\)\{\}]_*)+':
-            False,
 
-        r'^\s*\w+=\+?[a-zA-Z0-9\[\]\(\)\{\}]+'
-        r'(\s+\w+=\+?[a-zA-Z0-9\[\]\(\)\{\}]+)?':
-            False,
-
-        r'^\s*\w+=\+?[a-zA-Z0-9\[\]\(\)\{\}]+'
-        r'(\s+\w+=\+?[a-zA-Z0-9\[\]\(\)\{\}]+)*$':
-            False,
-
-        r'^\s*\w+=\+?[a-zA-Z0-9\[\]\(\)\{\}]+'
-        r'(\s+\w+=\+?[a-zA-Z0-9\[\]\(\)\{\}]+)*\s*$':
-            False,
-    }
+    def __init__(self) -> None:
+        """Initialize the parser state."""
+        self.match: re.Match
 
     def parse_metadata(self, meta_data: str) -> Dict[str, str] | None:
         """Parse a bracketed metadata string into a dictionary.
@@ -204,22 +194,37 @@ class MetaParser:
 
     def _check_syntax_meta(self, meta_data: str) -> None:
         """Check metadata syntax against known patterns."""
-        for pattern in MetaParser.patternsmetadata:
+        patterns = self.__get_patternmetadata()
+        list_action = []
+        for pattern in patterns.values():
             match: re.Match[str] | None = re.match(pattern, meta_data)
             if match is None:
-                MetaParser.patternsmetadata[pattern] = True
+                list_action.append(True)
             else:
-                MetaParser.patternsmetadata[pattern] = False
-        self._validate_syntax_meta(meta_data.split())
+                list_action.append(False)
+
+        self._validate_syntax_meta(list_action, meta_data.split())
         if match is None:
             return None
         self.match = match
 
-    def _validate_syntax_meta(self, data: List[str]) -> None:
-        for is_not_valid in MetaParser.patternsmetadata.values():
+    def __get_patternmetadata(self) -> Dict[re.Match, bool]:
+        """Load the metadata validation patterns from the project JSON file."""
+        path_pattern = Path('patternsmetadata.json')
+        if not path_pattern.exists():
+            raise FlyinError( "The 'patternsmetadata.json' file is missing. "
+                              "Please make sure it is downloaded"
+                              " from the project repository.")
+        with open(path_pattern, 'r') as fd:
+            patterns = json.load(fd)
+        return patterns
+
+    def _validate_syntax_meta(self, list_action, data: List[str]) -> None:
+        """Raise an error when metadata does not match the expected syntax."""
+        for is_not_valid in list_action:
             if is_not_valid:
                 raise FlyinError("[ERROR]: Invalid metadata property syntax at"
-                                 f" position {data}. Expected format: "
+                                 f" position  '{data}'. Expected format: "
                                  "key=value. For hubs, valid properties are: "
                                  "Hub: color=name_string, zone=[normal ,"
                                  "priority ,restricted, blocked"

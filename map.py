@@ -146,6 +146,8 @@ class Map:
         Raises:
             FlyinError: When the number has already been set or is invalid.
         """
+        if self.number_drones != -1:
+            raise FlyinError("[ERROR]: number of drones is already set")
         if number_drones < 1:
             raise FlyinError('[ERROR]: number of drones is not valid.'
                              ' Minimum required value is 1.',

@@ -1,0 +1,4 @@
+{
+    "pattern_1": "^\\s*(color|max_link_capacity|max_drones|zone)=\\+?[a-zA-Z0-9_\\[\\]\\(\\)\\{}]+",
+    "pattern_2": "^(\\s*(color|max_link_capacity|max_drones|zone)=\\+?[a-zA-Z0-9_\\[\\]\\(\\)\\{}]+)+$"
+}

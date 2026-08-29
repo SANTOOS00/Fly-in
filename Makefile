@@ -2,7 +2,7 @@ MAIN = main.py
 
 VENV = .venv
 
-MAP_DEF = maps/challenger/01_the_impossible_dream.txt
+MAPE = maps/challenger/01_the_impossible_dream.txt
 
 REQ = requirements.txt
 
@@ -26,7 +26,7 @@ install: env
 	@$(VENV)/bin/pip install -r $(REQ)
 
 run: env
-	@$(VENV)/bin/python3 $(MAIN) $(MAP_DEF)
+	@$(VENV)/bin/python3 $(MAIN) $(MAPE)
 
 clean:
 	@find . -type d -name "__pycache__" -exec rm -rf {} +
