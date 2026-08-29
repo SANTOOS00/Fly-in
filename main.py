@@ -27,5 +27,5 @@ if __name__ == "__main__":
     try:
         launcher = Fly_in()
         launcher.run()
-    except FlyinError as error:
+    except BaseException as error:
         print(error, file=sys.stderr)
